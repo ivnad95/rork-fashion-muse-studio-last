@@ -103,9 +103,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(90, 143, 214, 0.3)',
-              'rgba(61, 107, 184, 0.5)',
-              'rgba(90, 143, 214, 0.3)',
+              'rgba(90, 143, 214, 0.4)',
+              'rgba(61, 107, 184, 0.6)',
+              'rgba(90, 143, 214, 0.4)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -149,7 +149,7 @@ export default function GlowingButton({
           )}
 
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.18)', 'transparent']}
+            colors={['rgba(255, 255, 255, 0.22)', 'transparent']}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 0.4 }}
             style={styles.shineLayer}
@@ -190,10 +190,10 @@ const styles = StyleSheet.create({
   },
   containerPrimary: {
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.7,
+    shadowRadius: 24,
+    elevation: 15,
   },
   glowRing: {
     position: 'absolute',

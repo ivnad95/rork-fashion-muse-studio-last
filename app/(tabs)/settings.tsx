@@ -56,8 +56,8 @@ function ToggleSwitch({
       <LinearGradient
         colors={
           enabled
-            ? ['#2a4d8c', '#3d6bb8', '#5a8fd6', '#3d6bb8']
-            : ['rgba(200, 220, 245, 0.03)', 'rgba(200, 220, 245, 0.01)']
+            ? ['#3d6bb8', '#5a8fd6', '#7aa3d9', '#5a8fd6']
+            : ['rgba(200, 220, 245, 0.05)', 'rgba(200, 220, 245, 0.02)']
         }
         style={styles.toggleBackground}
       />
@@ -604,10 +604,10 @@ const styles = StyleSheet.create({
     borderRadius: 52,
     padding: 4,
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.7,
+    shadowRadius: 28,
+    elevation: 15,
   },
   avatarInner: {
     width: '100%',
@@ -622,6 +622,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     minHeight: 54,
+    shadowColor: Colors.dark.glassShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -678,16 +683,17 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     overflow: 'hidden',
     position: 'relative',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.dark.glassBorder,
+    backgroundColor: 'rgba(200, 220, 245, 0.03)',
   },
   toggleActive: {
     borderColor: Colors.dark.primaryLight,
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 10,
   },
   toggleBackground: {
     position: 'absolute',
@@ -714,10 +720,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.silverLight,
     borderRadius: 17,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   accountRow: {
     flexDirection: 'row',
@@ -734,9 +742,11 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(90, 143, 214, 0.15)',
+    backgroundColor: 'rgba(90, 143, 214, 0.18)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(90, 143, 214, 0.3)',
   },
   logoutText: {
     fontSize: 16,
@@ -758,9 +768,11 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
   },
   dangerText: {
     fontSize: 16,

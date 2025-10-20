@@ -51,12 +51,10 @@ export default function GenerateScreen() {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
-    await generateImages();
-    if (!error) {
-      router.push('/(tabs)/results');
-    } else {
-      if (Platform.OS === 'web') alert(error); else Alert.alert('Generation Error', error);
-    }
+    // Redirect to results immediately so user can see loading placeholders
+    router.push('/(tabs)/results');
+    // Start generation in background
+    generateImages();
   };
 
   return (
