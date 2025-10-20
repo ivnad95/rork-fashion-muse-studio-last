@@ -16,7 +16,7 @@ import GlowingButton from '@/components/GlowingButton';
 export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages, error } = useGeneration();
+  const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
   const [uploading, setUploading] = useState<boolean>(false);
 
   const handleImageSelect = async () => {
@@ -34,7 +34,7 @@ export default function GenerateScreen() {
       if (!result.canceled && result.assets[0]) {
         setSelectedImage(result.assets[0].uri);
       }
-    } catch (e) {
+    } catch {
       const msg = 'Failed to upload image. Please try again.';
       if (Platform.OS === 'web') alert(msg); else Alert.alert('Upload Error', msg);
     } finally {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Platform, Animated } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
-import { glassStyles, COLORS } from '@/constants/glassStyles';
+import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 
