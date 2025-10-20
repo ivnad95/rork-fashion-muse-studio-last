@@ -1,155 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
-import { Clock } from 'lucide-react-native';
+import GlassyTitle from '@/components/GlassyTitle';
+import GlassPanel from '@/components/GlassPanel';
+import { glassStyles, COLORS } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
-import { useGeneration, HistoryItem } from '@/contexts/GenerationContext';
-import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
-
-const PLACEHOLDER_IMAGE =
-  'https://storage.googleapis.com/static.a-b-c.io/app-assets/uploaded/pmlogo1.jpg-5a2dd41a-457d-454a-8654-878b3f37d728/original.jpeg';
+import { useGeneration } from '@/contexts/GenerationContext';
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const { history } = useGeneration();
-  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+  const [items, setItems] = useState(history);
 
   useEffect(() => {
-    if (history.length > 0 && !selectedItem) {
-      setSelectedItem(history[0]);
-    }
-  }, [history, selectedItem]);
+    setItems(history);
+  }, [history]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  const mockHistory = [
+    {
+      id: '1',
+      imageUrls: [
+        'https://via.placeholder.com/300x400/002857/FFFFFF?text=Gen+1-1',
+        'https://via.placeholder.com/300x400/004b93/FFFFFF?text=Gen+1-2',
+        'https://via.placeholder.com/300x400/002857/FFFFFF?text=Gen+1-3',
+        'https://via.placeholder.com/300x400/004b93/FFFFFF?text=Gen+1-4',
+      ],
+      prompt: 'Fashion photoshoot in urban setting',
+      style: 'Urban',
+      aspectRatio: 'portrait',
+      createdAt: new Date().toISOString(),
+    },
+  ];
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    }
-  };
-
-  const displayImage = selectedItem?.thumbnail || PLACEHOLDER_IMAGE;
+  const displayHistory = items.length > 0 ? items.map(h => ({
+    id: h.id,
+    imageUrls: [h.thumbnail],
+    prompt: 'Generated set',
+    style: null,
+    aspectRatio: 'portrait',
+    createdAt: `${h.date} ${h.time}`,
+  })) : mockHistory;
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#030711', '#060d1f', '#0d1736', '#121f4a']}
-        locations={[0, 0.35, 0.7, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 60, paddingBottom: 120 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        {history.length === 0 ? (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-              <LinearGradient
-                colors={['rgba(90, 143, 214, 0.12)', 'rgba(61, 107, 184, 0.06)']}
-                style={styles.emptyIconGradient}
-              >
-                <Clock size={52} color={Colors.dark.textMuted} strokeWidth={1.5} />
-              </LinearGradient>
-            </View>
-            <Text style={styles.emptyTitle}>No History Yet</Text>
-            <Text style={styles.emptySubtitle}>Your generated images will appear here</Text>
-          </View>
+      <LinearGradient colors={['#030711', '#060d1f', '#0d1736', '#121f4a']} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+        <GlassyTitle><Text>History</Text></GlassyTitle>
+        {displayHistory.length === 0 ? (
+          <GlassPanel style={styles.messagePanel} radius={20}>
+            <Text style={styles.messageText}>No generations found.</Text>
+          </GlassPanel>
         ) : (
-          <>
-            <Text style={styles.mainTitle}>History</Text>
-
-            <View style={styles.featuredContainer}>
-              <PremiumLiquidGlass
-                style={styles.featuredImageWrapper}
-                variant="elevated"
-                borderRadius={28}
-              >
-                <Image
-                  source={{ uri: displayImage }}
-                  style={styles.featuredImage}
-                  contentFit="cover"
-                />
-              </PremiumLiquidGlass>
-
-              {selectedItem && (
-                <View style={styles.detailsContainer}>
-                  <Text style={styles.detailsDate}>{formatDate(selectedItem.date)}</Text>
-                  <Text style={styles.detailsTime}>{selectedItem.time}</Text>
-                  <Text style={styles.detailsCount}>
-                    {selectedItem.count} {selectedItem.count === 1 ? 'image' : 'images'}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.historyList}>
-              <Text style={styles.listTitle}>Recent Generations</Text>
-              {history.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedItem(item);
-                  }}
-                  style={styles.historyCardContainer}
-                >
-                  <PremiumLiquidGlass
-                    style={[
-                      styles.historyCard,
-                      selectedItem?.id === item.id && styles.historyCardSelected,
-                    ]}
-                    variant={selectedItem?.id === item.id ? 'primary' : 'default'}
-                    borderRadius={18}
-                  >
-                    <View style={styles.cardContent}>
-                      <View style={styles.thumbnail}>
-                        <Image
-                          source={{ uri: item.thumbnail }}
-                          style={styles.thumbnailImage}
-                          contentFit="cover"
-                        />
-                      </View>
-                      <View style={styles.cardInfo}>
-                        <Text style={styles.cardDate}>{formatDate(item.date)}</Text>
-                        <Text style={styles.cardTime}>{item.time}</Text>
-                        <Text style={styles.cardCount}>
-                          {item.count} {item.count === 1 ? 'image' : 'images'}
-                        </Text>
-                      </View>
+          <View style={styles.historyList}>
+            {displayHistory.map((generation) => (
+              <GlassPanel key={generation.id} style={styles.generationCard} radius={24}>
+                <View style={styles.imageGrid}>
+                  {generation.imageUrls.map((url, index) => (
+                    <View key={index} style={styles.imageGridItem}>
+                      <Image source={{ uri: url }} style={styles.historyImage} resizeMode="cover" />
                     </View>
-                  </PremiumLiquidGlass>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
+                  ))}
+                </View>
+                <View style={styles.generationInfo}>
+                  <View style={styles.infoLeft}>
+                    <Text style={styles.dateText}>{generation.createdAt}</Text>
+                    <Text style={styles.promptText}>{generation.prompt}</Text>
+                  </View>
+                </View>
+              </GlassPanel>
+            ))}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -157,141 +78,17 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.dark.backgroundDeep,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-  },
-  mainTitle: {
-    fontSize: 36,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    letterSpacing: -1.2,
-    marginBottom: 28,
-  },
-  featuredContainer: {
-    marginBottom: 32,
-  },
-  featuredImageWrapper: {
-    width: '100%',
-    aspectRatio: 4 / 5,
-    marginBottom: 18,
-  },
-  featuredImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 28,
-  },
-  detailsContainer: {
-    paddingHorizontal: 8,
-    gap: 4,
-  },
-  detailsDate: {
-    fontSize: 20,
-    fontWeight: '600' as const,
-    color: Colors.dark.text,
-  },
-  detailsTime: {
-    fontSize: 16,
-    fontWeight: '500' as const,
-    color: Colors.dark.textSecondary,
-  },
-  detailsCount: {
-    fontSize: 14,
-    fontWeight: '500' as const,
-    color: Colors.dark.textMuted,
-    marginTop: 2,
-  },
-  emptyState: {
-    marginTop: 80,
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyIconContainer: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    overflow: 'hidden',
-    marginBottom: 24,
-  },
-  emptyIconGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '600' as const,
-    color: Colors.dark.text,
-    marginBottom: 12,
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-  },
-  historyList: {
-    gap: 14,
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.dark.textSecondary,
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  historyCardContainer: {
-    marginBottom: 4,
-  },
-  historyCard: {
-    minHeight: 96,
-  },
-  historyCardSelected: {
-    shadowColor: Colors.dark.primaryGlow,
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 14,
-  },
-  thumbnail: {
-    width: 74,
-    height: 92,
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: Colors.dark.backgroundElevated,
-    borderWidth: 1,
-    borderColor: Colors.dark.glassBorder,
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-  },
-  cardInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  cardDate: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.dark.text,
-  },
-  cardTime: {
-    fontSize: 14,
-    fontWeight: '500' as const,
-    color: Colors.dark.textSecondary,
-  },
-  cardCount: {
-    fontSize: 13,
-    fontWeight: '500' as const,
-    color: Colors.dark.textMuted,
-  },
+  container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
+  scrollView: { flex: 1 },
+  messagePanel: { padding: 24 },
+  messageText: { color: '#9CA3AF', textAlign: 'center', fontSize: 14 },
+  historyList: { gap: 24 },
+  generationCard: { padding: 16 },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 16 },
+  imageGridItem: { width: '47%', aspectRatio: 3 / 4, borderRadius: 12, overflow: 'hidden', position: 'relative' },
+  historyImage: { width: '100%', height: '100%' },
+  generationInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  infoLeft: { flex: 1 },
+  dateText: { color: '#fff', fontSize: 14, marginBottom: 4 },
+  promptText: { color: '#9CA3AF', fontSize: 12 },
 });

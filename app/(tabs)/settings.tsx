@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlowingButton from '@/components/GlowingButton';
+import GlassyTitle from '@/components/GlassyTitle';
 
 function ToggleSwitch({
   enabled,
@@ -292,7 +293,7 @@ export default function SettingsScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View>
-        <Text style={styles.mainTitle}>Settings</Text>
+        <GlassyTitle><Text>Settings</Text></GlassyTitle>
 
         {!user ? (
           <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
