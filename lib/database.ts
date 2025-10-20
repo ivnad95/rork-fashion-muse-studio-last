@@ -1,7 +1,20 @@
 import * as SQLite from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 
 // Database instance
 let db: SQLite.SQLiteDatabase | null = null;
+
+// Generate secure random ID
+async function generateId(prefix: string): Promise<string> {
+  try {
+    // Use expo-crypto for secure random UUID
+    const uuid = Crypto.randomUUID();
+    return `${prefix}_${uuid}`;
+  } catch {
+    // Fallback to timestamp-based ID (not cryptographically secure but acceptable for local DB)
+    return `${prefix}_${Date.now()}_${Date.now().toString(36)}`;
+  }
+}
 
 // Initialize database
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -142,7 +155,7 @@ export async function createUser(
   passwordHash: string
 ): Promise<User> {
   const db = getDatabase();
-  const id = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const id = await generateId('user');
   const now = Date.now();
   
   await db.runAsync(
@@ -237,7 +250,7 @@ export async function saveImage(
   isOriginal: boolean = false
 ): Promise<Image> {
   const db = getDatabase();
-  const id = `img_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const id = await generateId('img');
   const now = Date.now();
   
   await db.runAsync(
@@ -287,7 +300,7 @@ export async function saveHistory(
   imageIds: string[]
 ): Promise<History> {
   const db = getDatabase();
-  const id = `hist_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const id = await generateId('hist');
   const now = Date.now();
   
   // Insert history record
@@ -372,7 +385,7 @@ export async function createTransaction(
   description?: string
 ): Promise<Transaction> {
   const db = getDatabase();
-  const id = `txn_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const id = await generateId('txn');
   const now = Date.now();
   
   await db.runAsync(
