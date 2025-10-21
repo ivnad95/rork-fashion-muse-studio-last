@@ -220,4 +220,4 @@ const { selectedImage, generateImages, isGenerating } = useGeneration();
 - **Web fallbacks required** for BlurView, Haptics, native image pickers
 - **Image API timeout** is 120s - show loading states immediately
 - **History is local only** (AsyncStorage) - not synced to backend yet
-- **Auth is mock** - uses AsyncStorage, no real backend validation (signIn/signUp always succeed)
+- **Auth uses SQLite database with password hashing and validation** (signIn/signUp validate against database)
