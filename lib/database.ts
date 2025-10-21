@@ -413,19 +413,26 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
   return results;
 }
 
-// Simple password hashing (in production, use bcrypt or similar)
-export function hashPassword(password: string): string {
-  // This is a very basic hash - in production use bcrypt or similar
-  // For this local app, we'll use a simple approach
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash.toString(36) + password.length.toString(36);
+// Secure password hashing using SHA-256 and random salt (for production, use bcrypt or PBKDF2)
+export async function hashPassword(password: string): Promise<string> {
+  // Generate a 16-byte random salt
+  const saltBytes = await Crypto.getRandomBytesAsync(16);
+  const salt = Buffer.from(saltBytes).toString('hex');
+  const hash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    password + salt
+  );
+  // Store as salt:hash
+  return `${salt}:${hash}`;
 }
 
-export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  // stored is in the format salt:hash
+  const [salt, hash] = stored.split(':');
+  if (!salt || !hash) return false;
+  const passwordHash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    password + salt
+  );
+  return passwordHash === hash;
 }
