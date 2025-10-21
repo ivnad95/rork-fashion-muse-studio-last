@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { publicProcedure } from '../../../create-context';
+import { getUserByEmail, createUser, hashPassword } from '@/lib/database';
 
 const signUpInputSchema = z.object({
   name: z.string().min(2),
@@ -10,19 +11,29 @@ const signUpInputSchema = z.object({
 export const signUpProcedure = publicProcedure
   .input(signUpInputSchema)
   .mutation(async ({ input }) => {
-    const { name, email } = input;
+    const { name, email, password } = input;
 
     console.log('Sign up attempt:', name, email);
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      throw new Error('Email already registered');
+    }
+
+    // Create user
+    const passwordHash = hashPassword(password);
+    const user = await createUser(name, email, passwordHash);
 
     return {
       success: true,
       user: {
-        id: Date.now().toString(),
-        name,
-        email,
-        profileImage: null,
-        credits: 10,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profileImage: user.profile_image,
+        credits: user.credits,
       },
-      token: 'mock_token_' + Date.now(),
+      token: 'token_' + Date.now(),
     };
   });

@@ -7,11 +7,20 @@ import GlassPanel from '@/components/GlassPanel';
 import { glassStyles, COLORS } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
-  const { history } = useGeneration();
+  const { user } = useAuth();
+  const { history, loadHistory } = useGeneration();
   const [items, setItems] = useState(history);
+
+  useEffect(() => {
+    // Load history from database when user is authenticated
+    if (user) {
+      loadHistory(user.id);
+    }
+  }, [user]);
 
   useEffect(() => {
     setItems(history);

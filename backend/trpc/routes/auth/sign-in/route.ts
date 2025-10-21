@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { publicProcedure } from '../../../create-context';
+import { getUserByEmail, verifyPassword } from '@/lib/database';
 
 const signInInputSchema = z.object({
   email: z.string().email(),
@@ -9,19 +10,31 @@ const signInInputSchema = z.object({
 export const signInProcedure = publicProcedure
   .input(signInInputSchema)
   .mutation(async ({ input }) => {
-    const { email } = input;
+    const { email, password } = input;
 
     console.log('Sign in attempt:', email);
+
+    // Get user from database
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+
+    // Verify password
+    if (!verifyPassword(password, user.password_hash)) {
+      throw new Error('Invalid email or password');
+    }
 
     return {
       success: true,
       user: {
-        id: Date.now().toString(),
-        name: email.split('@')[0],
-        email,
-        profileImage: null,
-        credits: 10,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profileImage: user.profile_image,
+        credits: user.credits,
       },
-      token: 'mock_token_' + Date.now(),
+      token: 'token_' + Date.now(),
     };
   });

@@ -1,4 +1,10 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
+import { 
+  saveImage, 
+  saveHistory, 
+  getUserHistory, 
+  deleteHistory as dbDeleteHistory 
+} from '@/lib/database';
 
 type AspectRatio = 'portrait' | 'square' | 'landscape';
 
@@ -25,9 +31,11 @@ interface GenerationContextType extends GenerationState {
   setSelectedImage: (uri: string | null) => void;
   setGenerationCount: (count: number) => void;
   setAspectRatio: (ratio: AspectRatio) => void;
-  generateImages: () => Promise<void>;
+  generateImages: (userId: string) => Promise<void>;
   clearResults: () => void;
-  saveToHistory: () => void;
+  saveToHistory: (userId: string) => Promise<void>;
+  loadHistory: (userId: string) => Promise<void>;
+  deleteHistoryItem: (id: string) => Promise<void>;
 }
 
 const GenerationContext = createContext<GenerationContextType | undefined>(undefined);
@@ -69,26 +77,55 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, generatedImages: [], error: null }));
   }, []);
 
-  const saveToHistory = useCallback(() => {
+  const loadHistory = useCallback(async (userId: string) => {
+    try {
+      const historyItems = await getUserHistory(userId);
+      setState((prev) => ({ ...prev, history: historyItems }));
+    } catch (error) {
+      console.error('Error loading history:', error);
+    }
+  }, []);
+
+  const deleteHistoryItem = useCallback(async (id: string) => {
+    try {
+      await dbDeleteHistory(id);
+      setState((prev) => ({
+        ...prev,
+        history: prev.history.filter(item => item.id !== id),
+      }));
+    } catch (error) {
+      console.error('Error deleting history:', error);
+      throw error;
+    }
+  }, []);
+
+  const saveToHistory = useCallback(async (userId: string) => {
     if (state.generatedImages.length === 0) return;
 
-    const now = new Date();
-    const historyItem: HistoryItem = {
-      id: Date.now().toString(),
-      date: now.toISOString().split('T')[0],
-      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      count: state.generatedImages.length,
-      thumbnail: state.generatedImages[0],
-      results: state.generatedImages,
-    };
+    try {
+      // Save all generated images to database
+      const imageIds: string[] = [];
+      for (const imageData of state.generatedImages) {
+        const savedImage = await saveImage(userId, imageData);
+        imageIds.push(savedImage.id);
+      }
 
-    setState((prev) => ({
-      ...prev,
-      history: [historyItem, ...prev.history],
-    }));
-  }, [state.generatedImages]);
+      const now = new Date();
+      const date = now.toISOString().split('T')[0];
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-  const generateImages = useCallback(async () => {
+      // Save history record
+      await saveHistory(userId, date, time, imageIds);
+
+      // Reload history
+      await loadHistory(userId);
+    } catch (error) {
+      console.error('Error saving to history:', error);
+      throw error;
+    }
+  }, [state.generatedImages, loadHistory]);
+
+  const generateImages = useCallback(async (userId: string) => {
     if (!state.selectedImage) {
       setState((prev) => ({ ...prev, error: 'Please select an image first' }));
       return;
@@ -228,21 +265,28 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Save all generated images to database
+      const imageIds: string[] = [];
+      for (const imageData of results) {
+        const savedImage = await saveImage(userId, imageData);
+        imageIds.push(savedImage.id);
+      }
+
       const now = new Date();
-      const historyItem: HistoryItem = {
-        id: Date.now().toString(),
-        date: now.toISOString().split('T')[0],
-        time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-        count: results.length,
-        thumbnail: results[0],
-        results: results,
-      };
+      const date = now.toISOString().split('T')[0];
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+      // Save history record
+      await saveHistory(userId, date, time, imageIds);
+
+      // Load updated history
+      const historyItems = await getUserHistory(userId);
 
       setState((prev) => ({
         ...prev,
         isGenerating: false,
         generatedImages: results,
-        history: [historyItem, ...prev.history],
+        history: historyItems,
       }));
       
       console.log(`Successfully generated ${results.length} images`);
@@ -265,8 +309,10 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       generateImages,
       clearResults,
       saveToHistory,
+      loadHistory,
+      deleteHistoryItem,
     }),
-    [state, setSelectedImage, setGenerationCount, setAspectRatio, generateImages, clearResults, saveToHistory]
+    [state, setSelectedImage, setGenerationCount, setAspectRatio, generateImages, clearResults, saveToHistory, loadHistory, deleteHistoryItem]
   );
 
   return (

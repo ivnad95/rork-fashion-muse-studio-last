@@ -1,5 +1,15 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { 
+  initDatabase, 
+  getUserByEmail, 
+  getUserById, 
+  createUser as dbCreateUser, 
+  updateUser as dbUpdateUser,
+  updateUserCredits as dbUpdateUserCredits,
+  hashPassword,
+  verifyPassword,
+} from '@/lib/database';
 
 interface User {
   id: string;
@@ -25,7 +35,7 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = '@fashion_ai_user';
+const STORAGE_KEY = '@fashion_ai_user_session';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -35,20 +45,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    loadUser();
+    initializeAuth();
   }, []);
 
-  const loadUser = async () => {
+  const initializeAuth = async () => {
     try {
-      const userJson = await AsyncStorage.getItem(STORAGE_KEY);
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        setState({ user, isAuthenticated: true, isLoading: false });
+      // Initialize database
+      await initDatabase();
+      
+      // Load user session
+      const sessionJson = await AsyncStorage.getItem(STORAGE_KEY);
+      if (sessionJson) {
+        const session = JSON.parse(sessionJson);
+        const dbUser = await getUserById(session.userId);
+        
+        if (dbUser) {
+          const user: User = {
+            id: dbUser.id,
+            name: dbUser.name,
+            email: dbUser.email,
+            profileImage: dbUser.profile_image,
+            credits: dbUser.credits,
+          };
+          setState({ user, isAuthenticated: true, isLoading: false });
+        } else {
+          // Session exists but user not in DB - clear session
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          setState({ user: null, isAuthenticated: false, isLoading: false });
+        }
       } else {
         setState({ user: null, isAuthenticated: false, isLoading: false });
       }
     } catch (error) {
-      console.error('Error loading user:', error);
+      console.error('Error initializing auth:', error);
       setState({ user: null, isAuthenticated: false, isLoading: false });
     }
   };
@@ -57,17 +86,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: true }));
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get user from database
+      const dbUser = await getUserByEmail(email);
+      
+      if (!dbUser) {
+        throw new Error('Invalid email or password');
+      }
+      
+      // Verify password
+      if (!verifyPassword(password, dbUser.password_hash)) {
+        throw new Error('Invalid email or password');
+      }
       
       const user: User = {
-        id: Date.now().toString(),
-        name: email.split('@')[0],
-        email,
-        profileImage: null,
-        credits: 10,
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        profileImage: dbUser.profile_image,
+        credits: dbUser.credits,
       };
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      // Save session
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: user.id }));
       setState({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -79,17 +119,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: true }));
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Check if user already exists
+      const existingUser = await getUserByEmail(email);
+      if (existingUser) {
+        throw new Error('Email already registered');
+      }
+      
+      // Create user in database
+      const passwordHash = hashPassword(password);
+      const dbUser = await dbCreateUser(name, email, passwordHash);
       
       const user: User = {
-        id: Date.now().toString(),
-        name,
-        email,
-        profileImage: null,
-        credits: 10,
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        profileImage: dbUser.profile_image,
+        credits: dbUser.credits,
       };
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      // Save session
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: user.id }));
       setState({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -111,8 +160,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!state.user) return;
 
     try {
+      // Update in database
+      await dbUpdateUser(state.user.id, {
+        name: updates.name,
+        profile_image: updates.profileImage,
+      });
+      
       const updatedUser = { ...state.user, ...updates };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
       setState((prev) => ({ ...prev, user: updatedUser }));
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -120,12 +174,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state.user]);
 
-  const updateCredits = useCallback((amount: number) => {
+  const updateCredits = useCallback(async (amount: number) => {
     if (!state.user) return;
 
-    const updatedUser = { ...state.user, credits: state.user.credits + amount };
-    setState((prev) => ({ ...prev, user: updatedUser }));
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+    try {
+      // Update in database
+      const newCredits = await dbUpdateUserCredits(state.user.id, amount);
+      
+      const updatedUser = { ...state.user, credits: newCredits };
+      setState((prev) => ({ ...prev, user: updatedUser }));
+    } catch (error) {
+      console.error('Error updating credits:', error);
+      throw error;
+    }
   }, [state.user]);
 
   const value = useMemo(

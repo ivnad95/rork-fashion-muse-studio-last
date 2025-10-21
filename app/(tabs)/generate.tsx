@@ -7,6 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import GlassyTitle from '@/components/GlassyTitle';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
@@ -16,6 +17,7 @@ import GlowingButton from '@/components/GlowingButton';
 export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
   const [uploading, setUploading] = useState<boolean>(false);
 
@@ -48,13 +50,20 @@ export default function GenerateScreen() {
       if (Platform.OS === 'web') alert(msg); else Alert.alert('No Image', msg);
       return;
     }
+    
+    if (!user) {
+      const msg = 'Please sign in to generate images.';
+      if (Platform.OS === 'web') alert(msg); else Alert.alert('Authentication Required', msg);
+      return;
+    }
+    
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
     // Redirect to results immediately so user can see loading placeholders
     router.push('/(tabs)/results');
     // Start generation in background
-    generateImages();
+    generateImages(user.id);
   };
 
   return (
