@@ -12,7 +12,7 @@ async function generateId(prefix: string): Promise<string> {
     return `${prefix}_${uuid}`;
   } catch {
     // Fallback to timestamp-based ID (not cryptographically secure but acceptable for local DB)
-    return `${prefix}_${Date.now()}_${Date.now().toString(36)}`;
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
   }
 }
 
