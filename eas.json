@@ -33,7 +33,7 @@
         "autoIncrement": true
       },
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     },
     "testflight": {
@@ -41,8 +41,7 @@
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release",
-        "autoIncrement": true,
-        "submitToTestFlight": false
+        "autoIncrement": true
       }
     }
   },
