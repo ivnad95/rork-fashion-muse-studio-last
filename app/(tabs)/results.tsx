@@ -12,6 +12,8 @@ import GlassyTitle from '@/components/GlassyTitle';
 import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
+import ShimmerLoader from '@/components/ShimmerLoader';
+import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -113,6 +115,7 @@ function LoadingPlaceholder() {
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const { generatedImages, isGenerating, generationCount, deleteImage } = useGeneration();
+  const { handleScroll } = useScrollNavbar();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -282,7 +285,7 @@ export default function ResultsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
         <View style={styles.grid}>
@@ -296,7 +299,7 @@ export default function ResultsScreen() {
                 style={styles.gridItemGradient}
               >
                 <View style={styles.gridItemInner}>
-                  <LoadingPlaceholder />
+                  <ShimmerLoader width="100%" height="100%" borderRadius={16} />
                 </View>
               </LinearGradient>
             </View>
