@@ -128,7 +128,7 @@ function TabButton({
   });
 
   const getIcon = (routeName: string) => {
-    const color = isFocused ? 'rgba(200, 220, 255, 0.95)' : 'rgba(180, 200, 230, 0.6)';
+    const color = isFocused ? 'rgba(160, 200, 255, 0.95)' : 'rgba(140, 180, 220, 0.55)';
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -156,25 +156,18 @@ function TabButton({
         {isFocused && (
           <Animated.View style={[styles.buttonGlow, { opacity: glowOpacity }]}>
             <LinearGradient
-              colors={['rgba(200, 220, 255, 0.4)', 'rgba(150, 180, 230, 0.2)', 'rgba(200, 220, 255, 0.4)']}
+              colors={[
+                'rgba(80, 120, 180, 0.35)',
+                'rgba(60, 100, 160, 0.25)',
+                'rgba(80, 120, 180, 0.35)',
+              ]}
               style={StyleSheet.absoluteFill}
             />
           </Animated.View>
         )}
-        <LinearGradient
-          colors={
-            isFocused
-              ? ['rgba(200, 220, 255, 0.25)', 'rgba(150, 180, 230, 0.18)', 'rgba(120, 160, 220, 0.15)']
-              : ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.06)']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.buttonGradient}
-        >
-          <View style={styles.buttonInner}>
-            {getIcon(route.name)}
-          </View>
-        </LinearGradient>
+        <View style={styles.buttonContainer}>
+          {getIcon(route.name)}
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -219,12 +212,17 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
-        <LinearGradient
-          colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.12)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.tabBarGradient}
-        >
+        <View style={styles.tabBarGradient}>
+          <LinearGradient
+            colors={[
+              'rgba(60, 100, 160, 0.35)',
+              'rgba(50, 85, 140, 0.3)',
+              'rgba(40, 70, 120, 0.28)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.borderGradient}
+          />
           <View style={styles.tabBarBorder}>
             {Platform.OS === 'web' ? (
               <View style={styles.tabBarBlurWeb} />
@@ -232,7 +230,16 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
               <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
             )}
 
-            <View style={styles.topHighlight} />
+            <LinearGradient
+              colors={[
+                'rgba(70, 110, 170, 0.2)',
+                'rgba(50, 90, 150, 0.12)',
+                'transparent',
+              ]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 0.5 }}
+              style={styles.topHighlight}
+            />
 
             <View style={styles.tabBarInner}>
               {state.routes.map((route, index) => {
@@ -262,7 +269,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
               })}
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </Animated.View>
     </NavbarContext.Provider>
   );
@@ -276,82 +283,64 @@ const styles = StyleSheet.create({
     right: 20,
   },
   tabBarGradient: {
-    borderRadius: 40,
-    padding: 3.5,
-    shadowColor: 'rgba(200, 220, 255, 0.6)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.8,
-    shadowRadius: 40,
-    elevation: 25,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.5)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.42)',
-    borderRightColor: 'rgba(255, 255, 255, 0.25)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+    borderRadius: 32,
+    padding: 2,
+    shadowColor: 'rgba(60, 100, 160, 0.5)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.6,
+    shadowRadius: 28,
+    elevation: 18,
+    position: 'relative',
+  },
+  borderGradient: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 32,
   },
   tabBarBorder: {
-    height: 84,
-    backgroundColor: 'rgba(12, 18, 28, 0.75)',
-    borderRadius: 37,
+    height: 72,
+    backgroundColor: 'rgba(15, 25, 40, 0.8)',
+    borderRadius: 30,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.16)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(70, 110, 170, 0.25)',
   },
   tabBarBlurWeb: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(12, 18, 28, 0.85)',
+    backgroundColor: 'rgba(15, 25, 40, 0.9)',
   },
   tabBarInner: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   navButton: {
-    borderRadius: 30,
-    overflow: 'hidden',
+    borderRadius: 24,
+    overflow: 'visible',
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -8,
-    borderRadius: 38,
-  },
-  buttonGradient: {
-    width: 60,
-    height: 60,
+    inset: -6,
     borderRadius: 30,
-    padding: 3,
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  buttonInner: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 27,
+  buttonContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'transparent',
   },
   topHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderTopLeftRadius: 37,
-    borderTopRightRadius: 37,
+    height: '50%',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     zIndex: 1,
     pointerEvents: 'none',
   },
