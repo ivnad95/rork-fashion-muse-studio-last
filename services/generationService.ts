@@ -26,7 +26,9 @@ const FASHION_PROMPTS = [
 ];
 
 const RORK_API_URL = 'https://toolkit.rork.com/images/edit/';
-const TIMEOUT_MS = 120000; // 120 seconds
+const TIMEOUT_MS = 180000; // 180 seconds (3 minutes)
+const MAX_RETRIES = 2; // Number of retry attempts
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 4MB max image size
 
 /**
  * Generation service
@@ -84,13 +86,24 @@ export const generationService = {
     try {
       // If already base64, return as is
       if (uri.startsWith('data:image')) {
-        return uri.split(',')[1];
+        const base64 = uri.split(',')[1];
+        // Check size
+        const sizeInBytes = (base64.length * 3) / 4;
+        if (sizeInBytes > MAX_IMAGE_SIZE) {
+          throw new Error('Image is too large. Please use a smaller image (max 4MB).');
+        }
+        return base64;
       }
 
       // For file:// URIs, use FileReader (web) or expo-file-system (native)
       if (typeof window !== 'undefined' && uri.startsWith('file://')) {
         const response = await fetch(uri);
         const blob = await response.blob();
+        
+        // Check size before converting
+        if (blob.size > MAX_IMAGE_SIZE) {
+          throw new Error('Image is too large. Please use a smaller image (max 4MB).');
+        }
 
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -107,6 +120,11 @@ export const generationService = {
       if (uri.startsWith('http')) {
         const response = await fetch(uri);
         const blob = await response.blob();
+        
+        // Check size before converting
+        if (blob.size > MAX_IMAGE_SIZE) {
+          throw new Error('Image is too large. Please use a smaller image (max 4MB).');
+        }
 
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -122,65 +140,102 @@ export const generationService = {
       throw new Error('Unsupported image URI format');
     } catch (error) {
       console.error('Error converting image to base64:', error);
+      if (error instanceof Error && error.message.includes('too large')) {
+        throw error;
+      }
       throw new Error('Failed to process image');
     }
   },
 
   /**
-   * Call Rork AI API
+   * Call Rork AI API with retry logic
    */
   async callRorkAPI(base64Image: string, prompt: string): Promise<string> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    let lastError: Error | null = null;
 
-    try {
-      const response = await fetch(RORK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          images: [
-            {
-              type: 'image',
-              image: base64Image,
-            },
-          ],
-        }),
-        signal: controller.signal,
-      });
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.log(`Request timeout after ${TIMEOUT_MS}ms (attempt ${attempt + 1}/${MAX_RETRIES + 1})`);
+        controller.abort();
+      }, TIMEOUT_MS);
 
-      clearTimeout(timeoutId);
+      try {
+        console.log(`API call attempt ${attempt + 1}/${MAX_RETRIES + 1}`);
+        
+        const response = await fetch(RORK_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt,
+            images: [
+              {
+                type: 'image',
+                image: base64Image,
+              },
+            ],
+          }),
+          signal: controller.signal,
+        });
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please try again in a few moments.');
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('Rate limit exceeded. Please try again in a few moments.');
+          }
+          if (response.status === 413) {
+            throw new Error('Image too large. Please use a smaller image.');
+          }
+          if (response.status >= 500 && attempt < MAX_RETRIES) {
+            console.log(`Server error (${response.status}), retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+            continue;
+          }
+          throw new Error(`API error: ${response.status}`);
         }
-        if (response.status === 413) {
-          throw new Error('Image too large. Please use a smaller image.');
+
+        const data = await response.json();
+
+        if (!data.image || !data.image.base64Data) {
+          throw new Error('Invalid API response');
         }
-        throw new Error(`API error: ${response.status}`);
+
+        // Return as data URI
+        const mimeType = data.image.mimeType || 'image/jpeg';
+        return `data:${mimeType};base64,${data.image.base64Data}`;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        lastError = error;
+
+        if (error.name === 'AbortError') {
+          if (attempt < MAX_RETRIES) {
+            console.log(`Request timed out, retrying (${attempt + 1}/${MAX_RETRIES})...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            continue;
+          }
+          throw new Error('Request timed out after multiple attempts. Please try with a smaller image.');
+        }
+
+        // Don't retry for user errors
+        if (error.message.includes('too large') || error.message.includes('Rate limit')) {
+          throw error;
+        }
+
+        // Retry for network errors
+        if (attempt < MAX_RETRIES && (error.message.includes('network') || error.message.includes('fetch'))) {
+          console.log(`Network error, retrying (${attempt + 1}/${MAX_RETRIES})...`);
+          await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+          continue;
+        }
+
+        throw error;
       }
-
-      const data = await response.json();
-
-      if (!data.image || !data.image.base64Data) {
-        throw new Error('Invalid API response');
-      }
-
-      // Return as data URI
-      const mimeType = data.image.mimeType || 'image/jpeg';
-      return `data:${mimeType};base64,${data.image.base64Data}`;
-    } catch (error: any) {
-      clearTimeout(timeoutId);
-
-      if (error.name === 'AbortError') {
-        throw new Error('Generation timeout. Please try again with a smaller image or fewer generations.');
-      }
-
-      throw error;
     }
+
+    throw lastError || new Error('Failed to generate image after multiple attempts');
   },
 
   /**
