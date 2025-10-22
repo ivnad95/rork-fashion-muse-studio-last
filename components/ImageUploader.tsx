@@ -11,11 +11,11 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassPanel style={glassStyles.imagePlaceholder} radius={20}>
+    <GlassPanel style={glassStyles.imagePlaceholder} radius={24}>
       <TouchableOpacity
         style={glassStyles.imageContainer}
         onPress={onImageSelect}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         testID="image-uploader"
       >
         {uploadedImage ? (
@@ -44,30 +44,39 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
+    borderRadius: 24,                                   // Spec: 24px border radius for main panels
   },
   placeholderContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    marginBottom: 12,
-    opacity: 0.3,
+    width: 96,
+    height: 96,
+    marginBottom: 16,
+    opacity: 0.25,
   },
   logo: {
     width: '100%',
     height: '100%',
   },
   placeholderText: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    fontWeight: '500' as const,
+    color: COLORS.silverLight,                      // Spec: near-white primary text
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',         // Spec: neon-like glow effect
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   placeholderSubtext: {
-    color: '#6B7280',
-    fontSize: 12,
-    marginTop: 4,
+    color: COLORS.silverMid,                        // Spec: secondary silver text
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: '600' as const,
+    letterSpacing: -0.2,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
 });

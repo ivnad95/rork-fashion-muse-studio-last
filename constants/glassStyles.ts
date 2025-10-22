@@ -25,8 +25,12 @@ export const COLORS = {
 export const glassStyles = StyleSheet.create({
   glass3DSurface: {
     backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: extremely low opacity white
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: subtle light border
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',    // Spec: subtle light border with gradient
+    borderLeftColor: 'rgba(255, 255, 255, 0.10)',
+    borderRightColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 24,                               // Spec: 24px border radius for main panels
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.65,
@@ -36,6 +40,7 @@ export const glassStyles = StyleSheet.create({
   },
   glass3DButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,                               // Spec: 24px border radius for consistency
     borderWidth: 2,
     borderTopColor: 'rgba(255, 255, 255, 0.32)',
     borderLeftColor: 'rgba(255, 255, 255, 0.24)',
@@ -127,13 +132,13 @@ export const glassStyles = StyleSheet.create({
     textShadowRadius: 6,
   },
   panelContainer: {
-    padding: 16,
-    borderRadius: 24,
+    padding: 20,
+    borderRadius: 24,                               // Spec: 24px border radius for main panels
   },
   imagePlaceholder: {
     width: '100%',
     aspectRatio: 4 / 5,
-    borderRadius: 20,
+    borderRadius: 24,                               // Spec: 24px border radius for main panels
     marginBottom: 16,
     overflow: 'hidden',
   },
