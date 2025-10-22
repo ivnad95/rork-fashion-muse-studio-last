@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlowingButton from '@/components/GlowingButton';
 import GlassyTitle from '@/components/GlassyTitle';
+import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 // Glowing section divider
 function GlowingDivider() {
@@ -309,6 +310,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
+  const { handleScroll } = useScrollNavbar();
   const [darkMode, setDarkMode] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -491,6 +493,8 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View>

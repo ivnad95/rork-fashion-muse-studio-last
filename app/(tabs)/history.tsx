@@ -12,6 +12,7 @@ import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { history, loadHistory, deleteHistoryItem } = useGeneration();
+  const { handleScroll } = useScrollNavbar();
   const [items, setItems] = useState(history);
   const [selectedGeneration, setSelectedGeneration] = useState<typeof mockHistory[0] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,7 +146,7 @@ export default function HistoryScreen() {
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
       
-      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         <GlassyTitle><Text>History</Text></GlassyTitle>
         {isLoading ? (
           <View style={styles.messagePanel}>

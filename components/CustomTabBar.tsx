@@ -1,10 +1,32 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, createContext, useContext } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
+
+// Context for navbar visibility
+interface NavbarContextType {
+  hideNavbar: () => void;
+  showNavbar: () => void;
+  navbarTranslateY: Animated.Value;
+}
+
+const NavbarContext = createContext<NavbarContextType | null>(null);
+
+export const useNavbar = () => {
+  const context = useContext(NavbarContext);
+  if (!context) {
+    // Return dummy functions if context not available
+    return {
+      hideNavbar: () => {},
+      showNavbar: () => {},
+      navbarTranslateY: new Animated.Value(0),
+    };
+  }
+  return context;
+};
 
 const HomeIcon = ({ color }: { color: string }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
@@ -159,53 +181,90 @@ function TabButton({
 }
 
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const lastScrollY = useRef(0);
+  const isHidden = useRef(false);
+
+  const hideNavbar = () => {
+    if (!isHidden.current) {
+      isHidden.current = true;
+      Animated.spring(translateY, {
+        toValue: 120, // Hide below screen
+        friction: 9,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const showNavbar = () => {
+    if (isHidden.current) {
+      isHidden.current = false;
+      Animated.spring(translateY, {
+        toValue: 0, // Show at normal position
+        friction: 9,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.12)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.tabBarGradient}
+    <NavbarContext.Provider value={{ hideNavbar, showNavbar, navbarTranslateY: translateY }}>
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            transform: [{ translateY }],
+          },
+        ]}
       >
-        <View style={styles.tabBarBorder}>
-          {Platform.OS === 'web' ? (
-            <View style={styles.tabBarBlurWeb} />
-          ) : (
-            <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-          )}
+        <LinearGradient
+          colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.12)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.tabBarGradient}
+        >
+          <View style={styles.tabBarBorder}>
+            {Platform.OS === 'web' ? (
+              <View style={styles.tabBarBlurWeb} />
+            ) : (
+              <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
 
-          <View style={styles.topHighlight} />
+            <View style={styles.topHighlight} />
 
-          <View style={styles.tabBarInner}>
-            {state.routes.map((route, index) => {
-              const { options } = descriptors[route.key];
-              const isFocused = state.index === index;
+            <View style={styles.tabBarInner}>
+              {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const isFocused = state.index === index;
 
-              const onPress = () => {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-                if (!isFocused && !event.defaultPrevented) {
-                  navigation.navigate(route.name);
-                }
-              };
+                const onPress = () => {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (!isFocused && !event.defaultPrevented) {
+                    navigation.navigate(route.name);
+                  }
+                };
 
-              return (
-                <TabButton
-                  key={route.key}
-                  route={route}
-                  isFocused={isFocused}
-                  onPress={onPress}
-                  accessibilityLabel={options.tabBarAccessibilityLabel}
-                />
-              );
-            })}
+                return (
+                  <TabButton
+                    key={route.key}
+                    route={route}
+                    isFocused={isFocused}
+                    onPress={onPress}
+                    accessibilityLabel={options.tabBarAccessibilityLabel}
+                  />
+                );
+              })}
+            </View>
           </View>
-        </View>
-      </LinearGradient>
-    </View>
+        </LinearGradient>
+      </Animated.View>
+    </NavbarContext.Provider>
   );
 }
 
