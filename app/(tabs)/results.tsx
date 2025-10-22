@@ -331,14 +331,16 @@ export default function ResultsScreen() {
                     style={styles.actionButton}
                     activeOpacity={0.8}
                   >
-                    <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                    <View style={styles.actionButtonContainer}>
                       <LinearGradient
-                        colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']}
+                        colors={['rgba(34, 197, 94, 0.35)', 'rgba(22, 163, 74, 0.25)']}
                         style={styles.actionButtonGradient}
                       >
-                        <Download size={24} color={Colors.dark.primaryLight} strokeWidth={2} />
+                        <View style={styles.actionButtonGlass}>
+                          <Download size={24} color="#4ade80" strokeWidth={2.5} />
+                        </View>
                       </LinearGradient>
-                    </PremiumLiquidGlass>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -346,14 +348,16 @@ export default function ResultsScreen() {
                     style={styles.actionButton}
                     activeOpacity={0.8}
                   >
-                    <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                    <View style={styles.actionButtonContainer}>
                       <LinearGradient
-                        colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']}
+                        colors={['rgba(59, 130, 246, 0.35)', 'rgba(37, 99, 235, 0.25)']}
                         style={styles.actionButtonGradient}
                       >
-                        <Share2 size={24} color={Colors.dark.primaryLight} strokeWidth={2} />
+                        <View style={styles.actionButtonGlass}>
+                          <Share2 size={24} color="#60a5fa" strokeWidth={2.5} />
+                        </View>
                       </LinearGradient>
-                    </PremiumLiquidGlass>
+                    </View>
                   </TouchableOpacity>
 
                   {generatedImages.includes(selectedImage) && (
@@ -362,14 +366,16 @@ export default function ResultsScreen() {
                       style={styles.actionButton}
                       activeOpacity={0.8}
                     >
-                      <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                      <View style={styles.actionButtonContainer}>
                         <LinearGradient
-                          colors={['rgba(239, 68, 68, 0.25)', 'rgba(220, 38, 38, 0.15)']}
+                          colors={['rgba(239, 68, 68, 0.35)', 'rgba(220, 38, 38, 0.25)']}
                           style={styles.actionButtonGradient}
                         >
-                          <Trash2 size={24} color={Colors.dark.error} strokeWidth={2} />
+                          <View style={styles.actionButtonGlass}>
+                            <Trash2 size={24} color="#ff5757" strokeWidth={2.5} />
+                          </View>
                         </LinearGradient>
-                      </PremiumLiquidGlass>
+                      </View>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -379,14 +385,16 @@ export default function ResultsScreen() {
                   style={styles.closeButton}
                   activeOpacity={0.8}
                 >
-                  <PremiumLiquidGlass style={styles.closeButtonGlass} variant="elevated" borderRadius={22}>
+                  <View style={styles.closeButtonContainer}>
                     <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
+                      colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)']}
                       style={styles.closeButtonGradient}
                     >
-                      <X size={24} color={Colors.dark.text} strokeWidth={2} />
+                      <View style={styles.closeButtonGlass}>
+                        <X size={24} color="#ffffff" strokeWidth={2.5} />
+                      </View>
                     </LinearGradient>
-                  </PremiumLiquidGlass>
+                  </View>
                 </TouchableOpacity>
               </>
             )}
@@ -489,35 +497,76 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionButton: {
-    width: 56,
-    height: 56,
+    width: 64,
+    height: 64,
   },
-  actionButtonGlass: {
+  actionButtonContainer: {
     width: '100%',
     height: '100%',
-    shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 18,
-    elevation: 10,
+    borderRadius: 32,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    elevation: 12,
   },
   actionButtonGradient: {
     flex: 1,
+    padding: 2,
+  },
+  actionButtonGlass: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   closeButton: {
-    width: 44,
-    height: 44,
-    marginTop: 12,
+    width: 52,
+    height: 52,
+    marginTop: 16,
   },
-  closeButtonGlass: {
+  closeButtonContainer: {
     width: '100%',
     height: '100%',
+    borderRadius: 26,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 18,
+    elevation: 10,
   },
   closeButtonGradient: {
     flex: 1,
+    padding: 2,
+  },
+  closeButtonGlass: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
 });

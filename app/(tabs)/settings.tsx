@@ -56,7 +56,7 @@ function ToggleSwitch({
       <LinearGradient
         colors={
           enabled
-            ? ['#4a7ed6', '#6ba0ff', '#8ec5ff', '#6ba0ff']
+            ? ['rgba(74, 222, 128, 0.5)', 'rgba(34, 197, 94, 0.6)', 'rgba(22, 163, 74, 0.5)']
             : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
         }
         style={styles.toggleBackground}
@@ -80,9 +80,9 @@ function ToggleSwitch({
           <View style={styles.thumbGlow}>
             <LinearGradient
               colors={[
-                'rgba(107, 160, 255, 0.4)',
-                'rgba(74, 126, 214, 0.6)',
-                'rgba(107, 160, 255, 0.4)',
+                'rgba(74, 222, 128, 0.5)',
+                'rgba(34, 197, 94, 0.7)',
+                'rgba(74, 222, 128, 0.5)',
               ]}
               style={styles.thumbGlowGradient}
             />
@@ -369,11 +369,8 @@ export default function SettingsScreen() {
             </View>
           </PremiumLiquidGlass>
         ) : (
-          <PremiumLiquidGlass style={styles.creditsCard} variant="primary" borderRadius={20}>
-            <LinearGradient
-              colors={['rgba(107, 160, 255, 0.18)', 'rgba(74, 126, 214, 0.12)']}
-              style={styles.creditsContent}
-            >
+          <PremiumLiquidGlass style={styles.creditsCard} variant="elevated" borderRadius={20}>
+            <View style={styles.creditsContent}>
               <View style={styles.creditsInfo}>
                 <Text style={styles.creditsLabel}>Available Credits</Text>
                 <Text style={styles.creditsValue}>{user.credits}</Text>
@@ -387,27 +384,22 @@ export default function SettingsScreen() {
                 }}
                 style={styles.buyButton}
               >
-                <CreditCard size={18} color={Colors.dark.primaryLight} />
+                <CreditCard size={18} color="#d8e9ff" />
                 <Text style={styles.buyButtonText}>Buy More</Text>
-                <ChevronRight size={18} color={Colors.dark.primaryLight} />
+                <ChevronRight size={18} color="#d8e9ff" />
               </TouchableOpacity>
-            </LinearGradient>
+            </View>
           </PremiumLiquidGlass>
         )}
 
         {user && (
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={['#335ba8', '#4a7ed6', '#6ba0ff', '#4a7ed6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.avatarBorder}
-            >
+            <View style={styles.avatarBorder}>
               <View style={styles.avatarInner}>
-                <User size={42} color={Colors.dark.primaryLight} strokeWidth={1.5} />
+                <User size={42} color="#d8e9ff" strokeWidth={1.5} />
               </View>
-            </LinearGradient>
+            </View>
           </View>
 
           <View style={styles.profileInfo}>
@@ -521,7 +513,7 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'portrait'
-                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
                         : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
                     }
                     style={styles.formatOptionGradient}
@@ -553,7 +545,7 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'square'
-                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
                         : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
                     }
                     style={styles.formatOptionGradient}
@@ -585,7 +577,7 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'landscape'
-                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
                         : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
                     }
                     style={styles.formatOptionGradient}
@@ -672,6 +664,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   creditsInfo: {
     gap: 6,
@@ -700,12 +693,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: 'rgba(107, 160, 255, 0.18)',
+    backgroundColor: 'rgba(216, 233, 255, 0.1)',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.25)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   buyButtonText: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: Colors.dark.primaryLight,
+    color: '#d8e9ff',
   },
   profileSection: {
     marginBottom: 26,
@@ -719,7 +717,13 @@ const styles = StyleSheet.create({
     height: 104,
     borderRadius: 52,
     padding: 4,
-    shadowColor: Colors.dark.primaryGlow,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
+    borderRightColor: 'rgba(255, 255, 255, 0.12)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    shadowColor: 'rgba(200, 220, 255, 0.6)',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.7,
     shadowRadius: 28,
@@ -729,7 +733,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 48,
-    backgroundColor: Colors.dark.backgroundElevated,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.25)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -804,8 +813,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(220, 235, 255, 0.05)',
   },
   toggleActive: {
-    borderColor: Colors.dark.primaryLight,
-    shadowColor: Colors.dark.primaryGlow,
+    borderColor: '#4ade80',
+    shadowColor: 'rgba(74, 222, 128, 0.8)',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.75,
     shadowRadius: 24,
@@ -858,16 +867,16 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(107, 160, 255, 0.25)',
+    backgroundColor: 'rgba(216, 233, 255, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(107, 160, 255, 0.4)',
+    borderColor: 'rgba(216, 233, 255, 0.25)',
   },
   logoutText: {
     fontSize: 16,
     fontWeight: '500' as const,
-    color: Colors.dark.primaryLight,
+    color: '#d8e9ff',
   },
   dangerRow: {
     flexDirection: 'row',
@@ -935,8 +944,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   formatOptionActive: {
-    borderColor: Colors.dark.primaryLight,
-    shadowColor: Colors.dark.primaryGlow,
+    borderColor: 'rgba(216, 233, 255, 0.6)',
+    shadowColor: 'rgba(216, 233, 255, 0.5)',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 18,
@@ -947,7 +956,7 @@ const styles = StyleSheet.create({
     inset: 0,
   },
   formatIcon: {
-    backgroundColor: Colors.dark.textSecondary,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
     borderRadius: 3,
   },
   formatIconPortrait: {
@@ -968,6 +977,6 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
   },
   formatTextActive: {
-    color: Colors.dark.primaryLight,
+    color: '#d8e9ff',
   },
 });
