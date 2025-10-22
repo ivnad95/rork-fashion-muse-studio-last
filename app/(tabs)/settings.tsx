@@ -11,12 +11,13 @@ import {
   Alert,
   Keyboard,
   TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
-import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Moon, Zap, Bell, Cloud, Camera, CheckCircle, Star, Sparkles } from 'lucide-react-native';
+import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -311,8 +312,6 @@ export default function SettingsScreen() {
   const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
   const { handleScroll } = useScrollNavbar();
-  const [darkMode, setDarkMode] = useState(true);
-  const [reduceMotion, setReduceMotion] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [cloudStorage, setCloudStorage] = useState(false);
   const [name, setName] = useState(user?.name || 'User');
@@ -321,20 +320,6 @@ export default function SettingsScreen() {
   const [authPassword, setAuthPassword] = useState('');
   const [authName, setAuthName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  const toggleDarkMode = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setDarkMode(!darkMode);
-  };
-
-  const toggleReduceMotion = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setReduceMotion(!reduceMotion);
-  };
 
   const toggleNotifications = () => {
     if (Platform.OS !== 'web') {
@@ -664,10 +649,10 @@ export default function SettingsScreen() {
               <View style={styles.avatarBorder}>
                 <View style={styles.avatarInner}>
                   {user.profileImage ? (
-                    <View style={styles.avatarImage}>
-                      {/* Image would render here if we had proper image display */}
-                      <User size={42} color="#d8e9ff" strokeWidth={1.5} />
-                    </View>
+                    <Image
+                      source={{ uri: user.profileImage }}
+                      style={styles.avatarImage}
+                    />
                   ) : (
                     <User size={42} color="#d8e9ff" strokeWidth={1.5} />
                   )}
@@ -731,22 +716,6 @@ export default function SettingsScreen() {
         <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Preferences</Text>
-
-            <SettingsRow label="Dark Mode" icon={Moon}>
-              <ToggleSwitch enabled={darkMode} onChange={toggleDarkMode} label="Toggle dark mode" />
-            </SettingsRow>
-
-            <GlowingDivider />
-
-            <SettingsRow label="Reduce Motion" icon={Zap}>
-              <ToggleSwitch
-                enabled={reduceMotion}
-                onChange={toggleReduceMotion}
-                label="Toggle reduce motion"
-              />
-            </SettingsRow>
-
-            <GlowingDivider />
 
             <SettingsRow label="Notifications" icon={Bell}>
               <ToggleSwitch
@@ -1510,8 +1479,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   // Settings row icon styles
   settingLeft: {

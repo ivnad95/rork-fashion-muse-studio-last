@@ -320,6 +320,10 @@ export default function HistoryScreen() {
                       pagingEnabled
                       showsHorizontalScrollIndicator={false}
                       style={styles.imageScroll}
+                      contentContainerStyle={{
+                        alignItems: 'center',
+                        paddingHorizontal: 0,
+                      }}
                     >
                       {selectedGeneration.imageUrls.map((url, index) => (
                         <View key={index} style={styles.modalImageContainer}>
@@ -622,6 +626,7 @@ const styles = StyleSheet.create({
   },
   imageScroll: {
     width: '100%',
+    maxHeight: 600,
   },
   modalImageContainer: {
     width: SCREEN_WIDTH > 540 ? 540 : SCREEN_WIDTH - 48,
