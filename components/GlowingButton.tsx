@@ -116,8 +116,16 @@ export default function GlowingButton({
   }, [disabled, variant, glowAnim]);
 
   const handlePressIn = () => {
+    // Haptic feedback on press
+    if (Platform.OS !== 'web' && !disabled) {
+      const Haptics = require('expo-haptics');
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
     Animated.spring(scaleAnim, {
-      toValue: 0.96,
+      toValue: 0.95,
+      friction: 6,
+      tension: 50,
       useNativeDriver: true,
     }).start();
   };
@@ -125,8 +133,8 @@ export default function GlowingButton({
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
-      friction: 3,
-      tension: 40,
+      friction: 4,
+      tension: 45,
       useNativeDriver: true,
     }).start();
   };
@@ -260,7 +268,7 @@ export default function GlowingButton({
 const styles = StyleSheet.create({
   container: {
     minHeight: 64,
-    borderRadius: 30,
+    borderRadius: 32,
     overflow: 'visible',
     position: 'relative',
   },
@@ -295,23 +303,28 @@ const styles = StyleSheet.create({
   touchable: {
     flex: 1,
     position: 'relative',
-    borderRadius: 30,
+    borderRadius: 32,
     overflow: 'hidden',
   },
   outerBorder: {
     flex: 1,
-    borderRadius: 30,
-    padding: 2.5,
+    borderRadius: 32,
+    padding: 3,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.28)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.22)',
-    borderRightColor: 'rgba(255, 255, 255, 0.12)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: 'rgba(255, 255, 255, 0.30)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.24)',
+    borderRightColor: 'rgba(255, 255, 255, 0.14)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.10)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
   innerContainer: {
     flex: 1,
-    borderRadius: 27.5,
+    borderRadius: 29,
     overflow: 'hidden',
     backgroundColor: 'rgba(20, 25, 35, 0.6)',
     borderWidth: 1.5,
@@ -347,11 +360,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderTopLeftRadius: 27.5,
-    borderTopRightRadius: 27.5,
-    opacity: 0.5,
+    height: '40%',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderTopLeftRadius: 29,
+    borderTopRightRadius: 29,
+    opacity: 0.6,
     zIndex: 4,
   },
   content: {
@@ -366,13 +379,13 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#F5F7FA',
-    fontSize: 16,
-    fontWeight: '600' as const,
-    lineHeight: 20,
-    letterSpacing: -0.4,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    fontSize: 17,
+    fontWeight: '700' as const,
+    lineHeight: 22,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   textSmall: {
     fontSize: 14,
@@ -381,10 +394,11 @@ const styles = StyleSheet.create({
   },
   textPrimary: {
     color: '#FFFFFF',
-    fontWeight: '700' as const,
-    fontSize: 18,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    fontWeight: '800' as const,
+    fontSize: 19,
+    letterSpacing: -0.6,
+    textShadowColor: 'rgba(10, 118, 175, 0.8)',           // Spec: accent color glow for primary
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 16,
   },
 });

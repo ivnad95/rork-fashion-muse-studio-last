@@ -15,7 +15,7 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
       <TouchableOpacity
         style={glassStyles.imageContainer}
         onPress={onImageSelect}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         testID="image-uploader"
       >
         {uploadedImage ? (
@@ -51,10 +51,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    marginBottom: 12,
-    opacity: 0.3,
+    width: 96,
+    height: 96,
+    marginBottom: 16,
+    opacity: 0.25,
   },
   logo: {
     width: '100%',
@@ -62,19 +62,21 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     color: COLORS.silverLight,                      // Spec: near-white primary text
-    fontSize: 15,
-    fontWeight: '600' as const,
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',         // Spec: neon-like glow effect
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    textShadowRadius: 10,
   },
   placeholderSubtext: {
     color: COLORS.silverMid,                        // Spec: secondary silver text
-    fontSize: 13,
-    marginTop: 6,
-    fontWeight: '500' as const,
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: '600' as const,
+    letterSpacing: -0.2,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowRadius: 6,
   },
 });

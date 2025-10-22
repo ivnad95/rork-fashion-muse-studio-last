@@ -294,7 +294,24 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Multi-layer background with depth */}
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+
+      {/* Subtle ambient glow */}
+      <LinearGradient
+        colors={[
+          'transparent',
+          'rgba(10, 118, 175, 0.05)',
+          'rgba(10, 118, 175, 0.08)',
+          'transparent',
+        ]}
+        locations={[0, 0.3, 0.6, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
       <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
