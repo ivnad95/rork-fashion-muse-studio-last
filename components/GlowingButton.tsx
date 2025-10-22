@@ -103,9 +103,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(255, 255, 255, 0.45)',
-              'rgba(255, 255, 255, 0.7)',
-              'rgba(255, 255, 255, 0.45)',
+              'rgba(60, 90, 140, 0.3)',
+              'rgba(80, 120, 180, 0.5)',
+              'rgba(60, 90, 140, 0.3)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -122,41 +122,51 @@ export default function GlowingButton({
         activeOpacity={0.9}
         style={styles.touchable}
       >
+        {/* Blue dark gradient border */}
         <LinearGradient
-          colors={['#f7fbff', '#e6eefc', '#c9d7ef', '#e6eefc', '#f7fbff']}
+          colors={[
+            'rgba(80, 120, 180, 0.4)',
+            'rgba(60, 100, 160, 0.3)',
+            'rgba(40, 70, 120, 0.25)',
+            'rgba(60, 100, 160, 0.3)',
+          ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.borderGradient}
         />
 
         <View style={styles.innerContainer}>
+          {/* Blue dark gradient background */}
           <LinearGradient
-            colors={
-              variant === 'primary'
-                ? ['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.1)']
-                : ['rgba(240, 245, 255, 0.12)', 'rgba(240, 245, 255, 0.04)']
-            }
+            colors={[
+              'rgba(20, 35, 60, 0.95)',
+              'rgba(30, 50, 85, 0.9)',
+              'rgba(40, 70, 110, 0.85)',
+              'rgba(30, 50, 85, 0.9)',
+            ]}
             start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
+            end={{ x: 1, y: 1 }}
             style={styles.gradient}
           />
 
           {Platform.OS === 'web' ? (
-            <View style={[styles.blurLayer, { backgroundColor: Colors.dark.glass }]} />
+            <View style={[styles.blurLayer, { backgroundColor: 'rgba(25, 40, 70, 0.6)' }]} />
           ) : (
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            React.createElement(require('expo-blur').BlurView, { intensity: 25, style: styles.blurLayer })
+            React.createElement(require('expo-blur').BlurView, { intensity: 15, tint: 'dark', style: styles.blurLayer })
           )}
 
+          {/* Top light refraction */}
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0.08)', 'transparent']}
+            colors={['rgba(100, 140, 200, 0.25)', 'rgba(60, 100, 160, 0.12)', 'transparent']}
             start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 0.5 }}
+            end={{ x: 0.5, y: 0.6 }}
             style={styles.shineLayer}
           />
 
+          {/* Side light refraction */}
           <LinearGradient
-            colors={['transparent', 'rgba(255, 255, 255, 0.08)', 'transparent']}
+            colors={['transparent', 'rgba(80, 120, 180, 0.15)', 'transparent']}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={styles.sideGlow}
@@ -196,11 +206,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   containerPrimary: {
-    shadowColor: '#ffffff',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.85,
-    shadowRadius: 32,
-    elevation: 18,
+    shadowColor: 'rgba(60, 100, 160, 0.6)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.7,
+    shadowRadius: 24,
+    elevation: 12,
   },
   glowRing: {
     position: 'absolute',
