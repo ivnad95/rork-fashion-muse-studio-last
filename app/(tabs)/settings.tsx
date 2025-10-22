@@ -76,7 +76,7 @@ function AnimatedCreditDisplay({ credits, isGuest }: { credits: number; isGuest?
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.1,
+            toValue: 1.08,
             duration: 1000,
             useNativeDriver: true,
           }),
@@ -96,12 +96,12 @@ function AnimatedCreditDisplay({ credits, isGuest }: { credits: number; isGuest?
         <LinearGradient
           colors={
             isGuest && credits <= 2
-              ? ['rgba(255, 180, 100, 0.3)', 'rgba(255, 140, 60, 0.2)']
-              : ['rgba(74, 222, 128, 0.2)', 'rgba(34, 197, 94, 0.15)']
+              ? ['rgba(255, 180, 120, 0.15)', 'rgba(245, 160, 100, 0.12)']
+              : ['rgba(180, 210, 255, 0.18)', 'rgba(160, 200, 255, 0.12)']
           }
           style={styles.animatedCreditGradient}
         />
-        <Sparkles size={16} color={isGuest && credits <= 2 ? '#ffb464' : '#4ade80'} />
+        <Sparkles size={16} color={isGuest && credits <= 2 ? '#f5a064' : '#a0c8ff'} strokeWidth={2} />
         <Text style={[styles.animatedCreditText, isGuest && credits <= 2 && styles.animatedCreditTextWarning]}>
           {credits}
         </Text>
@@ -142,10 +142,10 @@ function TrialProgressBar({ used, total }: { used: number; total: number }) {
           <LinearGradient
             colors={
               percentage > 50
-                ? ['rgba(74, 222, 128, 0.7)', 'rgba(34, 197, 94, 0.8)']
+                ? ['rgba(160, 200, 255, 0.5)', 'rgba(140, 180, 240, 0.6)']
                 : percentage > 20
-                ? ['rgba(251, 191, 36, 0.7)', 'rgba(245, 158, 11, 0.8)']
-                : ['rgba(239, 68, 68, 0.7)', 'rgba(220, 38, 38, 0.8)']
+                ? ['rgba(240, 200, 140, 0.5)', 'rgba(220, 180, 120, 0.6)']
+                : ['rgba(255, 160, 140, 0.5)', 'rgba(240, 140, 120, 0.6)']
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -172,7 +172,7 @@ function BenefitsList() {
       {benefits.map((benefit, index) => (
         <View key={index} style={styles.benefitRow}>
           <View style={styles.benefitIconWrapper}>
-            <benefit.icon size={16} color="#4ade80" strokeWidth={2.5} />
+            <benefit.icon size={16} color="#a0c8ff" strokeWidth={2.5} />
           </View>
           <Text style={styles.benefitText}>{benefit.text}</Text>
         </View>
@@ -232,7 +232,7 @@ function ToggleSwitch({
         <LinearGradient
           colors={
             enabled
-              ? ['rgba(74, 222, 128, 0.6)', 'rgba(34, 197, 94, 0.7)', 'rgba(22, 163, 74, 0.6)']
+              ? ['rgba(160, 200, 255, 0.35)', 'rgba(140, 180, 240, 0.45)', 'rgba(120, 160, 220, 0.35)']
               : ['rgba(220, 235, 255, 0.1)', 'rgba(220, 235, 255, 0.05)', 'rgba(220, 235, 255, 0.08)']
           }
           start={{ x: 0, y: 0 }}
@@ -259,9 +259,9 @@ function ToggleSwitch({
             <View style={styles.thumbGlow}>
               <LinearGradient
                 colors={[
-                  'rgba(74, 222, 128, 0.6)',
-                  'rgba(34, 197, 94, 0.8)',
-                  'rgba(74, 222, 128, 0.6)',
+                  'rgba(160, 200, 255, 0.5)',
+                  'rgba(140, 180, 240, 0.7)',
+                  'rgba(160, 200, 255, 0.5)',
                 ]}
                 style={styles.thumbGlowGradient}
               />
@@ -670,7 +670,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.avatarCameraButton}>
                   <LinearGradient
-                    colors={['rgba(74, 222, 128, 0.9)', 'rgba(34, 197, 94, 0.9)']}
+                    colors={['rgba(160, 200, 255, 0.9)', 'rgba(140, 180, 240, 0.9)']}
                     style={styles.avatarCameraGradient}
                   />
                   <Camera size={14} color="#fff" strokeWidth={2.5} />
@@ -906,7 +906,7 @@ export default function SettingsScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Version 1.0.0</Text>
-          <Text style={styles.footerSubtext}>Made with Liquid Glass</Text>
+          <Text style={styles.footerSubtext}>Made by Ivan</Text>
         </View>
         </View>
         </TouchableWithoutFeedback>
@@ -1125,15 +1125,15 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   toggleActive: {
-    borderTopColor: 'rgba(74, 222, 128, 0.5)',
-    borderLeftColor: 'rgba(74, 222, 128, 0.45)',
-    borderRightColor: 'rgba(74, 222, 128, 0.35)',
-    borderBottomColor: 'rgba(74, 222, 128, 0.3)',
-    shadowColor: 'rgba(74, 222, 128, 0.7)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.8,
-    shadowRadius: 28,
-    elevation: 14,
+    borderTopColor: 'rgba(160, 200, 255, 0.45)',
+    borderLeftColor: 'rgba(160, 200, 255, 0.4)',
+    borderRightColor: 'rgba(160, 200, 255, 0.3)',
+    borderBottomColor: 'rgba(160, 200, 255, 0.25)',
+    shadowColor: 'rgba(160, 200, 255, 0.5)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 10,
   },
   toggleBackground: {
     position: 'absolute',
@@ -1384,10 +1384,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 2,
-    borderTopColor: 'rgba(74, 222, 128, 0.4)',
-    borderLeftColor: 'rgba(74, 222, 128, 0.35)',
-    borderRightColor: 'rgba(74, 222, 128, 0.25)',
-    borderBottomColor: 'rgba(74, 222, 128, 0.2)',
+    borderTopColor: 'rgba(160, 200, 255, 0.35)',
+    borderLeftColor: 'rgba(160, 200, 255, 0.3)',
+    borderRightColor: 'rgba(160, 200, 255, 0.2)',
+    borderBottomColor: 'rgba(160, 200, 255, 0.15)',
     overflow: 'hidden',
   },
   animatedCreditGradient: {
@@ -1397,10 +1397,10 @@ const styles = StyleSheet.create({
   animatedCreditText: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: '#4ade80',
+    color: '#a0c8ff',
   },
   animatedCreditTextWarning: {
-    color: '#ffb464',
+    color: '#f5a064',
   },
   creditsValueRow: {
     marginTop: 4,
@@ -1464,14 +1464,14 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    backgroundColor: 'rgba(160, 200, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderTopColor: 'rgba(74, 222, 128, 0.35)',
-    borderLeftColor: 'rgba(74, 222, 128, 0.3)',
-    borderRightColor: 'rgba(74, 222, 128, 0.2)',
-    borderBottomColor: 'rgba(74, 222, 128, 0.15)',
+    borderTopColor: 'rgba(160, 200, 255, 0.35)',
+    borderLeftColor: 'rgba(160, 200, 255, 0.3)',
+    borderRightColor: 'rgba(160, 200, 255, 0.2)',
+    borderBottomColor: 'rgba(160, 200, 255, 0.15)',
   },
   benefitText: {
     flex: 1,
@@ -1492,9 +1492,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2.5,
     borderColor: Colors.dark.backgroundDeep,
-    shadowColor: 'rgba(74, 222, 128, 0.6)',
+    shadowColor: 'rgba(160, 200, 255, 0.6)',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.7,
     shadowRadius: 12,
     elevation: 10,
   },
