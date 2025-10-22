@@ -1,33 +1,33 @@
 export default {
   dark: {
-    background: '#0b0f14',
-    backgroundDeep: '#070a0f',
-    backgroundElevated: '#0e141b',
+    background: '#0A133B',           // Deep Sea Glass primary background
+    backgroundDeep: '#0A133B',
+    backgroundElevated: '#002857',
     backgroundGradient: [
-      '#070a0f',
-      '#0b0f14',
-      '#0f151c',
-      '#121a22',
+      '#0A133B',                      // bgColor - deepest blue
+      '#002857',                      // lightColor1 - gradient start
+      '#004b93',                      // lightColor2 - gradient midpoint
+      '#0A76AF',                      // lightColor3 - accent
     ],
 
-    glass: 'rgba(255, 255, 255, 0.06)',
-    glassBorder: 'rgba(255, 255, 255, 0.22)',
-    glassHighlight: 'rgba(255, 255, 255, 0.32)',
-    glassWrapper: 'rgba(255, 255, 255, 0.1)',
+    glass: 'rgba(255, 255, 255, 0.03)',          // Spec: glassmorphism background
+    glassBorder: 'rgba(255, 255, 255, 0.1)',     // Spec: subtle border
+    glassHighlight: 'rgba(255, 255, 255, 0.1)',
+    glassWrapper: 'rgba(255, 255, 255, 0.03)',
     glassShadow: 'rgba(0, 0, 0, 0.45)',
 
-    primary: '#a6e3a1',
-    primaryLight: '#c1f0bd',
-    primaryDark: '#6abf6a',
-    primaryGlow: 'rgba(166, 227, 161, 0.9)',
+    primary: '#0A76AF',                          // Spec: lightColor3 - accent/active state
+    primaryLight: '#4A9ACF',
+    primaryDark: '#005580',
+    primaryGlow: 'rgba(10, 118, 175, 0.9)',
 
-    accent: '#e5e9f0',
-    accentSecondary: '#cdd6e0',
-    accentGlow: 'rgba(229, 233, 240, 0.85)',
+    accent: '#0A76AF',                           // Same as primary for consistency
+    accentSecondary: '#004b93',                  // lightColor2
+    accentGlow: 'rgba(10, 118, 175, 0.85)',
 
-    text: '#ffffff',
-    textSecondary: 'rgba(255, 255, 255, 0.95)',
-    textMuted: 'rgba(200, 210, 220, 0.85)',
+    text: '#F5F7FA',                             // Spec: silverLight - primary text
+    textSecondary: '#C8CDD5',                    // Spec: silverMid - secondary text
+    textMuted: '#8A92A0',                        // Spec: silverDark - tertiary text
 
     success: '#4ade80',
     warning: '#fbbf24',

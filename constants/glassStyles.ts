@@ -1,32 +1,30 @@
 import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-  bgColor: '#0b0f14',
-  lightColor1: '#1a1f27',
-  lightColor2: '#232a33',
-  lightColor3: '#2b333d',
-  silverLight: '#f8f8f8',
-  silverMid: '#e0e0e0',
-  silverDark: '#d0d0d0',
-  silverGlow: 'rgba(238, 238, 238, 0.45)',
+  // Deep Sea Glass color palette
+  bgColor: '#0A133B',        // Deep navy blue background
+  lightColor1: '#002857',    // Gradient start
+  lightColor2: '#004b93',    // Gradient midpoint
+  lightColor3: '#0A76AF',    // Accent/Active state
+  silverLight: '#F5F7FA',    // Primary text/icons
+  silverMid: '#C8CDD5',      // Secondary text/icons
+  silverDark: '#8A92A0',     // Tertiary text/chips
+  silverGlow: 'rgba(245, 247, 250, 0.45)',
   shadowColor: 'rgba(0,0,0,0.6)',
-  glassHighlight: 'rgba(255, 255, 255, 0.22)',
-  glassReflection: 'rgba(255, 255, 255, 0.08)',
+  glassHighlight: 'rgba(255, 255, 255, 0.1)',
+  glassReflection: 'rgba(255, 255, 255, 0.03)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
 };
 
 export const glassStyles = StyleSheet.create({
   glass3DSurface: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.28)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
-    borderRightColor: 'rgba(255, 255, 255, 0.12)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: extremely low opacity white
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: subtle light border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.65,
-    shadowRadius: 45,
+    shadowRadius: 35,                               // Multiple shadow layers for depth
     elevation: 20,
     overflow: 'hidden',
   },

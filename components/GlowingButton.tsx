@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import Colors from '@/constants/colors';
 
 interface GlowingButtonProps {
@@ -24,6 +25,13 @@ interface GlowingButtonProps {
   testID?: string;
 }
 
+/**
+ * GlowingButton - Deep Sea Glass button component
+ * Matches design specification:
+ * - Frosted white glass background
+ * - Active state uses lightColor3 (#0A76AF) accent
+ * - Text: 14-18px semi-bold, silverLight color
+ */
 export default function GlowingButton({
   onPress,
   children,
@@ -92,6 +100,7 @@ export default function GlowingButton({
       ]}
       testID={testID ?? 'glowing-button'}
     >
+      {/* Active glow for primary variant */}
       {variant === 'primary' && !disabled && (
         <Animated.View
           style={[
@@ -103,9 +112,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(60, 90, 140, 0.3)',
-              'rgba(80, 120, 180, 0.5)',
-              'rgba(60, 90, 140, 0.3)',
+              'rgba(10, 118, 175, 0.3)',   // lightColor3 accent glow
+              'rgba(10, 118, 175, 0.5)',
+              'rgba(10, 118, 175, 0.3)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -122,56 +131,30 @@ export default function GlowingButton({
         activeOpacity={0.9}
         style={styles.touchable}
       >
-        {/* Blue dark gradient border */}
-        <LinearGradient
-          colors={[
-            'rgba(80, 120, 180, 0.4)',
-            'rgba(60, 100, 160, 0.3)',
-            'rgba(40, 70, 120, 0.25)',
-            'rgba(60, 100, 160, 0.3)',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.borderGradient}
-        />
-
+        {/* Glass container */}
         <View style={styles.innerContainer}>
-          {/* Blue dark gradient background */}
-          <LinearGradient
-            colors={[
-              'rgba(20, 35, 60, 0.95)',
-              'rgba(30, 50, 85, 0.9)',
-              'rgba(40, 70, 110, 0.85)',
-              'rgba(30, 50, 85, 0.9)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradient}
-          />
-
+          {/* Blur layer */}
           {Platform.OS === 'web' ? (
-            <View style={[styles.blurLayer, { backgroundColor: 'rgba(25, 40, 70, 0.6)' }]} />
+            <View style={styles.blurLayerWeb} />
           ) : (
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            React.createElement(require('expo-blur').BlurView, { intensity: 15, tint: 'dark', style: styles.blurLayer })
+            <BlurView intensity={20} tint="dark" style={styles.blurLayer} />
           )}
 
-          {/* Top light refraction */}
-          <LinearGradient
-            colors={['rgba(100, 140, 200, 0.25)', 'rgba(60, 100, 160, 0.12)', 'transparent']}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 0.6 }}
-            style={styles.shineLayer}
-          />
+          {/* Accent gradient for primary variant */}
+          {variant === 'primary' && (
+            <LinearGradient
+              colors={[
+                'rgba(10, 118, 175, 0.15)',  // lightColor3 tint
+                'rgba(10, 118, 175, 0.08)',
+                'transparent',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.accentGradient}
+            />
+          )}
 
-          {/* Side light refraction */}
-          <LinearGradient
-            colors={['transparent', 'rgba(80, 120, 180, 0.15)', 'transparent']}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.sideGlow}
-          />
-
+          {/* Content */}
           <View style={styles.content}>
             {icon && icon}
             {text && (
@@ -206,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   containerPrimary: {
-    shadowColor: 'rgba(60, 100, 160, 0.6)',
+    shadowColor: 'rgba(10, 118, 175, 0.5)',  // lightColor3 shadow
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.7,
     shadowRadius: 24,
@@ -228,41 +211,26 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
   },
-  borderGradient: {
-    position: 'absolute',
-    inset: 0,
-    borderRadius: 30,
-  },
   innerContainer: {
     flex: 1,
-    margin: 2,
-    borderRadius: 28,
+    borderRadius: 30,
     overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: glass background
     borderWidth: 1,
-    borderColor: 'rgba(80, 120, 180, 0.3)',
-  },
-  gradient: {
-    position: 'absolute',
-    inset: 0,
+    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: glass border
   },
   blurLayer: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: Colors.dark.glass,
   },
-  shineLayer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    borderRadius: 28,
-  },
-  sideGlow: {
+  blurLayerWeb: {
     position: 'absolute',
     inset: 0,
-    borderRadius: 28,
-    opacity: 0.7,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  accentGradient: {
+    position: 'absolute',
+    inset: 0,
   },
   content: {
     flex: 1,
@@ -275,10 +243,10 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   text: {
-    color: Colors.dark.text,
-    fontSize: 20,
-    fontWeight: '600' as const,
-    lineHeight: 24,
+    color: '#F5F7FA',                              // Spec: silverLight
+    fontSize: 16,                                   // Spec: 14-18px
+    fontWeight: '600' as const,                     // Spec: semi-bold
+    lineHeight: 20,
     letterSpacing: -0.4,
   },
   textSmall: {
@@ -287,7 +255,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   textPrimary: {
-    color: Colors.dark.text,
+    color: '#F5F7FA',
     fontWeight: '700' as const,
+    fontSize: 18,
   },
 });

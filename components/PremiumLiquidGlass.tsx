@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Colors from '@/constants/colors';
 
 interface PremiumLiquidGlassProps {
   children?: React.ReactNode;
@@ -12,6 +10,13 @@ interface PremiumLiquidGlassProps {
   testID?: string;
 }
 
+/**
+ * PremiumLiquidGlass - Deep Sea Glass glassmorphism component
+ * Spec: Frosted white glass panels floating on deep blue background
+ * - Background: rgba(255, 255, 255, 0.03) - extremely low opacity white
+ * - Border: rgba(255, 255, 255, 0.1) - subtle light border
+ * - Blur: 20-30 intensity for authentic frosted glass effect
+ */
 export default function PremiumLiquidGlass({
   children,
   style,
@@ -31,86 +36,22 @@ export default function PremiumLiquidGlass({
       testID={testID ?? 'premium-glass'}
       pointerEvents="box-none"
     >
-      <LinearGradient
-        colors={[
-          'rgba(80, 120, 180, 0.4)',
-          'rgba(60, 100, 160, 0.3)',
-          'rgba(40, 70, 120, 0.25)',
-          'rgba(60, 100, 160, 0.3)',
-          'rgba(80, 120, 180, 0.4)',
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.borderGradient, { borderRadius }]}
-        pointerEvents="none"
-      />
-
-      <View style={[styles.innerContainer, { borderRadius: borderRadius - 2 }]}
-        pointerEvents="box-none"
-      >
+      {/* Glassmorphism container */}
+      <View style={[styles.glassContainer, { borderRadius }]} pointerEvents="box-none">
+        {/* Blur layer */}
         {Platform.OS === 'web' ? (
-          <View style={[styles.blurLayer, { borderRadius: borderRadius - 2 }]} pointerEvents="none" />
+          <View style={[styles.blurLayerWeb, { borderRadius }]} pointerEvents="none" />
         ) : (
           <BlurView
-            intensity={28}
-            style={[styles.blurLayer, { borderRadius: borderRadius - 2 }]}
+            intensity={25}
+            tint="dark"
+            style={[styles.blurLayer, { borderRadius }]}
             pointerEvents="none"
           />
         )}
 
-        <LinearGradient
-          colors={[
-            'rgba(30, 50, 85, 0.65)',
-            'rgba(25, 40, 70, 0.55)',
-            'rgba(30, 50, 85, 0.6)',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={[styles.backgroundGradient, { borderRadius: borderRadius - 2 }]}
-          pointerEvents="none"
-        />
-
-        <LinearGradient
-          colors={[
-            'rgba(100, 140, 200, 0.28)',
-            'rgba(60, 100, 160, 0.14)',
-            'transparent',
-          ]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.45 }}
-          style={[styles.topShine, { borderRadius: borderRadius - 2 }]}
-          pointerEvents="none"
-        />
-
-        <LinearGradient
-          colors={[
-            'transparent',
-            'rgba(80, 120, 180, 0.12)',
-            'transparent',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[styles.sideRefraction, { borderRadius: borderRadius - 2 }]}
-          pointerEvents="none"
-        />
-
-        <View style={[styles.edgeHighlight, { borderRadius: borderRadius - 2 }]} pointerEvents="none" />
-
-        {variant === 'primary' && (
-          <LinearGradient
-            colors={[
-              'rgba(100, 140, 200, 0.22)',
-              'rgba(80, 120, 180, 0.15)',
-              'transparent',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.glowEffect, { borderRadius: borderRadius - 2 }]}
-            pointerEvents="none"
-          />
-        )}
-
-        <View style={[styles.content, { borderRadius: borderRadius - 2 }]} testID="premium-glass-content">
+        {/* Content layer */}
+        <View style={[styles.content, { borderRadius }]} testID="premium-glass-content">
           {children}
         </View>
       </View>
@@ -124,71 +65,36 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   elevated: {
-    shadowColor: Colors.dark.glassShadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.6,
-    shadowRadius: 28,
+    shadowRadius: 35,
     elevation: 12,
   },
   primary: {
-    shadowColor: Colors.dark.primaryGlow,
+    shadowColor: 'rgba(10, 118, 175, 0.5)',  // lightColor3 accent
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.7,
-    shadowRadius: 32,
+    shadowRadius: 35,
     elevation: 15,
   },
-  borderGradient: {
-    position: 'absolute',
-    inset: 0,
-    zIndex: 0,
-  },
-  innerContainer: {
+  glassContainer: {
     position: 'relative',
-    margin: 2,
-    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: extremely low opacity white
     borderWidth: 1,
-    borderColor: 'rgba(80, 120, 180, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: subtle light border
+    overflow: 'hidden',
   },
   blurLayer: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(25, 40, 70, 0.5)',
     zIndex: 1,
   },
-  backgroundGradient: {
+  blurLayerWeb: {
     position: 'absolute',
     inset: 0,
-    zIndex: 2,
-  },
-  topShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '45%',
-    opacity: 0.85,
-    zIndex: 3,
-  },
-  sideRefraction: {
-    position: 'absolute',
-    inset: 0,
-    opacity: 0.6,
-    zIndex: 3,
-  },
-  edgeHighlight: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1.5,
-    backgroundColor: 'rgba(120, 160, 220, 0.3)',
-    zIndex: 4,
-  },
-  glowEffect: {
-    position: 'absolute',
-    inset: 0,
-    opacity: 0.4,
-    zIndex: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    zIndex: 1,
   },
   content: {
     position: 'relative',

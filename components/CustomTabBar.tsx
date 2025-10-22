@@ -2,7 +2,6 @@ import React, { useEffect, useRef, createContext, useContext } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 
@@ -18,7 +17,6 @@ const NavbarContext = createContext<NavbarContextType | null>(null);
 export const useNavbar = () => {
   const context = useContext(NavbarContext);
   if (!context) {
-    // Return dummy functions if context not available
     return {
       hideNavbar: () => {},
       showNavbar: () => {},
@@ -124,11 +122,12 @@ function TabButton({
 
   const glowOpacity = glowAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.3, 0.8],
+    outputRange: [0.3, 0.7],
   });
 
   const getIcon = (routeName: string) => {
-    const color = isFocused ? 'rgba(160, 200, 255, 0.95)' : 'rgba(140, 180, 220, 0.55)';
+    // Spec: Active state uses lightColor3 (#0A76AF), inactive uses silverMid (#C8CDD5)
+    const color = isFocused ? '#0A76AF' : '#C8CDD5';
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -155,14 +154,7 @@ function TabButton({
       >
         {isFocused && (
           <Animated.View style={[styles.buttonGlow, { opacity: glowOpacity }]}>
-            <LinearGradient
-              colors={[
-                'rgba(80, 120, 180, 0.35)',
-                'rgba(60, 100, 160, 0.25)',
-                'rgba(80, 120, 180, 0.35)',
-              ]}
-              style={StyleSheet.absoluteFill}
-            />
+            <View style={styles.glowInner} />
           </Animated.View>
         )}
         <View style={styles.buttonContainer}>
@@ -173,16 +165,24 @@ function TabButton({
   );
 }
 
+/**
+ * CustomTabBar - "Floating Island" navigation component
+ * Deep Sea Glass specification:
+ * - Frosted white glass panel (rgba(255, 255, 255, 0.03))
+ * - Blur intensity: 25-30
+ * - Subtle border: rgba(255, 255, 255, 0.1)
+ * - Active icons: lightColor3 (#0A76AF)
+ * - Detached from bottom for "floating" effect
+ */
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const translateY = useRef(new Animated.Value(0)).current;
-  const lastScrollY = useRef(0);
   const isHidden = useRef(false);
 
   const hideNavbar = () => {
     if (!isHidden.current) {
       isHidden.current = true;
       Animated.spring(translateY, {
-        toValue: 120, // Hide below screen
+        toValue: 120,
         friction: 9,
         tension: 50,
         useNativeDriver: true,
@@ -194,7 +194,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
     if (isHidden.current) {
       isHidden.current = false;
       Animated.spring(translateY, {
-        toValue: 0, // Show at normal position
+        toValue: 0,
         friction: 9,
         tension: 50,
         useNativeDriver: true,
@@ -212,62 +212,42 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
-        <View style={styles.tabBarGradient}>
-          <LinearGradient
-            colors={[
-              'rgba(60, 100, 160, 0.35)',
-              'rgba(50, 85, 140, 0.3)',
-              'rgba(40, 70, 120, 0.28)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.borderGradient}
-          />
-          <View style={styles.tabBarBorder}>
-            {Platform.OS === 'web' ? (
-              <View style={styles.tabBarBlurWeb} />
-            ) : (
-              <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-            )}
+        {/* Floating Island glass panel */}
+        <View style={styles.tabBarContainer}>
+          {/* Blur layer */}
+          {Platform.OS === 'web' ? (
+            <View style={styles.tabBarBlurWeb} />
+          ) : (
+            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+          )}
 
-            <LinearGradient
-              colors={[
-                'rgba(70, 110, 170, 0.2)',
-                'rgba(50, 90, 150, 0.12)',
-                'transparent',
-              ]}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 0.5 }}
-              style={styles.topHighlight}
-            />
+          {/* Tab buttons */}
+          <View style={styles.tabBarInner}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              const isFocused = state.index === index;
 
-            <View style={styles.tabBarInner}>
-              {state.routes.map((route, index) => {
-                const { options } = descriptors[route.key];
-                const isFocused = state.index === index;
+              const onPress = () => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+                if (!isFocused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
+              };
 
-                const onPress = () => {
-                  const event = navigation.emit({
-                    type: 'tabPress',
-                    target: route.key,
-                    canPreventDefault: true,
-                  });
-                  if (!isFocused && !event.defaultPrevented) {
-                    navigation.navigate(route.name);
-                  }
-                };
-
-                return (
-                  <TabButton
-                    key={route.key}
-                    route={route}
-                    isFocused={isFocused}
-                    onPress={onPress}
-                    accessibilityLabel={options.tabBarAccessibilityLabel}
-                  />
-                );
-              })}
-            </View>
+              return (
+                <TabButton
+                  key={route.key}
+                  route={route}
+                  isFocused={isFocused}
+                  onPress={onPress}
+                  accessibilityLabel={options.tabBarAccessibilityLabel}
+                />
+              );
+            })}
           </View>
         </View>
       </Animated.View>
@@ -282,32 +262,22 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
   },
-  tabBarGradient: {
-    borderRadius: 32,
-    padding: 2,
-    shadowColor: 'rgba(60, 100, 160, 0.5)',
+  tabBarContainer: {
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: glass background
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: glass border
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.6,
-    shadowRadius: 28,
+    shadowRadius: 35,
     elevation: 18,
-    position: 'relative',
-  },
-  borderGradient: {
-    position: 'absolute',
-    inset: 0,
-    borderRadius: 32,
-  },
-  tabBarBorder: {
-    height: 72,
-    backgroundColor: 'rgba(15, 25, 40, 0.8)',
-    borderRadius: 30,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(70, 110, 170, 0.25)',
   },
   tabBarBlurWeb: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 25, 40, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   tabBarInner: {
     flex: 1,
@@ -317,31 +287,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   navButton: {
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     overflow: 'visible',
+    position: 'relative',
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -6,
-    borderRadius: 30,
+    inset: -8,
+    borderRadius: 34,
+    backgroundColor: 'rgba(10, 118, 175, 0.2)',  // lightColor3 glow
+  },
+  glowInner: {
+    flex: 1,
+    borderRadius: 34,
   },
   buttonContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-  },
-  topHighlight: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    zIndex: 1,
-    pointerEvents: 'none',
   },
 });
