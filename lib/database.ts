@@ -1,8 +1,15 @@
+import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import * as Crypto from 'expo-crypto';
 
 // Database instance
 let db: SQLite.SQLiteDatabase | null = null;
+
+// Check if database is supported on this platform
+function isDatabaseSupported(): boolean {
+  // SQLite is only fully supported on native platforms
+  return Platform.OS !== 'web';
+}
 
 // Generate secure random ID
 async function generateId(prefix: string): Promise<string> {
@@ -18,6 +25,12 @@ async function generateId(prefix: string): Promise<string> {
 
 // Initialize database
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
+  if (!isDatabaseSupported()) {
+    console.warn('SQLite database is not supported on web platform. Some features may be limited.');
+    // Return a mock database object for web
+    return {} as SQLite.SQLiteDatabase;
+  }
+  
   if (db) return db;
   
   db = await SQLite.openDatabaseAsync('fashionmuse.db');
@@ -33,6 +46,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 // Get database instance
 export function getDatabase(): SQLite.SQLiteDatabase {
+  if (!isDatabaseSupported()) {
+    throw new Error('Database is not supported on web platform.');
+  }
   if (!db) {
     throw new Error('Database not initialized. Call initDatabase first.');
   }
@@ -41,7 +57,10 @@ export function getDatabase(): SQLite.SQLiteDatabase {
 
 // Create all tables
 async function createTables() {
-  if (!db) throw new Error('Database not initialized');
+  if (!isDatabaseSupported() || !db) {
+    console.warn('Skipping table creation on web platform.');
+    return;
+  }
   
   await db.execAsync(`
     -- Users table
@@ -154,6 +173,9 @@ export async function createUser(
   email: string,
   passwordHash: string
 ): Promise<User> {
+  if (!isDatabaseSupported()) {
+    throw new Error('User creation is not supported on web platform.');
+  }
   const db = getDatabase();
   const id = await generateId('user');
   const now = Date.now();
@@ -177,6 +199,9 @@ export async function createUser(
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
+  if (!isDatabaseSupported()) {
+    return null;
+  }
   const db = getDatabase();
   const result = await db.getFirstAsync<User>(
     'SELECT * FROM users WHERE email = ?',
@@ -186,6 +211,9 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function getUserById(id: string): Promise<User | null> {
+  if (!isDatabaseSupported()) {
+    return null;
+  }
   const db = getDatabase();
   const result = await db.getFirstAsync<User>(
     'SELECT * FROM users WHERE id = ?',
@@ -198,6 +226,9 @@ export async function updateUser(
   id: string,
   updates: Partial<Pick<User, 'name' | 'profile_image'>>
 ): Promise<void> {
+  if (!isDatabaseSupported()) {
+    return;
+  }
   const db = getDatabase();
   const now = Date.now();
   
@@ -230,6 +261,9 @@ export async function updateUserCredits(
   userId: string,
   amount: number
 ): Promise<number> {
+  if (!isDatabaseSupported()) {
+    return 0;
+  }
   const db = getDatabase();
   const now = Date.now();
   
@@ -249,6 +283,9 @@ export async function saveImage(
   mimeType: string = 'image/jpeg',
   isOriginal: boolean = false
 ): Promise<Image> {
+  if (!isDatabaseSupported()) {
+    throw new Error('Image saving is not supported on web platform.');
+  }
   const db = getDatabase();
   const id = await generateId('img');
   const now = Date.now();
@@ -270,6 +307,9 @@ export async function saveImage(
 }
 
 export async function getImageById(id: string): Promise<Image | null> {
+  if (!isDatabaseSupported()) {
+    return null;
+  }
   const db = getDatabase();
   const result = await db.getFirstAsync<Image>(
     'SELECT * FROM images WHERE id = ?',
@@ -279,6 +319,9 @@ export async function getImageById(id: string): Promise<Image | null> {
 }
 
 export async function getUserImages(userId: string): Promise<Image[]> {
+  if (!isDatabaseSupported()) {
+    return [];
+  }
   const db = getDatabase();
   const results = await db.getAllAsync<Image>(
     'SELECT * FROM images WHERE user_id = ? ORDER BY created_at DESC',
@@ -288,6 +331,9 @@ export async function getUserImages(userId: string): Promise<Image[]> {
 }
 
 export async function deleteImage(id: string): Promise<void> {
+  if (!isDatabaseSupported()) {
+    return;
+  }
   const db = getDatabase();
   await db.runAsync('DELETE FROM images WHERE id = ?', [id]);
 }
@@ -299,6 +345,9 @@ export async function saveHistory(
   time: string,
   imageIds: string[]
 ): Promise<History> {
+  if (!isDatabaseSupported()) {
+    throw new Error('History saving is not supported on web platform.');
+  }
   const db = getDatabase();
   const id = await generateId('hist');
   const now = Date.now();
@@ -329,14 +378,17 @@ export async function saveHistory(
   };
 }
 
-export async function getUserHistory(userId: string): Promise<Array<{
+export async function getUserHistory(userId: string): Promise<{
   id: string;
   date: string;
   time: string;
   count: number;
   thumbnail: string;
   results: string[];
-}>> {
+}[]> {
+  if (!isDatabaseSupported()) {
+    return [];
+  }
   const db = getDatabase();
   
   // Get all history records
@@ -373,6 +425,9 @@ export async function getUserHistory(userId: string): Promise<Array<{
 }
 
 export async function deleteHistory(id: string): Promise<void> {
+  if (!isDatabaseSupported()) {
+    return;
+  }
   const db = getDatabase();
   await db.runAsync('DELETE FROM history WHERE id = ?', [id]);
 }
@@ -384,6 +439,9 @@ export async function createTransaction(
   type: 'purchase' | 'deduction' | 'refund',
   description?: string
 ): Promise<Transaction> {
+  if (!isDatabaseSupported()) {
+    throw new Error('Transaction creation is not supported on web platform.');
+  }
   const db = getDatabase();
   const id = await generateId('txn');
   const now = Date.now();
@@ -405,6 +463,9 @@ export async function createTransaction(
 }
 
 export async function getUserTransactions(userId: string): Promise<Transaction[]> {
+  if (!isDatabaseSupported()) {
+    return [];
+  }
   const db = getDatabase();
   const results = await db.getAllAsync<Transaction>(
     'SELECT * FROM transactions WHERE user_id = ? ORDER BY created_at DESC',
