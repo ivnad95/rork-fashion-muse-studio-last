@@ -474,11 +474,18 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
   return results;
 }
 
+// Convert Uint8Array to hex string (Buffer alternative for React Native)
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 // Secure password hashing using SHA-256 and random salt (for production, use bcrypt or PBKDF2)
 export async function hashPassword(password: string): Promise<string> {
   // Generate a 16-byte random salt
   const saltBytes = await Crypto.getRandomBytesAsync(16);
-  const salt = Buffer.from(saltBytes).toString('hex');
+  const salt = bytesToHex(saltBytes);
   const hash = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
     password + salt
