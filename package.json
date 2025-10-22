@@ -68,4 +68,13 @@
     "typescript": "~5.8.3"
   },
   "private": true
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "expo-web-browser",
+        "expo-sqlite"
+      ]
+    }
+  }
 }
