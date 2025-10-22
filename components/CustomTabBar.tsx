@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-na
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
 // Context for navbar visibility
