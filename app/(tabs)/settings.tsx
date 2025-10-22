@@ -794,8 +794,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'portrait'
-                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
-                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
+                        ? ['rgba(80, 120, 180, 0.25)', 'rgba(60, 100, 160, 0.15)']
+                        : ['rgba(60, 100, 160, 0.12)', 'rgba(40, 80, 140, 0.08)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -826,8 +826,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'square'
-                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
-                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
+                        ? ['rgba(80, 120, 180, 0.25)', 'rgba(60, 100, 160, 0.15)']
+                        : ['rgba(60, 100, 160, 0.12)', 'rgba(40, 80, 140, 0.08)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -858,8 +858,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'landscape'
-                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
-                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
+                        ? ['rgba(80, 120, 180, 0.25)', 'rgba(60, 100, 160, 0.15)']
+                        : ['rgba(60, 100, 160, 0.12)', 'rgba(40, 80, 140, 0.08)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -1324,18 +1324,18 @@ const styles = StyleSheet.create({
     inset: 0,
   },
   formatIcon: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(160, 200, 255, 0.25)',
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: 'rgba(60, 100, 160, 0.5)',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.8)',
-    borderRightColor: 'rgba(200, 200, 200, 0.5)',
-    borderBottomColor: 'rgba(180, 180, 180, 0.6)',
+    borderTopColor: 'rgba(180, 210, 255, 0.4)',
+    borderLeftColor: 'rgba(160, 200, 255, 0.35)',
+    borderRightColor: 'rgba(120, 170, 230, 0.25)',
+    borderBottomColor: 'rgba(100, 150, 210, 0.3)',
   },
   formatIconPortrait: {
     width: 24,

@@ -32,7 +32,13 @@ export default function PremiumLiquidGlass({
       pointerEvents="box-none"
     >
       <LinearGradient
-        colors={['#f5f8fb', '#dce4ed', '#c0cfe0', '#dce4ed', '#f5f8fb']}
+        colors={[
+          'rgba(80, 120, 180, 0.4)',
+          'rgba(60, 100, 160, 0.3)',
+          'rgba(40, 70, 120, 0.25)',
+          'rgba(60, 100, 160, 0.3)',
+          'rgba(80, 120, 180, 0.4)',
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.borderGradient, { borderRadius }]}
@@ -53,7 +59,11 @@ export default function PremiumLiquidGlass({
         )}
 
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.06)']}
+          colors={[
+            'rgba(30, 50, 85, 0.65)',
+            'rgba(25, 40, 70, 0.55)',
+            'rgba(30, 50, 85, 0.6)',
+          ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={[styles.backgroundGradient, { borderRadius: borderRadius - 2 }]}
@@ -61,7 +71,11 @@ export default function PremiumLiquidGlass({
         />
 
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.1)', 'transparent']}
+          colors={[
+            'rgba(100, 140, 200, 0.28)',
+            'rgba(60, 100, 160, 0.14)',
+            'transparent',
+          ]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 0.45 }}
           style={[styles.topShine, { borderRadius: borderRadius - 2 }]}
@@ -69,7 +83,11 @@ export default function PremiumLiquidGlass({
         />
 
         <LinearGradient
-          colors={['transparent', 'rgba(255, 255, 255, 0.05)', 'transparent']}
+          colors={[
+            'transparent',
+            'rgba(80, 120, 180, 0.12)',
+            'transparent',
+          ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[styles.sideRefraction, { borderRadius: borderRadius - 2 }]}
@@ -80,7 +98,11 @@ export default function PremiumLiquidGlass({
 
         {variant === 'primary' && (
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)', 'transparent']}
+            colors={[
+              'rgba(100, 140, 200, 0.22)',
+              'rgba(80, 120, 180, 0.15)',
+              'transparent',
+            ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.glowEffect, { borderRadius: borderRadius - 2 }]}
@@ -125,12 +147,12 @@ const styles = StyleSheet.create({
     margin: 2,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.dark.glassBorder,
+    borderColor: 'rgba(80, 120, 180, 0.3)',
   },
   blurLayer: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: Colors.dark.glass,
+    backgroundColor: 'rgba(25, 40, 70, 0.5)',
     zIndex: 1,
   },
   backgroundGradient: {
@@ -159,7 +181,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(120, 160, 220, 0.3)',
     zIndex: 4,
   },
   glowEffect: {

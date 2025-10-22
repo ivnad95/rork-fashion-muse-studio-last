@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.dark.glassBorder,
+    borderColor: 'rgba(80, 120, 180, 0.3)',
   },
   gradient: {
     position: 'absolute',
