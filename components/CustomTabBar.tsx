@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { glassStyles, COLORS } from '@/constants/glassStyles';
 
 const HomeIcon = ({ color }: { color: string }) => (
@@ -30,7 +31,7 @@ const HistoryIcon = ({ color }: { color: string }) => (
 const SettingsIcon = ({ color }: { color: string }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="3" />
-    <Path d="M12 1v6m0 6v6m8.66-14.66l-4.24 4.24m-4.84 4.84l-4.24 4.24m16.98-2.34h-6m-6 0H1m19.66 8.66l-4.24-4.24m-4.84-4.84l-4.24-4.24" />
+    <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </Svg>
 );
 
@@ -58,7 +59,13 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
   return (
     <View style={styles.container}>
       <View style={[glassStyles.glass3DSurface, styles.tabBar]}>
-        {Platform.OS === 'web' ? null : null}
+        {Platform.OS === 'web' ? (
+          <View style={StyleSheet.absoluteFill} />
+        ) : (
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          React.createElement(require('expo-blur').BlurView, { intensity: 35, style: StyleSheet.absoluteFill })
+        )}
+        <View style={[styles.topHighlight]} />
         <View style={styles.tabBarInner}>
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
@@ -120,5 +127,16 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  topHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '35%',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    zIndex: 1,
   },
 });
