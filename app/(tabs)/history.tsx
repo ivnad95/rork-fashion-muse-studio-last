@@ -420,7 +420,6 @@ const styles = StyleSheet.create({
   modalBlur: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(7, 10, 15, 0.92)',
-    backdropFilter: 'blur(40px)',
   },
   modalContent: {
     width: '100%',
