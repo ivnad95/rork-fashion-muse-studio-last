@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { glassStyles, COLORS } from '@/constants/glassStyles';
+import Colors from '@/constants/colors';
 
 const HomeIcon = ({ color }: { color: string }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
@@ -35,21 +38,85 @@ const SettingsIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const getIcon = (routeName: string, isFocused: boolean) => {
-    const color = isFocused ? COLORS.silverLight : COLORS.silverMid;
+function TabButton({
+  route,
+  isFocused,
+  onPress,
+  accessibilityLabel
+}: {
+  route: any;
+  isFocused: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: isFocused ? 1.05 : 1,
+      friction: 6,
+      tension: 50,
+      useNativeDriver: true,
+    }).start();
+
+    if (isFocused) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      glowAnim.setValue(0);
+    }
+  }, [isFocused, scaleAnim, glowAnim]);
+
+  const handlePress = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.92,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: isFocused ? 1.05 : 1,
+        friction: 6,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    onPress();
+  };
+
+  const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.8],
+  });
+
+  const getIcon = (routeName: string) => {
+    const color = isFocused ? 'rgba(200, 220, 255, 0.95)' : 'rgba(180, 200, 230, 0.6)';
     switch (routeName) {
       case 'generate':
-      case 'Home':
         return <HomeIcon color={color} />;
       case 'results':
-      case 'Results':
         return <ResultsIcon color={color} />;
       case 'history':
-      case 'History':
         return <HistoryIcon color={color} />;
       case 'settings':
-      case 'Settings':
         return <SettingsIcon color={color} />;
       default:
         return <HomeIcon color={color} />;
@@ -57,47 +124,89 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[glassStyles.glass3DSurface, styles.tabBar]}>
-        {Platform.OS === 'web' ? (
-          <View style={StyleSheet.absoluteFill} />
-        ) : (
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          React.createElement(require('expo-blur').BlurView, { intensity: 35, style: StyleSheet.absoluteFill })
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityState={isFocused ? { selected: true } : {}}
+        accessibilityLabel={accessibilityLabel}
+        onPress={handlePress}
+        style={styles.navButton}
+        activeOpacity={1}
+      >
+        {isFocused && (
+          <Animated.View style={[styles.buttonGlow, { opacity: glowOpacity }]}>
+            <LinearGradient
+              colors={['rgba(200, 220, 255, 0.4)', 'rgba(150, 180, 230, 0.2)', 'rgba(200, 220, 255, 0.4)']}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
         )}
-        <View style={[styles.topHighlight]} />
-        <View style={styles.tabBarInner}>
-          {state.routes.map((route, index) => {
-            const { options } = descriptors[route.key];
-            const isFocused = state.index === index;
+        <LinearGradient
+          colors={
+            isFocused
+              ? ['rgba(200, 220, 255, 0.25)', 'rgba(150, 180, 230, 0.18)', 'rgba(120, 160, 220, 0.15)']
+              : ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.06)']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.buttonGradient}
+        >
+          <View style={styles.buttonInner}>
+            {getIcon(route.name)}
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            };
+export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.12)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.tabBarGradient}
+      >
+        <View style={styles.tabBarBorder}>
+          {Platform.OS === 'web' ? (
+            <View style={styles.tabBarBlurWeb} />
+          ) : (
+            <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+          )}
 
-            return (
-              <TouchableOpacity
-                key={route.key}
-                accessibilityRole="button"
-                accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={options.tabBarAccessibilityLabel}
-                onPress={onPress}
-                style={[glassStyles.glass3DButton, styles.navButton, isFocused && glassStyles.activeButton]}
-                activeOpacity={0.7}
-              >
-                {getIcon(route.name, isFocused)}
-              </TouchableOpacity>
-            );
-          })}
+          <View style={styles.topHighlight} />
+
+          <View style={styles.tabBarInner}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              const isFocused = state.index === index;
+
+              const onPress = () => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+                if (!isFocused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
+              };
+
+              return (
+                <TabButton
+                  key={route.key}
+                  route={route}
+                  isFocused={isFocused}
+                  onPress={onPress}
+                  accessibilityLabel={options.tabBarAccessibilityLabel}
+                />
+              );
+            })}
+          </View>
         </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -105,38 +214,88 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
+    bottom: 20,
+    left: 20,
+    right: 20,
   },
-  tabBar: {
-    height: 80,
+  tabBarGradient: {
     borderRadius: 40,
+    padding: 3.5,
+    shadowColor: 'rgba(200, 220, 255, 0.6)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 40,
+    elevation: 25,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.42)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  tabBarBorder: {
+    height: 84,
+    backgroundColor: 'rgba(12, 18, 28, 0.75)',
+    borderRadius: 37,
     overflow: 'hidden',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.16)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  tabBarBlurWeb: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(12, 18, 28, 0.85)',
   },
   tabBarInner: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   navButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  buttonGlow: {
+    position: 'absolute',
+    inset: -8,
+    borderRadius: 38,
+  },
+  buttonGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  buttonInner: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   topHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    height: '40%',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopLeftRadius: 37,
+    borderTopRightRadius: 37,
     zIndex: 1,
+    pointerEvents: 'none',
   },
 });

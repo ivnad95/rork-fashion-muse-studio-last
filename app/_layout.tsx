@@ -1,17 +1,44 @@
 import 'whatwg-fetch';
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from 'expo-system-ui';
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Colors from '@/constants/colors';
 import { GenerationProvider } from '@/contexts/GenerationContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import AuthSplash from '@/components/AuthSplash';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) {
+      // Still loading auth state
+      return;
+    }
+
+    const inAuthGroup = segments[0] === 'auth';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // User is not signed in and not on an auth screen, redirect to login
+      router.replace('/auth/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      // User is signed in but on an auth screen, redirect to main app
+      router.replace('/(tabs)/generate');
+    }
+  }, [isAuthenticated, isLoading, segments]);
+
+  // Show splash screen while loading
+  if (isLoading) {
+    return <AuthSplash />;
+  }
+
   return (
     <Stack
       screenOptions={{
@@ -19,6 +46,8 @@ function RootLayoutNav() {
         contentStyle: { backgroundColor: Colors.dark.background },
       }}
     >
+      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="plans" options={{ headerShown: false, presentation: 'modal' }} />
     </Stack>

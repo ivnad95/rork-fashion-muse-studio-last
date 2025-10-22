@@ -20,18 +20,19 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 function LoadingPlaceholder() {
   const pulseAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1500,
+          duration: 1800,
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 0,
-          duration: 1500,
+          duration: 1800,
           useNativeDriver: true,
         }),
       ])
@@ -40,21 +41,43 @@ function LoadingPlaceholder() {
     const rotate = Animated.loop(
       Animated.timing(rotateAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 2500,
         useNativeDriver: true,
       })
     );
 
+    const glow = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
     pulse.start();
     rotate.start();
+    glow.start();
 
     return () => {
       pulse.stop();
       rotate.stop();
+      glow.stop();
     };
-  }, [pulseAnim, rotateAnim]);
+  }, [pulseAnim, rotateAnim, glowAnim]);
 
   const opacity = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 0.95],
+  });
+
+  const glowOpacity = glowAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.3, 0.8],
   });
@@ -67,11 +90,17 @@ function LoadingPlaceholder() {
   return (
     <View style={styles.loadingPlaceholder}>
       <LinearGradient
-        colors={['rgba(90, 143, 214, 0.15)', 'rgba(61, 107, 184, 0.08)', 'rgba(42, 77, 140, 0.05)']}
+        colors={['rgba(120, 180, 240, 0.18)', 'rgba(80, 140, 210, 0.12)', 'rgba(50, 100, 170, 0.08)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
+      <Animated.View style={[styles.spinnerGlow, { opacity: glowOpacity }]}>
+        <LinearGradient
+          colors={['rgba(200, 220, 255, 0.4)', 'rgba(100, 150, 220, 0.2)', 'rgba(200, 220, 255, 0.4)']}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
       <Animated.View style={[styles.loadingSpinner, { opacity, transform: [{ rotate }] }]}>
         <View style={styles.spinnerRing} />
         <View style={[styles.spinnerRing, styles.spinnerRingInner]} />
@@ -110,18 +139,18 @@ export default function ResultsScreen() {
       Animated.parallel([
         Animated.spring(scaleAnim, {
           toValue: 1,
-          friction: 8,
-          tension: 40,
+          friction: 9,
+          tension: 50,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 250,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
-      scaleAnim.setValue(0.8);
+      scaleAnim.setValue(0.9);
       fadeAnim.setValue(0);
     }
   }, [selectedImage, fadeAnim, scaleAnim]);
@@ -261,27 +290,47 @@ export default function ResultsScreen() {
         <View style={styles.grid}>
           {/* Show loading placeholders when generating */}
           {isGenerating && placeholders.map((_, i) => (
-            <GlassPanel key={`loading-${i}`} style={styles.gridItem} radius={20}>
-              <LoadingPlaceholder />
-            </GlassPanel>
+            <View key={`loading-${i}`} style={styles.gridItem}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gridItemGradient}
+              >
+                <View style={styles.gridItemInner}>
+                  <LoadingPlaceholder />
+                </View>
+              </LinearGradient>
+            </View>
           ))}
-          
+
           {/* Show generated or display images */}
           {displayImages.map((img, i) => (
-            <GlassPanel key={`image-${i}`} style={styles.gridItem} radius={20}>
-              <TouchableOpacity 
-                style={styles.imageWrapper} 
-                activeOpacity={0.8} 
-                onPress={() => handleImagePress(img, i)} 
-                testID={`result-card-${i}`}
+            <View key={`image-${i}`} style={styles.gridItem}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.06)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gridItemGradient}
               >
-                <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
-                  style={styles.imageOverlay}
-                />
-              </TouchableOpacity>
-            </GlassPanel>
+                <View style={styles.gridItemInner}>
+                  <TouchableOpacity
+                    style={styles.imageWrapper}
+                    activeOpacity={0.92}
+                    onPress={() => handleImagePress(img, i)}
+                    testID={`result-card-${i}`}
+                  >
+                    <View style={styles.imageFrame}>
+                      <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
+                        style={styles.imageOverlay}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -301,7 +350,7 @@ export default function ResultsScreen() {
           {Platform.OS === 'web' ? (
             <View style={styles.modalBlur} />
           ) : (
-            <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="dark" />
+            <BlurView intensity={100} style={StyleSheet.absoluteFill} tint="dark" />
           )}
           
           <TouchableOpacity 
@@ -321,80 +370,87 @@ export default function ResultsScreen() {
           >
             {selectedImage && (
               <>
-                <PremiumLiquidGlass style={styles.imageContainer} variant="elevated" borderRadius={24}>
-                  <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
-                </PremiumLiquidGlass>
-                
+                <LinearGradient
+                  colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.imageContainer}
+                >
+                  <View style={styles.imageContainerInner}>
+                    <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                  </View>
+                </LinearGradient>
+
                 <View style={styles.actionButtons}>
-                  <TouchableOpacity 
-                    onPress={handleDownload} 
+                  <TouchableOpacity
+                    onPress={handleDownload}
                     style={styles.actionButton}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                   >
-                    <View style={styles.actionButtonContainer}>
-                      <LinearGradient
-                        colors={['rgba(34, 197, 94, 0.35)', 'rgba(22, 163, 74, 0.25)']}
-                        style={styles.actionButtonGradient}
-                      >
-                        <View style={styles.actionButtonGlass}>
-                          <Download size={24} color="#4ade80" strokeWidth={2.5} />
-                        </View>
-                      </LinearGradient>
-                    </View>
+                    <LinearGradient
+                      colors={['rgba(74, 222, 128, 0.3)', 'rgba(34, 197, 94, 0.2)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.actionButtonGradient}
+                    >
+                      <View style={styles.actionButtonInner}>
+                        <Download size={22} color="rgba(74, 222, 128, 0.95)" strokeWidth={2.8} />
+                      </View>
+                    </LinearGradient>
                   </TouchableOpacity>
 
-                  <TouchableOpacity 
-                    onPress={handleShare} 
+                  <TouchableOpacity
+                    onPress={handleShare}
                     style={styles.actionButton}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                   >
-                    <View style={styles.actionButtonContainer}>
-                      <LinearGradient
-                        colors={['rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.12)']}
-                        style={styles.actionButtonGradient}
-                      >
-                        <View style={styles.actionButtonGlass}>
-                          <Share2 size={24} color="#e6eefc" strokeWidth={2.5} />
-                        </View>
-                      </LinearGradient>
-                    </View>
+                    <LinearGradient
+                      colors={['rgba(200, 220, 255, 0.3)', 'rgba(150, 180, 230, 0.2)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.actionButtonGradient}
+                    >
+                      <View style={styles.actionButtonInner}>
+                        <Share2 size={22} color="rgba(200, 220, 255, 0.95)" strokeWidth={2.8} />
+                      </View>
+                    </LinearGradient>
                   </TouchableOpacity>
 
                   {generatedImages.includes(selectedImage) && (
-                    <TouchableOpacity 
-                      onPress={handleDelete} 
+                    <TouchableOpacity
+                      onPress={handleDelete}
                       style={styles.actionButton}
-                      activeOpacity={0.8}
+                      activeOpacity={0.85}
                     >
-                      <View style={styles.actionButtonContainer}>
-                        <LinearGradient
-                          colors={['rgba(239, 68, 68, 0.35)', 'rgba(220, 38, 38, 0.25)']}
-                          style={styles.actionButtonGradient}
-                        >
-                          <View style={styles.actionButtonGlass}>
-                            <Trash2 size={24} color="#ff5757" strokeWidth={2.5} />
-                          </View>
-                        </LinearGradient>
-                      </View>
+                      <LinearGradient
+                        colors={['rgba(239, 68, 68, 0.3)', 'rgba(220, 38, 38, 0.2)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.actionButtonGradient}
+                      >
+                        <View style={styles.actionButtonInner}>
+                          <Trash2 size={22} color="rgba(255, 100, 100, 0.95)" strokeWidth={2.8} />
+                        </View>
+                      </LinearGradient>
                     </TouchableOpacity>
                   )}
                 </View>
 
-                <TouchableOpacity 
-                  onPress={handleCloseModal} 
+                <TouchableOpacity
+                  onPress={handleCloseModal}
                   style={styles.closeButton}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
-                  <View style={styles.closeButtonContainer}>
-                    <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)']}
-                      style={styles.closeButtonGradient}
-                    >
-                      <View style={styles.closeButtonGlass}>
-                        <X size={24} color="#ffffff" strokeWidth={2.5} />
-                      </View>
-                    </LinearGradient>
-                  </View>
+                  <LinearGradient
+                    colors={['rgba(255, 255, 255, 0.28)', 'rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.12)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.closeButtonGradient}
+                  >
+                    <View style={styles.closeButtonInner}>
+                      <X size={22} color="#ffffff" strokeWidth={2.8} />
+                    </View>
+                  </LinearGradient>
                 </TouchableOpacity>
               </>
             )}
@@ -408,13 +464,45 @@ export default function ResultsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
   scrollView: { flex: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 16 },
-  gridItem: { width: (SCREEN_WIDTH - 56) / 2, aspectRatio: 3 / 4 },
-  imageWrapper: { 
-    flex: 1, 
-    borderRadius: 20, 
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 18, marginBottom: 16 },
+  gridItem: {
+    width: (SCREEN_WIDTH - 60) / 2,
+    aspectRatio: 3 / 4,
+  },
+  gridItemGradient: {
+    flex: 1,
+    borderRadius: 28,
+    padding: 3,
+    shadowColor: 'rgba(200, 220, 255, 0.45)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.7,
+    shadowRadius: 36,
+    elevation: 18,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
+    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  gridItemInner: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 20, 30, 0.6)',
+    borderRadius: 26,
     overflow: 'hidden',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
+    borderRightColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  imageWrapper: {
+    flex: 1,
     position: 'relative',
+  },
+  imageFrame: {
+    flex: 1,
+    borderRadius: 26,
+    overflow: 'hidden',
   },
   resultImage: { width: '100%', height: '100%' },
   imageOverlay: {
@@ -422,151 +510,171 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: '30%',
+    height: '40%',
   },
   loadingPlaceholder: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 26,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.dark.backgroundElevated,
+    position: 'relative',
+  },
+  spinnerGlow: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   loadingSpinner: {
-    width: 50,
-    height: 50,
+    width: 56,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   spinnerRing: {
     position: 'absolute',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 3,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 3.5,
     borderColor: 'transparent',
-    borderTopColor: Colors.dark.primaryLight,
-    borderRightColor: Colors.dark.primaryLight,
+    borderTopColor: 'rgba(200, 220, 255, 0.9)',
+    borderRightColor: 'rgba(200, 220, 255, 0.8)',
   },
   spinnerRingInner: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderTopColor: Colors.dark.accent,
-    borderRightColor: Colors.dark.accent,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderTopColor: 'rgba(150, 190, 240, 0.8)',
+    borderRightColor: 'rgba(150, 190, 240, 0.7)',
   },
   loadingText: {
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.92)',
+    fontSize: 15,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
-  modalOverlay: { 
-    flex: 1, 
-    justifyContent: 'center', 
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
   modalBlur: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(5, 8, 12, 0.95)',
   },
-  modalContent: { 
-    width: '100%', 
-    maxWidth: 500,
+  modalContent: {
+    width: '100%',
+    maxWidth: 540,
     alignItems: 'center',
-    gap: 20,
+    gap: 26,
   },
   imageContainer: {
     width: '100%',
     aspectRatio: 3 / 4,
+    borderRadius: 36,
+    padding: 3.5,
     overflow: 'hidden',
-    shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.4,
-    shadowRadius: 32,
-    elevation: 20,
+    shadowColor: 'rgba(200, 220, 255, 0.6)',
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 0.8,
+    shadowRadius: 48,
+    elevation: 25,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.42)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
   },
-  modalImage: { 
-    width: '100%', 
+  imageContainerInner: {
+    flex: 1,
+    backgroundColor: 'rgba(12, 18, 28, 0.75)',
+    borderRadius: 33,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.16)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  modalImage: {
+    width: '100%',
     height: '100%',
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 18,
     justifyContent: 'center',
   },
   actionButton: {
-    width: 64,
-    height: 64,
-  },
-  actionButtonContainer: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 32,
+    borderRadius: 30,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.3)',
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.7,
-    shadowRadius: 28,
-    elevation: 14,
   },
   actionButtonGradient: {
-    flex: 1,
-    padding: 2.5,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 32,
+    elevation: 16,
   },
-  actionButtonGlass: {
+  actionButtonInner: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 29,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
+    borderRightColor: 'rgba(255, 255, 255, 0.18)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
   },
   closeButton: {
-    width: 52,
-    height: 52,
-    marginTop: 16,
-  },
-  closeButtonContainer: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 26,
+    borderRadius: 30,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.3)',
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 22,
-    elevation: 12,
   },
   closeButtonGradient: {
-    flex: 1,
-    padding: 2,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.55)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.45)',
+    borderRightColor: 'rgba(255, 255, 255, 0.28)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: 'rgba(200, 220, 255, 0.7)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.8,
+    shadowRadius: 36,
+    elevation: 20,
   },
-  closeButtonGlass: {
+  closeButtonInner: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
+    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
   },
 });

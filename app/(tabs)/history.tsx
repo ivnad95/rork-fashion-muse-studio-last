@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Calendar, Trash2, X } from 'lucide-react-native';
+import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
@@ -53,13 +53,13 @@ export default function HistoryScreen() {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 250,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnim, {
           toValue: 1,
-          friction: 8,
-          tension: 40,
+          friction: 9,
+          tension: 50,
           useNativeDriver: true,
         }),
       ]).start();
@@ -143,58 +143,100 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      
       <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <GlassyTitle><Text>History</Text></GlassyTitle>
         {isLoading ? (
-          <PremiumLiquidGlass style={styles.messagePanel} variant="elevated" borderRadius={24}>
-            <View style={styles.messageContent}>
-              <Text style={styles.messageText}><Text>Loading history...</Text></Text>
-            </View>
-          </PremiumLiquidGlass>
+          <View style={styles.messagePanel}>
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.glassCard}
+            >
+              <View style={styles.glassInner}>
+                <Sparkles size={32} color="rgba(200, 220, 255, 0.8)" />
+                <Text style={styles.messageText}><Text>Loading history...</Text></Text>
+              </View>
+            </LinearGradient>
+          </View>
         ) : error ? (
-          <PremiumLiquidGlass style={styles.messagePanel} variant="elevated" borderRadius={24}>
-            <View style={styles.messageContent}>
-              <Text style={styles.errorText}><Text>{error}</Text></Text>
-            </View>
-          </PremiumLiquidGlass>
+          <View style={styles.messagePanel}>
+            <LinearGradient
+              colors={['rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.08)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.glassCard}
+            >
+              <View style={styles.glassInner}>
+                <Text style={styles.errorText}><Text>{error}</Text></Text>
+              </View>
+            </LinearGradient>
+          </View>
         ) : displayHistory.length === 0 ? (
-          <PremiumLiquidGlass style={styles.messagePanel} variant="elevated" borderRadius={24}>
-            <View style={styles.messageContent}>
-              <Text style={styles.messageText}>
-                <Text>{!user ? 'Sign in to view your generation history' : 'No generations yet. Start creating!'}</Text>
-              </Text>
-            </View>
-          </PremiumLiquidGlass>
+          <View style={styles.messagePanel}>
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.glassCard}
+            >
+              <View style={styles.glassInner}>
+                <Sparkles size={32} color="rgba(200, 220, 255, 0.8)" />
+                <Text style={styles.messageText}>
+                  <Text>{!user ? 'Sign in to view your generation history' : 'No generations yet. Start creating!'}</Text>
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
         ) : (
           <View style={styles.historyList}>
-            {displayHistory.map((generation) => (
+            {displayHistory.map((generation, index) => (
               <TouchableOpacity
                 key={generation.id}
                 onPress={() => handleGenerationPress(generation)}
-                activeOpacity={0.9}
+                activeOpacity={0.92}
               >
-                <PremiumLiquidGlass style={styles.generationCard} variant="elevated" borderRadius={24}>
-                  <View style={styles.cardHeader}>
-                    <View style={styles.dateContainer}>
-                      <Calendar size={16} color={Colors.dark.textSecondary} />
-                      <Text style={styles.dateText}><Text>{generation.createdAt}</Text></Text>
-                    </View>
-                  </View>
-                  <View style={styles.imageGrid}>
-                    {generation.imageUrls.slice(0, 4).map((url, index) => (
-                      <View key={index} style={styles.imageGridItem}>
-                        <Image source={{ uri: url }} style={styles.historyImage} resizeMode="cover" />
-                        <LinearGradient
-                          colors={['transparent', 'rgba(0, 0, 0, 0.3)']}
-                          style={styles.imageOverlay}
-                        />
+                <Animated.View style={[styles.generationCard, { opacity: 1, transform: [{ scale: 1 }] }]}>
+                  <LinearGradient
+                    colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.cardGradient}
+                  >
+                    <View style={styles.cardContent}>
+                      <View style={styles.cardHeader}>
+                        <View style={styles.dateContainer}>
+                          <LinearGradient
+                            colors={['rgba(200, 220, 255, 0.25)', 'rgba(200, 220, 255, 0.12)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.dateBadge}
+                          >
+                            <Calendar size={14} color="rgba(200, 220, 255, 0.9)" />
+                            <Text style={styles.dateText}><Text>{generation.createdAt}</Text></Text>
+                          </LinearGradient>
+                        </View>
                       </View>
-                    ))}
-                  </View>
-                  <View style={styles.generationInfo}>
-                    <Text style={styles.promptText}><Text>{generation.prompt}</Text></Text>
-                  </View>
-                </PremiumLiquidGlass>
+                      <View style={styles.imageGrid}>
+                        {generation.imageUrls.slice(0, 4).map((url, imgIndex) => (
+                          <View key={imgIndex} style={styles.imageGridItem}>
+                            <View style={styles.imageFrame}>
+                              <Image source={{ uri: url }} style={styles.historyImage} resizeMode="cover" />
+                              <LinearGradient
+                                colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
+                                style={styles.imageOverlay}
+                              />
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                      <View style={styles.generationInfo}>
+                        <Text style={styles.promptText} numberOfLines={2}><Text>{generation.prompt}</Text></Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </Animated.View>
               </TouchableOpacity>
             ))}
           </View>
@@ -216,7 +258,7 @@ export default function HistoryScreen() {
           {Platform.OS === 'web' ? (
             <View style={styles.modalBlur} />
           ) : (
-            <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="dark" />
+            <BlurView intensity={100} style={StyleSheet.absoluteFill} tint="dark" />
           )}
 
           <TouchableOpacity
@@ -236,60 +278,81 @@ export default function HistoryScreen() {
           >
             {selectedGeneration && (
               <>
-                <PremiumLiquidGlass style={styles.modalCard} variant="elevated" borderRadius={24}>
-                  <View style={styles.modalHeader}>
-                    <View style={styles.modalDateContainer}>
-                      <Calendar size={18} color={Colors.dark.textSecondary} />
-                      <Text style={styles.modalDateText}><Text>{selectedGeneration.createdAt}</Text></Text>
-                    </View>
-                    {user && (
-                      <TouchableOpacity
-                        onPress={handleDeleteGeneration}
-                        style={styles.deleteButton}
-                        activeOpacity={0.8}
+                <LinearGradient
+                  colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.modalCard}
+                >
+                  <View style={styles.modalCardInner}>
+                    <View style={styles.modalHeader}>
+                      <LinearGradient
+                        colors={['rgba(200, 220, 255, 0.28)', 'rgba(200, 220, 255, 0.15)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.modalDateContainer}
                       >
-                        <Trash2 size={18} color={Colors.dark.error} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
+                        <Calendar size={16} color="rgba(255, 255, 255, 0.95)" />
+                        <Text style={styles.modalDateText}><Text>{selectedGeneration.createdAt}</Text></Text>
+                      </LinearGradient>
+                      {user && (
+                        <TouchableOpacity
+                          onPress={handleDeleteGeneration}
+                          style={styles.deleteButton}
+                          activeOpacity={0.85}
+                        >
+                          <LinearGradient
+                            colors={['rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.15)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.deleteButtonGradient}
+                          >
+                            <Trash2 size={18} color="rgba(255, 100, 100, 0.95)" />
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      )}
+                    </View>
 
-                  <ScrollView
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.imageScroll}
-                  >
-                    {selectedGeneration.imageUrls.map((url, index) => (
-                      <View key={index} style={styles.modalImageContainer}>
-                        <Image
-                          source={{ uri: url }}
-                          style={styles.modalImage}
-                          resizeMode="contain"
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
+                    <ScrollView
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.imageScroll}
+                    >
+                      {selectedGeneration.imageUrls.map((url, index) => (
+                        <View key={index} style={styles.modalImageContainer}>
+                          <View style={styles.modalImageFrame}>
+                            <Image
+                              source={{ uri: url }}
+                              style={styles.modalImage}
+                              resizeMode="contain"
+                            />
+                          </View>
+                        </View>
+                      ))}
+                    </ScrollView>
 
-                  <View style={styles.modalFooter}>
-                    <Text style={styles.modalPromptText}><Text>{selectedGeneration.prompt}</Text></Text>
+                    <View style={styles.modalFooter}>
+                      <Text style={styles.modalPromptText}><Text>{selectedGeneration.prompt}</Text></Text>
+                    </View>
                   </View>
-                </PremiumLiquidGlass>
+                </LinearGradient>
 
                 <TouchableOpacity
                   onPress={handleCloseModal}
                   style={styles.closeButton}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
-                  <View style={styles.closeButtonContainer}>
-                    <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)']}
-                      style={styles.closeButtonGradient}
-                    >
-                      <View style={styles.closeButtonGlass}>
-                        <X size={24} color="#ffffff" strokeWidth={2.5} />
-                      </View>
-                    </LinearGradient>
-                  </View>
+                  <LinearGradient
+                    colors={['rgba(255, 255, 255, 0.28)', 'rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.12)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.closeButtonGradient}
+                  >
+                    <View style={styles.closeButtonInner}>
+                      <X size={22} color="#ffffff" strokeWidth={2.8} />
+                    </View>
+                  </LinearGradient>
                 </TouchableOpacity>
               </>
             )}
@@ -304,89 +367,140 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
   scrollView: { flex: 1 },
   messagePanel: {
-    padding: 40,
-    marginTop: 20,
-    shadowColor: 'rgba(200, 220, 255, 0.3)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 10,
+    marginTop: 32,
+    marginBottom: 24,
   },
-  messageContent: { alignItems: 'center' },
+  glassCard: {
+    borderRadius: 32,
+    padding: 3,
+    shadowColor: 'rgba(200, 220, 255, 0.45)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.7,
+    shadowRadius: 36,
+    elevation: 18,
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
+    borderRightColor: 'rgba(255, 255, 255, 0.18)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  glassInner: {
+    backgroundColor: 'rgba(20, 25, 35, 0.5)',
+    borderRadius: 30,
+    padding: 48,
+    alignItems: 'center',
+    gap: 18,
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
+    borderRightColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+  },
   messageText: {
-    color: Colors.dark.textSecondary,
+    color: 'rgba(255, 255, 255, 0.92)',
     textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600' as const,
-    letterSpacing: 0.2,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    fontSize: 18,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   errorText: {
-    color: Colors.dark.error,
+    color: 'rgba(255, 100, 100, 0.95)',
     textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600' as const,
-    letterSpacing: 0.2,
+    fontSize: 18,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
-  historyList: { gap: 20 },
+  historyList: { gap: 24 },
   generationCard: {
-    padding: 18,
-    shadowColor: 'rgba(200, 220, 255, 0.35)',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.6,
-    shadowRadius: 26,
-    elevation: 12,
+    overflow: 'hidden',
+  },
+  cardGradient: {
+    borderRadius: 32,
+    padding: 3,
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.7,
+    shadowRadius: 40,
+    elevation: 20,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
+    borderRightColor: 'rgba(255, 255, 255, 0.22)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  cardContent: {
+    backgroundColor: 'rgba(15, 20, 30, 0.65)',
+    borderRadius: 30,
+    padding: 22,
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.18)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   dateContainer: {
+    overflow: 'hidden',
+    borderRadius: 16,
+  },
+  dateBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(200, 220, 255, 0.35)',
+    borderLeftColor: 'rgba(200, 220, 255, 0.28)',
+    borderRightColor: 'rgba(200, 220, 255, 0.15)',
+    borderBottomColor: 'rgba(200, 220, 255, 0.1)',
   },
   dateText: {
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    fontWeight: '600' as const,
-    letterSpacing: 0.3,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: 13,
+    fontWeight: '700' as const,
+    letterSpacing: 0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 14,
+    gap: 12,
+    marginBottom: 16,
   },
   imageGridItem: {
-    width: (SCREEN_WIDTH - 88) / 2,
+    width: (SCREEN_WIDTH - 110) / 2,
     aspectRatio: 3 / 4,
-    borderRadius: 16,
+  },
+  imageFrame: {
+    flex: 1,
+    borderRadius: 22,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.25)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.1)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
-    shadowColor: 'rgba(0, 0, 0, 0.5)',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 3,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: 'rgba(0, 0, 0, 0.6)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    elevation: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
   historyImage: { width: '100%', height: '100%' },
   imageOverlay: {
@@ -394,172 +508,190 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: '40%',
+    height: '45%',
   },
   generationInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 4,
+    paddingTop: 6,
   },
   promptText: {
-    color: Colors.dark.text,
-    fontSize: 15,
-    fontWeight: '600' as const,
-    letterSpacing: 0.2,
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: 0.3,
+    lineHeight: 22,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
   modalBlur: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(7, 10, 15, 0.92)',
+    backgroundColor: 'rgba(5, 8, 12, 0.95)',
   },
   modalContent: {
     width: '100%',
-    maxWidth: 500,
+    maxWidth: 540,
     alignItems: 'center',
-    gap: 24,
+    gap: 28,
   },
   modalCard: {
     width: '100%',
+    borderRadius: 36,
+    padding: 3.5,
     overflow: 'hidden',
-    shadowColor: 'rgba(200, 220, 255, 0.4)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.7,
-    shadowRadius: 36,
-    elevation: 20,
+    shadowColor: 'rgba(200, 220, 255, 0.6)',
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 0.8,
+    shadowRadius: 48,
+    elevation: 25,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.42)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  modalCardInner: {
+    backgroundColor: 'rgba(12, 18, 28, 0.75)',
+    borderRadius: 33,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.16)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingBottom: 14,
+    padding: 24,
+    paddingBottom: 16,
   },
   modalDateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.25)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.1)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalDateText: {
-    color: Colors.dark.text,
-    fontSize: 16,
-    fontWeight: '700' as const,
-    letterSpacing: 0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: 'rgba(255, 255, 255, 0.98)',
+    fontSize: 15,
+    fontWeight: '800' as const,
+    letterSpacing: 0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
   deleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(239, 68, 68, 0.18)',
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  deleteButtonGradient: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderTopColor: 'rgba(239, 68, 68, 0.4)',
-    borderLeftColor: 'rgba(239, 68, 68, 0.35)',
+    borderTopColor: 'rgba(239, 68, 68, 0.45)',
+    borderLeftColor: 'rgba(239, 68, 68, 0.38)',
     borderRightColor: 'rgba(239, 68, 68, 0.25)',
-    borderBottomColor: 'rgba(239, 68, 68, 0.2)',
-    shadowColor: 'rgba(239, 68, 68, 0.5)',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 16,
-    elevation: 8,
+    borderBottomColor: 'rgba(239, 68, 68, 0.18)',
+    shadowColor: 'rgba(239, 68, 68, 0.6)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.7,
+    shadowRadius: 20,
+    elevation: 10,
   },
   imageScroll: {
     width: '100%',
   },
   modalImageContainer: {
-    width: SCREEN_WIDTH > 500 ? 500 : SCREEN_WIDTH - 40,
+    width: SCREEN_WIDTH > 540 ? 540 : SCREEN_WIDTH - 48,
     aspectRatio: 3 / 4,
-    padding: 20,
+    padding: 24,
+  },
+  modalImageFrame: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
+    borderRightColor: 'rgba(255, 255, 255, 0.18)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
+    shadowColor: 'rgba(0, 0, 0, 0.7)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.6,
+    shadowRadius: 32,
+    elevation: 15,
   },
   modalImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.22)',
-    borderRightColor: 'rgba(255, 255, 255, 0.12)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: 'rgba(0, 0, 0, 0.6)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
   },
   modalFooter: {
-    padding: 20,
-    paddingTop: 12,
+    padding: 24,
+    paddingTop: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   modalPromptText: {
-    color: Colors.dark.textSecondary,
-    fontSize: 15,
-    fontWeight: '600' as const,
+    color: 'rgba(255, 255, 255, 0.92)',
+    fontSize: 16,
+    fontWeight: '700' as const,
     textAlign: 'center',
-    letterSpacing: 0.2,
-    lineHeight: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    letterSpacing: 0.3,
+    lineHeight: 24,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
   closeButton: {
-    width: 56,
-    height: 56,
-    marginTop: 20,
-  },
-  closeButtonContainer: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 28,
+    borderRadius: 30,
     overflow: 'hidden',
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.45)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
-    borderRightColor: 'rgba(255, 255, 255, 0.22)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.7,
-    shadowRadius: 28,
-    elevation: 15,
   },
   closeButtonGradient: {
-    flex: 1,
-    padding: 2.5,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.55)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.45)',
+    borderRightColor: 'rgba(255, 255, 255, 0.28)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: 'rgba(200, 220, 255, 0.7)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.8,
+    shadowRadius: 36,
+    elevation: 20,
   },
-  closeButtonGlass: {
+  closeButtonInner: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.3)',
-    borderRightColor: 'rgba(255, 255, 255, 0.18)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
+    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
   },
 });
