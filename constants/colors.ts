@@ -27,7 +27,7 @@ export default {
 
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.95)',
-    textMuted: 'rgba(240, 248, 255, 0.7)',
+    textMuted: 'rgba(180, 200, 220, 0.85)',
 
     success: '#4ade80',
     warning: '#fbbf24',
