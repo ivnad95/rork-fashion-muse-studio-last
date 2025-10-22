@@ -34,63 +34,92 @@ function ToggleSwitch({
   label: string;
 }) {
   const translateAnim = React.useRef(new Animated.Value(enabled ? 1 : 0)).current;
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
   React.useEffect(() => {
     Animated.spring(translateAnim, {
       toValue: enabled ? 1 : 0,
-      friction: 5,
-      tension: 40,
+      friction: 6,
+      tension: 50,
       useNativeDriver: true,
     }).start();
   }, [enabled, translateAnim]);
 
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.92,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        tension: 60,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onChange();
+  };
+
   return (
-    <TouchableOpacity
-      onPress={onChange}
-      style={[styles.toggle, enabled && styles.toggleActive]}
-      activeOpacity={0.9}
-      accessibilityLabel={label}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: enabled }}
-    >
-      <LinearGradient
-        colors={
-          enabled
-            ? ['rgba(74, 222, 128, 0.5)', 'rgba(34, 197, 94, 0.6)', 'rgba(22, 163, 74, 0.5)']
-            : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
-        }
-        style={styles.toggleBackground}
-      />
-      <Animated.View
-        style={[
-          styles.toggleThumb,
-          {
-            transform: [
-              {
-                translateX: translateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [2, 40],
-                }),
-              },
-            ],
-          },
-        ]}
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        onPress={handlePress}
+        style={[styles.toggle, enabled && styles.toggleActive]}
+        activeOpacity={1}
+        accessibilityLabel={label}
+        accessibilityRole="switch"
+        accessibilityState={{ checked: enabled }}
       >
-        {enabled && (
-          <View style={styles.thumbGlow}>
-            <LinearGradient
-              colors={[
-                'rgba(74, 222, 128, 0.5)',
-                'rgba(34, 197, 94, 0.7)',
-                'rgba(74, 222, 128, 0.5)',
-              ]}
-              style={styles.thumbGlowGradient}
-            />
-          </View>
-        )}
-        <View style={styles.thumbInner} />
-      </Animated.View>
-    </TouchableOpacity>
+        <LinearGradient
+          colors={
+            enabled
+              ? ['rgba(74, 222, 128, 0.6)', 'rgba(34, 197, 94, 0.7)', 'rgba(22, 163, 74, 0.6)']
+              : ['rgba(220, 235, 255, 0.1)', 'rgba(220, 235, 255, 0.05)', 'rgba(220, 235, 255, 0.08)']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.toggleBackground}
+        />
+        <View style={styles.toggleInnerShadow} />
+        <Animated.View
+          style={[
+            styles.toggleThumb,
+            {
+              transform: [
+                {
+                  translateX: translateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [3, 42],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          {enabled && (
+            <View style={styles.thumbGlow}>
+              <LinearGradient
+                colors={[
+                  'rgba(74, 222, 128, 0.6)',
+                  'rgba(34, 197, 94, 0.8)',
+                  'rgba(74, 222, 128, 0.6)',
+                ]}
+                style={styles.thumbGlowGradient}
+              />
+            </View>
+          )}
+          <LinearGradient
+            colors={['#ffffff', '#f5f5f5', '#e8e8e8']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.thumbInner}
+          />
+          <View style={styles.thumbHighlight} />
+        </Animated.View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -658,9 +687,14 @@ const styles = StyleSheet.create({
   },
   creditsCard: {
     marginBottom: 26,
+    shadowColor: 'rgba(200, 220, 255, 0.35)',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.6,
+    shadowRadius: 28,
+    elevation: 14,
   },
   creditsContent: {
-    padding: 20,
+    padding: 22,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -690,15 +724,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    backgroundColor: 'rgba(216, 233, 255, 0.1)',
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.25)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    backgroundColor: 'rgba(216, 233, 255, 0.12)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.22)',
+    borderRightColor: 'rgba(255, 255, 255, 0.12)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    shadowColor: 'rgba(200, 220, 255, 0.35)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
   buyButtonText: {
     fontSize: 15,
@@ -713,32 +752,32 @@ const styles = StyleSheet.create({
     marginBottom: 26,
   },
   avatarBorder: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    padding: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.2)',
-    borderRightColor: 'rgba(255, 255, 255, 0.12)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: 'rgba(200, 220, 255, 0.6)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.7,
-    shadowRadius: 28,
-    elevation: 15,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    padding: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: 'rgba(200, 220, 255, 0.65)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.8,
+    shadowRadius: 32,
+    elevation: 18,
   },
   avatarInner: {
     width: '100%',
     height: '100%',
-    borderRadius: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.25)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.22)',
+    borderRightColor: 'rgba(255, 255, 255, 0.12)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -746,18 +785,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   inputContainer: {
-    minHeight: 54,
-    shadowColor: Colors.dark.glassShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    minHeight: 56,
+    shadowColor: 'rgba(200, 220, 255, 0.25)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
   },
   inputIcon: {
     marginRight: 12,
@@ -775,10 +814,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   settingsPanel: {
-    marginBottom: 16,
+    marginBottom: 18,
+    shadowColor: 'rgba(200, 220, 255, 0.3)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 10,
   },
   panelContent: {
-    padding: 20,
+    padding: 22,
   },
   sectionTitle: {
     fontSize: 19,
@@ -803,38 +847,60 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   toggle: {
-    width: 76,
-    height: 38,
-    borderRadius: 19,
+    width: 80,
+    height: 42,
+    borderRadius: 21,
     overflow: 'hidden',
     position: 'relative',
-    borderWidth: 1.5,
-    borderColor: Colors.dark.glassBorder,
-    backgroundColor: 'rgba(220, 235, 255, 0.05)',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(220, 235, 255, 0.06)',
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   toggleActive: {
-    borderColor: '#4ade80',
-    shadowColor: 'rgba(74, 222, 128, 0.8)',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.75,
-    shadowRadius: 24,
-    elevation: 12,
+    borderTopColor: 'rgba(74, 222, 128, 0.5)',
+    borderLeftColor: 'rgba(74, 222, 128, 0.45)',
+    borderRightColor: 'rgba(74, 222, 128, 0.35)',
+    borderBottomColor: 'rgba(74, 222, 128, 0.3)',
+    shadowColor: 'rgba(74, 222, 128, 0.7)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 28,
+    elevation: 14,
   },
   toggleBackground: {
     position: 'absolute',
     inset: 0,
   },
+  toggleInnerShadow: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 19,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.15)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.1)',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
   toggleThumb: {
     position: 'absolute',
-    top: 2,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    top: 3,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   thumbGlow: {
     position: 'absolute',
-    inset: -5,
-    borderRadius: 22,
+    inset: -6,
+    borderRadius: 24,
     overflow: 'hidden',
   },
   thumbGlowGradient: {
@@ -842,15 +908,26 @@ const styles = StyleSheet.create({
   },
   thumbInner: {
     flex: 1,
-    backgroundColor: Colors.dark.silverLight,
-    borderRadius: 17,
+    borderRadius: 18,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 12,
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.7)',
+    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  thumbHighlight: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    right: 2,
+    height: '35%',
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   accountRow: {
     flexDirection: 'row',
@@ -864,14 +941,22 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   iconWrapperLogout: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(216, 233, 255, 0.12)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(216, 233, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(216, 233, 255, 0.25)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(216, 233, 255, 0.35)',
+    borderLeftColor: 'rgba(216, 233, 255, 0.3)',
+    borderRightColor: 'rgba(216, 233, 255, 0.2)',
+    borderBottomColor: 'rgba(216, 233, 255, 0.15)',
+    shadowColor: 'rgba(216, 233, 255, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   logoutText: {
     fontSize: 16,
@@ -890,14 +975,22 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   iconWrapperDanger: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.25)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(239, 68, 68, 0.35)',
+    borderLeftColor: 'rgba(239, 68, 68, 0.3)',
+    borderRightColor: 'rgba(239, 68, 68, 0.2)',
+    borderBottomColor: 'rgba(239, 68, 68, 0.15)',
+    shadowColor: 'rgba(239, 68, 68, 0.4)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
+    elevation: 7,
   },
   dangerText: {
     fontSize: 16,
@@ -930,39 +1023,55 @@ const styles = StyleSheet.create({
   },
   formatSelector: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 14,
   },
   formatOption: {
     flex: 1,
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: Colors.dark.glassBorder,
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.18)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
   formatOptionActive: {
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    shadowColor: 'rgba(255, 255, 255, 0.4)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    elevation: 10,
+    borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.45)',
+    borderRightColor: 'rgba(255, 255, 255, 0.35)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.7,
+    shadowRadius: 28,
+    elevation: 14,
   },
   formatOptionGradient: {
     position: 'absolute',
     inset: 0,
   },
   formatIcon: {
-    backgroundColor: 'rgba(255, 255, 255, 0.75)',
-    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.9)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.8)',
+    borderRightColor: 'rgba(200, 200, 200, 0.5)',
+    borderBottomColor: 'rgba(180, 180, 180, 0.6)',
   },
   formatIconPortrait: {
     width: 24,
