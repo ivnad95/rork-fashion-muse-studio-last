@@ -11,7 +11,7 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassPanel style={glassStyles.imagePlaceholder} radius={20}>
+    <GlassPanel style={glassStyles.imagePlaceholder} radius={24}>
       <TouchableOpacity
         style={glassStyles.imageContainer}
         onPress={onImageSelect}
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
+    borderRadius: 24,                                   // Spec: 24px border radius for main panels
   },
   placeholderContent: {
     alignItems: 'center',
@@ -61,13 +61,20 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   placeholderText: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    fontWeight: '500' as const,
+    color: COLORS.silverLight,                      // Spec: near-white primary text
+    fontSize: 15,
+    fontWeight: '600' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',         // Spec: neon-like glow effect
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   placeholderSubtext: {
-    color: '#6B7280',
-    fontSize: 12,
-    marginTop: 4,
+    color: COLORS.silverMid,                        // Spec: secondary silver text
+    fontSize: 13,
+    marginTop: 6,
+    fontWeight: '500' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 });

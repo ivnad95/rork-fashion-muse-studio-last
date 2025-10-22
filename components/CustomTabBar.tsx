@@ -213,6 +213,19 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
+        {/* Gradient fade to create visual separation from content above */}
+        <LinearGradient
+          colors={[
+            'rgba(10, 19, 59, 0)',
+            'rgba(10, 19, 59, 0.3)',
+            'rgba(10, 19, 59, 0.7)',
+            'rgba(10, 19, 59, 0.95)',
+          ]}
+          locations={[0, 0.3, 0.7, 1]}
+          style={styles.topFadeGradient}
+          pointerEvents="none"
+        />
+
         {/* Multi-layer glass container with depth */}
         <View style={styles.tabBarOuter}>
           {/* Outer glow layer for floating effect */}
@@ -280,25 +293,36 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  topFadeGradient: {
+    position: 'absolute',
+    top: -60,
+    left: 0,
+    right: 0,
+    height: 60,
+    zIndex: 0,
   },
   tabBarOuter: {
     position: 'relative',
     height: 72,
     borderRadius: 36,
+    zIndex: 1,
   },
   outerGlow: {
     position: 'absolute',
     inset: -4,
     borderRadius: 40,
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',        // Spec: accent color (#0A76AF) for active states
     shadowColor: 'rgba(10, 118, 175, 0.6)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.8,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.9,
+    shadowRadius: 28,
+    elevation: 12,
   },
   tabBarContainer: {
     height: 72,

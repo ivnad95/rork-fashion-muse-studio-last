@@ -12,7 +12,6 @@ import GlassyTitle from '@/components/GlassyTitle';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import ShimmerLoader from '@/components/ShimmerLoader';
-import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -132,7 +131,6 @@ function LoadingPlaceholder() {
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const { generatedImages, isGenerating, generationCount, deleteImage } = useGeneration();
-  const { handleScroll } = useScrollNavbar();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -297,7 +295,7 @@ export default function ResultsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
         <View style={styles.grid}>
@@ -496,24 +494,29 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 24,
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, marginBottom: 24 },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 24,
+    justifyContent: 'space-between',
+  },
   gridItem: {
-    width: Platform.OS === 'ios' || SCREEN_WIDTH < 768 ? (SCREEN_WIDTH - 64) / 2 : (SCREEN_WIDTH - 200) / 3,
+    width: (SCREEN_WIDTH - 48 - 16) / 2,  // 2 columns: subtract padding (24*2) and gap (16), then divide by 2
     aspectRatio: 3 / 4,
-    minWidth: Platform.OS === 'ios' ? 160 : 150,
-    maxWidth: Platform.OS === 'ios' ? 200 : 280,
+    minWidth: 150,
   },
   gridItemGradient: {
     flex: 1,
-    borderRadius: 28,
+    borderRadius: 24,                                   // Spec: 24px border radius
     padding: 3,
-    shadowColor: 'rgba(200, 220, 255, 0.45)',
+    shadowColor: 'rgba(200, 220, 255, 0.45)',          // Spec: colored shadows for depth
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.7,
     shadowRadius: 36,
     elevation: 18,
     borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',        // Spec: gradient borders
     borderLeftColor: 'rgba(255, 255, 255, 0.35)',
     borderRightColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
@@ -521,7 +524,7 @@ const styles = StyleSheet.create({
   gridItemInner: {
     flex: 1,
     backgroundColor: 'rgba(15, 20, 30, 0.6)',
-    borderRadius: 26,
+    borderRadius: 22,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.15)',
@@ -535,7 +538,7 @@ const styles = StyleSheet.create({
   },
   imageFrame: {
     flex: 1,
-    borderRadius: 26,
+    borderRadius: 22,
     overflow: 'hidden',
   },
   resultImage: { width: '100%', height: '100%' },
@@ -548,7 +551,7 @@ const styles = StyleSheet.create({
   },
   loadingPlaceholder: {
     flex: 1,
-    borderRadius: 26,
+    borderRadius: 22,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -613,7 +616,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: 36,
+    borderRadius: 24,                                   // Spec: 24px border radius for main panels
     padding: 3.5,
     overflow: 'hidden',
     shadowColor: 'rgba(200, 220, 255, 0.6)',
@@ -630,7 +633,7 @@ const styles = StyleSheet.create({
   imageContainerInner: {
     flex: 1,
     backgroundColor: 'rgba(12, 18, 28, 0.75)',
-    borderRadius: 33,
+    borderRadius: 21,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
@@ -713,7 +716,7 @@ const styles = StyleSheet.create({
   },
   emptyPlaceholder: {
     flex: 1,
-    borderRadius: 26,
+    borderRadius: 22,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
