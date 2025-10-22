@@ -28,6 +28,7 @@
           "apple": {
             "security": {
               "application-groups": [
+                "group.com.myapp",
                 "group.com.myapp"
               ]
             }
@@ -53,15 +54,17 @@
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.INTERNET",
         "android.permission.RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "INTERNET",
-        "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO",
-        "READ_MEDIA_AUDIO",
-        "READ_MEDIA_VISUAL_USER_SELECTED",
-        "ACCESS_MEDIA_LOCATION",
-        "CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -115,6 +118,12 @@
       "eas": {
         "projectId": "08499949-ca52-4748-9b7c-27f3b1954cbd"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/08499949-ca52-4748-9b7c-27f3b1954cbd"
     }
   }
 }
