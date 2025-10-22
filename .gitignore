@@ -1,42 +1,80 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Learn more: https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# =============================
+#  Dependencies / Package Managers
+# =============================
 node_modules/
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Expo
+# =============================
+#  Expo
+# =============================
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# =============================
+#  Native Builds (Android / iOS)
+# =============================
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.keystore
+*.xcarchive
+android/
+ios/
 
-# Metro
+# =============================
+#  Metro / Cache
+# =============================
 .metro-health-check*
+.cache/
+tmp/
 
-# debug
+# =============================
+#  Logs / Debug
+# =============================
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
-# macOS
+# =============================
+#  OS & Editor Junk
+# =============================
 .DS_Store
+Thumbs.db
 *.pem
+.idea/
+.vscode/
 
-# local env files
+# =============================
+#  Local Environment
+# =============================
+.env
 .env*.local
+.env.development
+.env.production
 
-# typescript
+# =============================
+#  TypeScript / Build
+# =============================
 *.tsbuildinfo
 .vercel
+build/
+dist/
 
-# Local database
+# =============================
+#  Local Databases
+# =============================
 *.db
 *.db-shm
 *.db-wal
