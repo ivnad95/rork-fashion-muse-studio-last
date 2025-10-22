@@ -10,6 +10,11 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AuthSplash from '@/components/AuthSplash';
 
+// Import test utilities for development (provides browser console helpers)
+if (process.env.NODE_ENV === 'development') {
+  import('@/scripts/add-credits');
+}
+
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
