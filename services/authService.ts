@@ -136,7 +136,14 @@ export const authService = {
    */
   async updateProfile(userId: string, updates: { name?: string; email?: string; profileImage?: string }): Promise<User> {
     try {
-      const dbUser = await updateUser(userId, updates);
+      // Update user in database
+      await updateUser(userId, updates);
+
+      // Fetch updated user
+      const dbUser = await getUserById(userId);
+      if (!dbUser) {
+        throw new Error('User not found after update');
+      }
 
       return {
         id: dbUser.id,

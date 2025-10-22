@@ -37,7 +37,7 @@ export default function PremiumLiquidGlass({
   // Color tint configurations
   const tintColors = {
     blue: {
-      gradient: ['rgba(100, 150, 200, 0.15)', 'rgba(100, 150, 200, 0.08)', 'rgba(100, 150, 200, 0.04)'],
+      gradient: ['rgba(100, 150, 200, 0.15)', 'rgba(100, 150, 200, 0.08)', 'rgba(100, 150, 200, 0.04)'] as const,
       shadow: Colors.dark.shadowBlue,
       border: {
         top: 'rgba(150, 180, 240, 0.35)',
@@ -47,7 +47,7 @@ export default function PremiumLiquidGlass({
       },
     },
     purple: {
-      gradient: ['rgba(150, 100, 200, 0.15)', 'rgba(150, 100, 200, 0.08)', 'rgba(150, 100, 200, 0.04)'],
+      gradient: ['rgba(150, 100, 200, 0.15)', 'rgba(150, 100, 200, 0.08)', 'rgba(150, 100, 200, 0.04)'] as const,
       shadow: Colors.dark.shadowPurple,
       border: {
         top: 'rgba(180, 150, 240, 0.35)',
@@ -57,7 +57,7 @@ export default function PremiumLiquidGlass({
       },
     },
     teal: {
-      gradient: ['rgba(100, 200, 200, 0.15)', 'rgba(100, 200, 200, 0.08)', 'rgba(100, 200, 200, 0.04)'],
+      gradient: ['rgba(100, 200, 200, 0.15)', 'rgba(100, 200, 200, 0.08)', 'rgba(100, 200, 200, 0.04)'] as const,
       shadow: Colors.dark.shadowTeal,
       border: {
         top: 'rgba(100, 220, 220, 0.35)',
@@ -67,7 +67,7 @@ export default function PremiumLiquidGlass({
       },
     },
     warm: {
-      gradient: ['rgba(240, 180, 120, 0.15)', 'rgba(240, 180, 120, 0.08)', 'rgba(240, 180, 120, 0.04)'],
+      gradient: ['rgba(240, 180, 120, 0.15)', 'rgba(240, 180, 120, 0.08)', 'rgba(240, 180, 120, 0.04)'] as const,
       shadow: Colors.dark.shadowWarm,
       border: {
         top: 'rgba(240, 200, 150, 0.35)',
@@ -77,7 +77,7 @@ export default function PremiumLiquidGlass({
       },
     },
     none: {
-      gradient: ['rgba(255, 255, 255, 0.10)', 'rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)'],
+      gradient: ['rgba(255, 255, 255, 0.10)', 'rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)'] as const,
       shadow: Colors.dark.shadowBlack,
       border: {
         top: 'rgba(255, 255, 255, 0.25)',

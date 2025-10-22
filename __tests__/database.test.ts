@@ -54,7 +54,7 @@ async function runTests() {
     let testUser: any;
     try {
       const email = `test_${Date.now()}@example.com`;
-      const passwordHash = hashPassword('password123');
+      const passwordHash = await hashPassword('password123');
       testUser = await createUser('Test User', email, passwordHash);
       
       const hasRequiredFields = 
@@ -72,10 +72,10 @@ async function runTests() {
     // Test 3: Password Hashing and Verification
     try {
       const password = 'testPassword123';
-      const hash = hashPassword(password);
-      const isValid = verifyPassword(password, hash);
-      const isInvalid = !verifyPassword('wrongPassword', hash);
-      
+      const hash = await hashPassword(password);
+      const isValid = await verifyPassword(password, hash);
+      const isInvalid = !(await verifyPassword('wrongPassword', hash));
+
       logTest('Password Hashing and Verification', isValid && isInvalid);
     } catch (error) {
       logTest('Password Hashing and Verification', false, error instanceof Error ? error.message : 'Unknown error');
@@ -107,7 +107,7 @@ async function runTests() {
 
     // Test 6: Duplicate Email Detection
     try {
-      const passwordHash = hashPassword('password456');
+      const passwordHash = await hashPassword('password456');
       await createUser('Another User', testUser.email, passwordHash);
       logTest('Duplicate Email Detection', false, 'Should have thrown error');
     } catch (error) {

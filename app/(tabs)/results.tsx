@@ -326,7 +326,7 @@ export default function ResultsScreen() {
                 style={styles.gridItemGradient}
               >
                 <View style={styles.gridItemInner}>
-                  <ShimmerLoader width="100%" height="100%" borderRadius={16} />
+                  <ShimmerLoader height={200} borderRadius={16} />
                 </View>
               </LinearGradient>
             </View>

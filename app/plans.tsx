@@ -129,9 +129,7 @@ export default function PlansScreen() {
               style={styles.planWrapper}
             >
               <PremiumLiquidGlass
-                style={[
-                  styles.planCard,
-                ]}
+                style={styles.planCard}
                 variant={selectedPlan === plan.id ? 'luxury' : 'elevated'}
                 colorTint={selectedPlan === plan.id ? 'blue' : 'none'}
                 borderRadius={28}

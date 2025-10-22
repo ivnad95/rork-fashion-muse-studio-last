@@ -35,7 +35,7 @@ export const creditService = {
       await dbUpdateUserCredits(userId, amount);
 
       // Create transaction record
-      await createTransaction(userId, amount, 'credit', reason);
+      await createTransaction(userId, amount, 'purchase', reason);
 
       // Get new balance
       const user = await getUserById(userId);
@@ -69,7 +69,7 @@ export const creditService = {
       await dbUpdateUserCredits(userId, -amount);
 
       // Create transaction record
-      await createTransaction(userId, amount, 'debit', reason);
+      await createTransaction(userId, amount, 'deduction', reason);
 
       // Get new balance
       const updatedUser = await getUserById(userId);
