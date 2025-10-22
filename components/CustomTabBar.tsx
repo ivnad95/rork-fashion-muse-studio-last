@@ -212,42 +212,63 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
-        {/* Floating Island glass panel */}
-        <View style={styles.tabBarContainer}>
-          {/* Blur layer */}
-          {Platform.OS === 'web' ? (
-            <View style={styles.tabBarBlurWeb} />
-          ) : (
-            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
-          )}
+        {/* Multi-layer glass container with depth */}
+        <View style={styles.tabBarOuter}>
+          {/* Outer glow layer for floating effect */}
+          <View style={styles.outerGlow} />
 
-          {/* Tab buttons */}
-          <View style={styles.tabBarInner}>
-            {state.routes.map((route, index) => {
-              const { options } = descriptors[route.key];
-              const isFocused = state.index === index;
+          {/* Main glass panel with multi-stage borders */}
+          <View style={styles.tabBarContainer}>
+            {/* Blur layer */}
+            {Platform.OS === 'web' ? (
+              <View style={styles.tabBarBlurWeb} />
+            ) : (
+              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
 
-              const onPress = () => {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-                if (!isFocused && !event.defaultPrevented) {
-                  navigation.navigate(route.name);
-                }
-              };
+            {/* Gradient overlay for depth */}
+            <LinearGradient
+              colors={[
+                'rgba(255, 255, 255, 0.08)',
+                'rgba(255, 255, 255, 0.04)',
+                'rgba(255, 255, 255, 0.02)',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
 
-              return (
-                <TabButton
-                  key={route.key}
-                  route={route}
-                  isFocused={isFocused}
-                  onPress={onPress}
-                  accessibilityLabel={options.tabBarAccessibilityLabel}
-                />
-              );
-            })}
+            {/* Top glossy highlight for 3D glass effect */}
+            <View style={styles.topHighlight} />
+
+            {/* Tab buttons */}
+            <View style={styles.tabBarInner}>
+              {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const isFocused = state.index === index;
+
+                const onPress = () => {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (!isFocused && !event.defaultPrevented) {
+                    navigation.navigate(route.name);
+                  }
+                };
+
+                return (
+                  <TabButton
+                    key={route.key}
+                    route={route}
+                    isFocused={isFocused}
+                    onPress={onPress}
+                    accessibilityLabel={options.tabBarAccessibilityLabel}
+                  />
+                );
+              })}
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -262,22 +283,53 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
   },
+  tabBarOuter: {
+    position: 'relative',
+    height: 72,
+    borderRadius: 36,
+  },
+  outerGlow: {
+    position: 'absolute',
+    inset: -4,
+    borderRadius: 40,
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',
+    shadowColor: 'rgba(10, 118, 175, 0.6)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 24,
+    elevation: 8,
+  },
   tabBarContainer: {
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: glass background
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: glass border
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.25)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
-    shadowRadius: 35,
-    elevation: 18,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.7,
+    shadowRadius: 40,
+    elevation: 20,
+    position: 'relative',
   },
   tabBarBlurWeb: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(15, 20, 35, 0.65)',
+  },
+  topHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '40%',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    opacity: 0.6,
   },
   tabBarInner: {
     flex: 1,
@@ -285,6 +337,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 24,
+    zIndex: 10,
   },
   navButton: {
     width: 52,
@@ -295,13 +348,18 @@ const styles = StyleSheet.create({
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -8,
-    borderRadius: 34,
-    backgroundColor: 'rgba(10, 118, 175, 0.2)',  // lightColor3 glow
+    inset: -10,
+    borderRadius: 36,
+    backgroundColor: 'rgba(10, 118, 175, 0.25)',
+    shadowColor: 'rgba(10, 118, 175, 0.7)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.9,
+    shadowRadius: 16,
+    elevation: 8,
   },
   glowInner: {
     flex: 1,
-    borderRadius: 34,
+    borderRadius: 36,
   },
   buttonContainer: {
     width: 52,
@@ -309,6 +367,16 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    shadowColor: 'rgba(0, 0, 0, 0.4)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

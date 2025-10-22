@@ -100,7 +100,7 @@ export default function GlowingButton({
       ]}
       testID={testID ?? 'glowing-button'}
     >
-      {/* Active glow for primary variant */}
+      {/* Outer glow ring for primary variant */}
       {variant === 'primary' && !disabled && (
         <Animated.View
           style={[
@@ -112,9 +112,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(10, 118, 175, 0.3)',   // lightColor3 accent glow
-              'rgba(10, 118, 175, 0.5)',
-              'rgba(10, 118, 175, 0.3)',
+              'rgba(10, 118, 175, 0.4)',
+              'rgba(10, 118, 175, 0.6)',
+              'rgba(10, 118, 175, 0.4)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -131,45 +131,63 @@ export default function GlowingButton({
         activeOpacity={0.9}
         style={styles.touchable}
       >
-        {/* Glass container */}
-        <View style={styles.innerContainer}>
-          {/* Blur layer */}
-          {Platform.OS === 'web' ? (
-            <View style={styles.blurLayerWeb} />
-          ) : (
-            <BlurView intensity={20} tint="dark" style={styles.blurLayer} />
-          )}
+        {/* Multi-layer glass container */}
+        <View style={styles.outerBorder}>
+          {/* Inner glass surface */}
+          <View style={styles.innerContainer}>
+            {/* Blur layer */}
+            {Platform.OS === 'web' ? (
+              <View style={styles.blurLayerWeb} />
+            ) : (
+              <BlurView intensity={25} tint="dark" style={styles.blurLayer} />
+            )}
 
-          {/* Accent gradient for primary variant */}
-          {variant === 'primary' && (
+            {/* Base gradient overlay */}
             <LinearGradient
               colors={[
-                'rgba(10, 118, 175, 0.15)',  // lightColor3 tint
-                'rgba(10, 118, 175, 0.08)',
-                'transparent',
+                'rgba(255, 255, 255, 0.12)',
+                'rgba(255, 255, 255, 0.06)',
+                'rgba(255, 255, 255, 0.03)',
               ]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.accentGradient}
+              style={styles.baseGradient}
             />
-          )}
 
-          {/* Content */}
-          <View style={styles.content}>
-            {icon && icon}
-            {text && (
-              <Text
-                style={[
-                  styles.text,
-                  variant === 'small' && styles.textSmall,
-                  variant === 'primary' && styles.textPrimary,
-                  textStyle,
+            {/* Accent gradient for primary variant */}
+            {variant === 'primary' && (
+              <LinearGradient
+                colors={[
+                  'rgba(10, 118, 175, 0.25)',
+                  'rgba(10, 118, 175, 0.15)',
+                  'rgba(10, 118, 175, 0.08)',
                 ]}
-              >
-                {text}
-              </Text>
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.accentGradient}
+              />
             )}
-            {children}
+
+            {/* Top glossy highlight */}
+            <View style={styles.topHighlight} />
+
+            {/* Content */}
+            <View style={styles.content}>
+              {icon && icon}
+              {text && (
+                <Text
+                  style={[
+                    styles.text,
+                    variant === 'small' && styles.textSmall,
+                    variant === 'primary' && styles.textPrimary,
+                    textStyle,
+                  ]}
+                >
+                  {text}
+                </Text>
+              )}
+              {children}
+            </View>
           </View>
         </View>
       </TouchableOpacity>
@@ -189,21 +207,21 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   containerPrimary: {
-    shadowColor: 'rgba(10, 118, 175, 0.5)',  // lightColor3 shadow
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.7,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowColor: 'rgba(10, 118, 175, 0.6)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.8,
+    shadowRadius: 32,
+    elevation: 16,
   },
   glowRing: {
     position: 'absolute',
-    inset: -8,
-    borderRadius: 38,
+    inset: -10,
+    borderRadius: 40,
     overflow: 'hidden',
   },
   glowGradient: {
     flex: 1,
-    borderRadius: 38,
+    borderRadius: 40,
   },
   touchable: {
     flex: 1,
@@ -211,26 +229,61 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     overflow: 'hidden',
   },
-  innerContainer: {
+  outerBorder: {
     flex: 1,
     borderRadius: 30,
+    padding: 2.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.28)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.22)',
+    borderRightColor: 'rgba(255, 255, 255, 0.12)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  innerContainer: {
+    flex: 1,
+    borderRadius: 27.5,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: glass background
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',       // Spec: glass border
+    backgroundColor: 'rgba(20, 25, 35, 0.6)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
+    borderRightColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    position: 'relative',
   },
   blurLayer: {
     position: 'absolute',
     inset: 0,
+    zIndex: 1,
   },
   blurLayerWeb: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(20, 25, 35, 0.7)',
+    zIndex: 1,
+  },
+  baseGradient: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 2,
   },
   accentGradient: {
     position: 'absolute',
     inset: 0,
+    zIndex: 3,
+  },
+  topHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '35%',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderTopLeftRadius: 27.5,
+    borderTopRightRadius: 27.5,
+    opacity: 0.5,
+    zIndex: 4,
   },
   content: {
     flex: 1,
@@ -243,11 +296,14 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   text: {
-    color: '#F5F7FA',                              // Spec: silverLight
-    fontSize: 16,                                   // Spec: 14-18px
-    fontWeight: '600' as const,                     // Spec: semi-bold
+    color: '#F5F7FA',
+    fontSize: 16,
+    fontWeight: '600' as const,
     lineHeight: 20,
     letterSpacing: -0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   textSmall: {
     fontSize: 14,
@@ -255,8 +311,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   textPrimary: {
-    color: '#F5F7FA',
+    color: '#FFFFFF',
     fontWeight: '700' as const,
     fontSize: 18,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
 });
