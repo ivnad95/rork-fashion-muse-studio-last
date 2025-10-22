@@ -22,7 +22,7 @@ export const signUpProcedure = publicProcedure
     }
 
     // Create user
-    const passwordHash = hashPassword(password);
+    const passwordHash = await hashPassword(password);
     const user = await createUser(name, email, passwordHash);
 
     return {

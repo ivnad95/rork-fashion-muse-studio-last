@@ -22,7 +22,8 @@ export const signInProcedure = publicProcedure
     }
 
     // Verify password
-    if (!verifyPassword(password, user.password_hash)) {
+    const isValid = await verifyPassword(password, user.password_hash);
+    if (!isValid) {
       throw new Error('Invalid email or password');
     }
 

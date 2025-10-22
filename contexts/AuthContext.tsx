@@ -94,7 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Verify password
-      if (!verifyPassword(password, dbUser.password_hash)) {
+      const isValid = await verifyPassword(password, dbUser.password_hash);
+      if (!isValid) {
         throw new Error('Invalid email or password');
       }
       
@@ -126,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Create user in database
-      const passwordHash = hashPassword(password);
+      const passwordHash = await hashPassword(password);
       const dbUser = await dbCreateUser(name, email, passwordHash);
       
       const user: User = {
