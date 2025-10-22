@@ -56,8 +56,8 @@ function ToggleSwitch({
       <LinearGradient
         colors={
           enabled
-            ? ['#3d6bb8', '#5a8fd6', '#7aa3d9', '#5a8fd6']
-            : ['rgba(200, 220, 245, 0.05)', 'rgba(200, 220, 245, 0.02)']
+            ? ['#4a7ed6', '#6ba0ff', '#8ec5ff', '#6ba0ff']
+            : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
         }
         style={styles.toggleBackground}
       />
@@ -80,9 +80,9 @@ function ToggleSwitch({
           <View style={styles.thumbGlow}>
             <LinearGradient
               colors={[
-                'rgba(90, 143, 214, 0.3)',
-                'rgba(61, 107, 184, 0.5)',
-                'rgba(90, 143, 214, 0.3)',
+                'rgba(107, 160, 255, 0.4)',
+                'rgba(74, 126, 214, 0.6)',
+                'rgba(107, 160, 255, 0.4)',
               ]}
               style={styles.thumbGlowGradient}
             />
@@ -277,7 +277,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#030711', '#060d1f', '#0d1736', '#121f4a']}
+        colors={['#050b16', '#0a1428', '#11213f', '#1a2f58']}
         locations={[0, 0.35, 0.7, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -371,7 +371,7 @@ export default function SettingsScreen() {
         ) : (
           <PremiumLiquidGlass style={styles.creditsCard} variant="primary" borderRadius={20}>
             <LinearGradient
-              colors={['rgba(90, 143, 214, 0.12)', 'rgba(61, 107, 184, 0.08)']}
+              colors={['rgba(107, 160, 255, 0.18)', 'rgba(74, 126, 214, 0.12)']}
               style={styles.creditsContent}
             >
               <View style={styles.creditsInfo}>
@@ -399,7 +399,7 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <LinearGradient
-              colors={['#2a4d8c', '#3d6bb8', '#5a8fd6', '#3d6bb8']}
+              colors={['#335ba8', '#4a7ed6', '#6ba0ff', '#4a7ed6']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.avatarBorder}
@@ -570,12 +570,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.dark.textSecondary,
     fontWeight: '500' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   creditsValue: {
     fontSize: 32,
     fontWeight: '700' as const,
     color: Colors.dark.text,
     letterSpacing: -1,
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   buyButton: {
     flexDirection: 'row',
@@ -584,7 +590,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: 'rgba(90, 143, 214, 0.12)',
+    backgroundColor: 'rgba(107, 160, 255, 0.18)',
   },
   buyButtonText: {
     fontSize: 15,
@@ -685,15 +691,15 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderWidth: 1.5,
     borderColor: Colors.dark.glassBorder,
-    backgroundColor: 'rgba(200, 220, 245, 0.03)',
+    backgroundColor: 'rgba(220, 235, 255, 0.05)',
   },
   toggleActive: {
     borderColor: Colors.dark.primaryLight,
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.75,
+    shadowRadius: 24,
+    elevation: 12,
   },
   toggleBackground: {
     position: 'absolute',
@@ -720,12 +726,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.silverLight,
     borderRadius: 17,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   accountRow: {
     flexDirection: 'row',
@@ -742,11 +748,11 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(90, 143, 214, 0.18)',
+    backgroundColor: 'rgba(107, 160, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(90, 143, 214, 0.3)',
+    borderColor: 'rgba(107, 160, 255, 0.4)',
   },
   logoutText: {
     fontSize: 16,

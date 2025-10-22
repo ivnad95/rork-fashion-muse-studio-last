@@ -46,14 +46,14 @@ export default function PremiumLiquidGlass({
           <View style={[styles.blurLayer, { borderRadius: borderRadius - 2 }]} pointerEvents="none" />
         ) : (
           <BlurView
-            intensity={15}
+            intensity={28}
             style={[styles.blurLayer, { borderRadius: borderRadius - 2 }]}
             pointerEvents="none"
           />
         )}
 
         <LinearGradient
-          colors={['rgba(200, 220, 245, 0.06)', 'rgba(200, 220, 245, 0.02)']}
+          colors={['rgba(220, 235, 255, 0.12)', 'rgba(220, 235, 255, 0.04)', 'rgba(220, 235, 255, 0.08)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={[styles.backgroundGradient, { borderRadius: borderRadius - 2 }]}
@@ -61,10 +61,18 @@ export default function PremiumLiquidGlass({
         />
 
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.15)', 'transparent']}
+          colors={['rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.1)', 'transparent']}
           start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.35 }}
+          end={{ x: 0.5, y: 0.45 }}
           style={[styles.topShine, { borderRadius: borderRadius - 2 }]}
+          pointerEvents="none"
+        />
+
+        <LinearGradient
+          colors={['transparent', 'rgba(255, 255, 255, 0.05)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.sideRefraction, { borderRadius: borderRadius - 2 }]}
           pointerEvents="none"
         />
 
@@ -72,7 +80,7 @@ export default function PremiumLiquidGlass({
 
         {variant === 'primary' && (
           <LinearGradient
-            colors={['rgba(90, 143, 214, 0.15)', 'rgba(61, 107, 184, 0.1)', 'transparent']}
+            colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)', 'transparent']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.glowEffect, { borderRadius: borderRadius - 2 }]}
@@ -95,17 +103,17 @@ const styles = StyleSheet.create({
   },
   elevated: {
     shadowColor: Colors.dark.glassShadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.6,
+    shadowRadius: 28,
+    elevation: 12,
   },
   primary: {
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 32,
+    elevation: 15,
   },
   borderGradient: {
     position: 'absolute',
@@ -135,8 +143,14 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
-    opacity: 0.7,
+    height: '45%',
+    opacity: 0.85,
+    zIndex: 3,
+  },
+  sideRefraction: {
+    position: 'absolute',
+    inset: 0,
+    opacity: 0.6,
     zIndex: 3,
   },
   edgeHighlight: {
@@ -144,8 +158,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    height: 1.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     zIndex: 4,
   },
   glowEffect: {

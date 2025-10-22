@@ -103,9 +103,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(90, 143, 214, 0.4)',
-              'rgba(61, 107, 184, 0.6)',
-              'rgba(90, 143, 214, 0.4)',
+              'rgba(107, 160, 255, 0.5)',
+              'rgba(74, 126, 214, 0.7)',
+              'rgba(107, 160, 255, 0.5)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -133,8 +133,8 @@ export default function GlowingButton({
           <LinearGradient
             colors={
               variant === 'primary'
-                ? ['rgba(61, 107, 184, 0.2)', 'rgba(42, 77, 140, 0.12)']
-                : ['rgba(200, 220, 245, 0.06)', 'rgba(200, 220, 245, 0.02)']
+                ? ['rgba(74, 126, 214, 0.28)', 'rgba(51, 91, 168, 0.18)']
+                : ['rgba(220, 235, 255, 0.12)', 'rgba(220, 235, 255, 0.04)']
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
@@ -145,14 +145,21 @@ export default function GlowingButton({
             <View style={[styles.blurLayer, { backgroundColor: Colors.dark.glass }]} />
           ) : (
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            React.createElement(require('expo-blur').BlurView, { intensity: 15, style: styles.blurLayer })
+            React.createElement(require('expo-blur').BlurView, { intensity: 25, style: styles.blurLayer })
           )}
 
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.22)', 'transparent']}
+            colors={['rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0.08)', 'transparent']}
             start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 0.4 }}
+            end={{ x: 0.5, y: 0.5 }}
             style={styles.shineLayer}
+          />
+
+          <LinearGradient
+            colors={['transparent', 'rgba(255, 255, 255, 0.08)', 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.sideGlow}
           />
 
           <View style={styles.content}>
@@ -190,20 +197,20 @@ const styles = StyleSheet.create({
   },
   containerPrimary: {
     shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.7,
-    shadowRadius: 24,
-    elevation: 15,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.85,
+    shadowRadius: 32,
+    elevation: 18,
   },
   glowRing: {
     position: 'absolute',
-    inset: -6,
-    borderRadius: 36,
+    inset: -8,
+    borderRadius: 38,
     overflow: 'hidden',
   },
   glowGradient: {
     flex: 1,
-    borderRadius: 36,
+    borderRadius: 38,
   },
   touchable: {
     flex: 1,
@@ -238,8 +245,14 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
+    height: '50%',
     borderRadius: 28,
+  },
+  sideGlow: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 28,
+    opacity: 0.7,
   },
   content: {
     flex: 1,
