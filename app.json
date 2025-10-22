@@ -20,18 +20,8 @@
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos."
-      },
-      "entitlements": {
-        "com": {
-          "apple": {
-            "security": {
-              "application-groups": [
-                "group.com.myapp"
-              ]
-            }
-          }
-        }
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -41,16 +31,17 @@
       },
       "package": "app.rork.liquid_glass_fashion_app_q7e9uo5m_ne13q4mt_86oegyng_z34avf6w_j4dba864",
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.VIBRATE",
-        "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO",
-        "READ_MEDIA_AUDIO",
-        "READ_MEDIA_VISUAL_USER_SELECTED",
-        "ACCESS_MEDIA_LOCATION",
-        "INTERNET"
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -96,6 +87,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://rork.com/"
+      },
+      "eas": {
+        "projectId": "08499949-ca52-4748-9b7c-27f3b1954cbd"
+      }
     }
   }
 }
