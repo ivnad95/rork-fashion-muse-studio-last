@@ -17,6 +17,24 @@ import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+function EmptyPlaceholder() {
+  return (
+    <View style={styles.emptyPlaceholder}>
+      <Image
+        source={require('@/assets/images/icon.png')}
+        style={styles.emptyPlaceholderLogo}
+        resizeMode="contain"
+      />
+      <LinearGradient
+        colors={['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
+  );
+}
+
 function LoadingPlaceholder() {
   const pulseAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -121,19 +139,14 @@ export default function ResultsScreen() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Create placeholders for the number of images being generated
-  const placeholderCount = isGenerating ? generationCount : 0;
-  const placeholders = Array(placeholderCount).fill(null);
+  // Show loading placeholders when generating
+  const loadingPlaceholders = isGenerating ? Array(generationCount).fill(null) : [];
 
-  // Only show mock results if not generating and no generated images
-  const mockResults = [
-    'https://via.placeholder.com/300x400/002857/FFFFFF?text=Result+1',
-    'https://via.placeholder.com/300x400/004b93/FFFFFF?text=Result+2',
-    'https://via.placeholder.com/300x400/002857/FFFFFF?text=Result+3',
-    'https://via.placeholder.com/300x400/004b93/FFFFFF?text=Result+4',
-  ];
+  // Show empty placeholders equal to generationCount when no generated images and not generating
+  const emptyPlaceholders = !isGenerating && generatedImages.length === 0 ? Array(generationCount).fill(null) : [];
 
-  const displayImages = generatedImages.length > 0 ? generatedImages : (!isGenerating ? mockResults : []);
+  // Display actual generated images
+  const displayImages = generatedImages;
 
   useEffect(() => {
     if (selectedImage) {
@@ -290,7 +303,7 @@ export default function ResultsScreen() {
 
         <View style={styles.grid}>
           {/* Show loading placeholders when generating */}
-          {isGenerating && placeholders.map((_, i) => (
+          {loadingPlaceholders.map((_, i) => (
             <View key={`loading-${i}`} style={styles.gridItem}>
               <LinearGradient
                 colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
@@ -305,7 +318,23 @@ export default function ResultsScreen() {
             </View>
           ))}
 
-          {/* Show generated or display images */}
+          {/* Show empty placeholders with logo when no images and not generating */}
+          {emptyPlaceholders.map((_, i) => (
+            <View key={`empty-${i}`} style={styles.gridItem}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gridItemGradient}
+              >
+                <View style={styles.gridItemInner}>
+                  <EmptyPlaceholder />
+                </View>
+              </LinearGradient>
+            </View>
+          ))}
+
+          {/* Show generated images */}
           {displayImages.map((img, i) => (
             <View key={`image-${i}`} style={styles.gridItem}>
               <LinearGradient
@@ -467,8 +496,10 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 18, marginBottom: 16 },
   gridItem: {
-    width: (SCREEN_WIDTH - 60) / 2,
+    width: SCREEN_WIDTH < 768 ? (SCREEN_WIDTH - 58) / 2 : (SCREEN_WIDTH - 200) / 3,
     aspectRatio: 3 / 4,
+    minWidth: 150,
+    maxWidth: 280,
   },
   gridItemGradient: {
     flex: 1,
@@ -677,5 +708,20 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(255, 255, 255, 0.35)',
     borderRightColor: 'rgba(255, 255, 255, 0.2)',
     borderBottomColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  emptyPlaceholder: {
+    flex: 1,
+    borderRadius: 26,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    backgroundColor: 'rgba(10, 19, 59, 0.4)',
+  },
+  emptyPlaceholderLogo: {
+    width: '50%',
+    height: '50%',
+    opacity: 0.3,
+    zIndex: 10,
   },
 });
