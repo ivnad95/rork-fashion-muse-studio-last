@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,7 +106,7 @@ function SettingsRow({ label, children }: { label: string; children: React.React
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { clearResults, setSelectedImage } = useGeneration();
+  const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -497,6 +497,116 @@ export default function SettingsScreen() {
 
         <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
           <View style={styles.panelContent}>
+            <Text style={styles.sectionTitle}>Image Generation</Text>
+
+            <View style={styles.settingSection}>
+              <View style={styles.settingHeaderRow}>
+                <ImageIcon size={20} color={Colors.dark.textSecondary} />
+                <Text style={styles.settingLabel}>Image Format</Text>
+              </View>
+              <View style={styles.formatSelector}>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setAspectRatio('portrait');
+                  }}
+                  style={[
+                    styles.formatOption,
+                    aspectRatio === 'portrait' && styles.formatOptionActive,
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={
+                      aspectRatio === 'portrait'
+                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                    }
+                    style={styles.formatOptionGradient}
+                  />
+                  <View style={[styles.formatIcon, styles.formatIconPortrait]} />
+                  <Text
+                    style={[
+                      styles.formatText,
+                      aspectRatio === 'portrait' && styles.formatTextActive,
+                    ]}
+                  >
+                    Portrait
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setAspectRatio('square');
+                  }}
+                  style={[
+                    styles.formatOption,
+                    aspectRatio === 'square' && styles.formatOptionActive,
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={
+                      aspectRatio === 'square'
+                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                    }
+                    style={styles.formatOptionGradient}
+                  />
+                  <View style={[styles.formatIcon, styles.formatIconSquare]} />
+                  <Text
+                    style={[
+                      styles.formatText,
+                      aspectRatio === 'square' && styles.formatTextActive,
+                    ]}
+                  >
+                    Square
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setAspectRatio('landscape');
+                  }}
+                  style={[
+                    styles.formatOption,
+                    aspectRatio === 'landscape' && styles.formatOptionActive,
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={
+                      aspectRatio === 'landscape'
+                        ? ['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']
+                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                    }
+                    style={styles.formatOptionGradient}
+                  />
+                  <View style={[styles.formatIcon, styles.formatIconLandscape]} />
+                  <Text
+                    style={[
+                      styles.formatText,
+                      aspectRatio === 'landscape' && styles.formatTextActive,
+                    ]}
+                  >
+                    Landscape
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </PremiumLiquidGlass>
+
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
+          <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Account</Text>
 
             {user ? (
@@ -799,5 +909,65 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.dark.textMuted,
     opacity: 0.7,
+  },
+  settingSection: {
+    gap: 14,
+  },
+  settingHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
+  formatSelector: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  formatOption: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: Colors.dark.glassBorder,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  formatOptionActive: {
+    borderColor: Colors.dark.primaryLight,
+    shadowColor: Colors.dark.primaryGlow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  formatOptionGradient: {
+    position: 'absolute',
+    inset: 0,
+  },
+  formatIcon: {
+    backgroundColor: Colors.dark.textSecondary,
+    borderRadius: 3,
+  },
+  formatIconPortrait: {
+    width: 24,
+    height: 34,
+  },
+  formatIconSquare: {
+    width: 32,
+    height: 32,
+  },
+  formatIconLandscape: {
+    width: 42,
+    height: 28,
+  },
+  formatText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.dark.textSecondary,
+  },
+  formatTextActive: {
+    color: Colors.dark.primaryLight,
   },
 });

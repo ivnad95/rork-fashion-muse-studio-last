@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Animated } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Animated, Platform, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
+import * as Haptics from 'expo-haptics';
+import { Download, Trash2, Share2, X } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
@@ -69,15 +76,20 @@ function LoadingPlaceholder() {
         <View style={styles.spinnerRing} />
         <View style={[styles.spinnerRing, styles.spinnerRingInner]} />
       </Animated.View>
-      <Animated.Text style={[styles.loadingText, { opacity }]}>Generating...</Animated.Text>
+      <Animated.Text style={[styles.loadingText, { opacity }]}>
+        <Text>Generating...</Text>
+      </Animated.Text>
     </View>
   );
 }
 
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
-  const { generatedImages, isGenerating, generationCount } = useGeneration();
+  const { generatedImages, isGenerating, generationCount, deleteImage } = useGeneration();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Create placeholders for the number of images being generated
   const placeholderCount = isGenerating ? generationCount : 0;
@@ -92,6 +104,153 @@ export default function ResultsScreen() {
   ];
 
   const displayImages = generatedImages.length > 0 ? generatedImages : (!isGenerating ? mockResults : []);
+
+  useEffect(() => {
+    if (selectedImage) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 8,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0.8);
+      fadeAnim.setValue(0);
+    }
+  }, [selectedImage, fadeAnim, scaleAnim]);
+
+  const handleImagePress = (img: string, index: number) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedImage(img);
+    setSelectedImageIndex(index);
+  };
+
+  const handleCloseModal = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedImage(null);
+    setSelectedImageIndex(-1);
+  };
+
+  const handleDownload = async () => {
+    if (!selectedImage) return;
+
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+
+      if (Platform.OS === 'web') {
+        const link = document.createElement('a');
+        link.href = selectedImage;
+        link.download = `photoshoot-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+        alert('Image downloaded successfully!');
+      } else {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Required', 'Please grant permission to save images to your gallery.');
+          return;
+        }
+
+        const fileUri = FileSystem.documentDirectory + `photoshoot-${Date.now()}.png`;
+        await FileSystem.writeAsStringAsync(fileUri, selectedImage.split(',')[1], {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const asset = await MediaLibrary.createAssetAsync(fileUri);
+        await MediaLibrary.createAlbumAsync('Photoshoot', asset, false);
+        
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert('Success', 'Image saved to gallery!');
+      }
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      if (Platform.OS === 'web') {
+        alert('Failed to download image');
+      } else {
+        Alert.alert('Error', 'Failed to download image');
+      }
+    }
+  };
+
+  const handleShare = async () => {
+    if (!selectedImage) return;
+
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+
+      if (Platform.OS === 'web') {
+        if (navigator.share) {
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
+          const file = new File([blob], `photoshoot-${Date.now()}.png`, { type: 'image/png' });
+          await navigator.share({
+            files: [file],
+            title: 'Photoshoot Result',
+          });
+        } else {
+          alert('Sharing is not supported in this browser');
+        }
+      } else {
+        const fileUri = FileSystem.documentDirectory + `photoshoot-${Date.now()}.png`;
+        await FileSystem.writeAsStringAsync(fileUri, selectedImage.split(',')[1], {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        await Sharing.shareAsync(fileUri);
+      }
+    } catch (error) {
+      console.error('Error sharing image:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (selectedImageIndex < 0 || selectedImageIndex >= generatedImages.length) return;
+
+    const confirmDelete = () => {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      }
+      deleteImage(selectedImageIndex);
+      handleCloseModal();
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (confirm('Are you sure you want to delete this image?')) {
+        confirmDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete Image',
+        'Are you sure you want to delete this image?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: confirmDelete },
+        ]
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -110,22 +269,129 @@ export default function ResultsScreen() {
           {/* Show generated or display images */}
           {displayImages.map((img, i) => (
             <GlassPanel key={`image-${i}`} style={styles.gridItem} radius={20}>
-              <TouchableOpacity style={styles.imageWrapper} activeOpacity={0.8} onPress={() => setSelectedImage(img)} testID={`result-card-${i}`}>
+              <TouchableOpacity 
+                style={styles.imageWrapper} 
+                activeOpacity={0.8} 
+                onPress={() => handleImagePress(img, i)} 
+                testID={`result-card-${i}`}
+              >
                 <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
+                  style={styles.imageOverlay}
+                />
               </TouchableOpacity>
             </GlassPanel>
           ))}
         </View>
       </ScrollView>
 
-      <Modal visible={selectedImage !== null} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelectedImage(null)}>
-          <View style={styles.modalContent}>
+      <Modal 
+        visible={selectedImage !== null} 
+        transparent 
+        animationType="none" 
+        onRequestClose={handleCloseModal}
+      >
+        <Animated.View 
+          style={[
+            styles.modalOverlay,
+            { opacity: fadeAnim }
+          ]}
+        >
+          {Platform.OS === 'web' ? (
+            <View style={styles.modalBlur} />
+          ) : (
+            <BlurView intensity={90} style={StyleSheet.absoluteFill} tint="dark" />
+          )}
+          
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={handleCloseModal}
+          />
+          
+          <Animated.View 
+            style={[
+              styles.modalContent,
+              {
+                transform: [{ scale: scaleAnim }],
+                opacity: fadeAnim,
+              }
+            ]}
+          >
             {selectedImage && (
-              <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+              <>
+                <PremiumLiquidGlass style={styles.imageContainer} variant="elevated" borderRadius={24}>
+                  <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                </PremiumLiquidGlass>
+                
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity 
+                    onPress={handleDownload} 
+                    style={styles.actionButton}
+                    activeOpacity={0.8}
+                  >
+                    <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                      <LinearGradient
+                        colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']}
+                        style={styles.actionButtonGradient}
+                      >
+                        <Download size={24} color={Colors.dark.primaryLight} strokeWidth={2} />
+                      </LinearGradient>
+                    </PremiumLiquidGlass>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    onPress={handleShare} 
+                    style={styles.actionButton}
+                    activeOpacity={0.8}
+                  >
+                    <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                      <LinearGradient
+                        colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)']}
+                        style={styles.actionButtonGradient}
+                      >
+                        <Share2 size={24} color={Colors.dark.primaryLight} strokeWidth={2} />
+                      </LinearGradient>
+                    </PremiumLiquidGlass>
+                  </TouchableOpacity>
+
+                  {generatedImages.includes(selectedImage) && (
+                    <TouchableOpacity 
+                      onPress={handleDelete} 
+                      style={styles.actionButton}
+                      activeOpacity={0.8}
+                    >
+                      <PremiumLiquidGlass style={styles.actionButtonGlass} variant="elevated" borderRadius={28}>
+                        <LinearGradient
+                          colors={['rgba(239, 68, 68, 0.25)', 'rgba(220, 38, 38, 0.15)']}
+                          style={styles.actionButtonGradient}
+                        >
+                          <Trash2 size={24} color={Colors.dark.error} strokeWidth={2} />
+                        </LinearGradient>
+                      </PremiumLiquidGlass>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <TouchableOpacity 
+                  onPress={handleCloseModal} 
+                  style={styles.closeButton}
+                  activeOpacity={0.8}
+                >
+                  <PremiumLiquidGlass style={styles.closeButtonGlass} variant="elevated" borderRadius={22}>
+                    <LinearGradient
+                      colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
+                      style={styles.closeButtonGradient}
+                    >
+                      <X size={24} color={Colors.dark.text} strokeWidth={2} />
+                    </LinearGradient>
+                  </PremiumLiquidGlass>
+                </TouchableOpacity>
+              </>
             )}
-          </View>
-        </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
       </Modal>
     </View>
   );
@@ -136,8 +402,20 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 16 },
   gridItem: { width: (SCREEN_WIDTH - 56) / 2, aspectRatio: 3 / 4 },
-  imageWrapper: { flex: 1, borderRadius: 20, overflow: 'hidden' },
+  imageWrapper: { 
+    flex: 1, 
+    borderRadius: 20, 
+    overflow: 'hidden',
+    position: 'relative',
+  },
   resultImage: { width: '100%', height: '100%' },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '30%',
+  },
   loadingPlaceholder: {
     flex: 1,
     borderRadius: 20,
@@ -175,7 +453,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { width: '90%', height: '80%' },
-  modalImage: { width: '100%', height: '100%' },
+  modalOverlay: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalBlur: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+  },
+  modalContent: { 
+    width: '100%', 
+    maxWidth: 500,
+    alignItems: 'center',
+    gap: 20,
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    overflow: 'hidden',
+    shadowColor: Colors.dark.primaryGlow,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.4,
+    shadowRadius: 32,
+    elevation: 20,
+  },
+  modalImage: { 
+    width: '100%', 
+    height: '100%',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 16,
+    justifyContent: 'center',
+  },
+  actionButton: {
+    width: 56,
+    height: 56,
+  },
+  actionButtonGlass: {
+    width: '100%',
+    height: '100%',
+    shadowColor: Colors.dark.primaryGlow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  actionButtonGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    width: 44,
+    height: 44,
+    marginTop: 12,
+  },
+  closeButtonGlass: {
+    width: '100%',
+    height: '100%',
+  },
+  closeButtonGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

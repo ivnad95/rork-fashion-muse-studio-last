@@ -33,6 +33,7 @@ interface GenerationContextType extends GenerationState {
   setAspectRatio: (ratio: AspectRatio) => void;
   generateImages: (userId: string) => Promise<void>;
   clearResults: () => void;
+  deleteImage: (index: number) => void;
   saveToHistory: (userId: string) => Promise<void>;
   loadHistory: (userId: string) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
@@ -75,6 +76,13 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
 
   const clearResults = useCallback(() => {
     setState((prev) => ({ ...prev, generatedImages: [], error: null }));
+  }, []);
+
+  const deleteImage = useCallback((index: number) => {
+    setState((prev) => ({
+      ...prev,
+      generatedImages: prev.generatedImages.filter((_, i) => i !== index),
+    }));
   }, []);
 
   const loadHistory = useCallback(async (userId: string) => {
@@ -308,11 +316,12 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       setAspectRatio,
       generateImages,
       clearResults,
+      deleteImage,
       saveToHistory,
       loadHistory,
       deleteHistoryItem,
     }),
-    [state, setSelectedImage, setGenerationCount, setAspectRatio, generateImages, clearResults, saveToHistory, loadHistory, deleteHistoryItem]
+    [state, setSelectedImage, setGenerationCount, setAspectRatio, generateImages, clearResults, deleteImage, saveToHistory, loadHistory, deleteHistoryItem]
   );
 
   return (
