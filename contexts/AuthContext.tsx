@@ -38,7 +38,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@fashion_ai_user_session';
 const GUEST_CREDITS_KEY = '@fashion_ai_guest_credits';
-const INITIAL_GUEST_CREDITS = 5;
+const INITIAL_GUEST_CREDITS = 50;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({

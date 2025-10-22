@@ -22,7 +22,7 @@ const GUEST_CREDITS_KEY = '@fashion_ai_guest_credits';
 export async function addGuestCredits(amount: number): Promise<number> {
   try {
     const currentCreditsStr = await AsyncStorage.getItem(GUEST_CREDITS_KEY);
-    const currentCredits = currentCreditsStr ? parseInt(currentCreditsStr, 10) : 5;
+    const currentCredits = currentCreditsStr ? parseInt(currentCreditsStr, 10) : 50;
     const newCredits = Math.max(0, currentCredits + amount);
 
     await AsyncStorage.setItem(GUEST_CREDITS_KEY, String(newCredits));
@@ -55,7 +55,7 @@ export async function setGuestCredits(amount: number): Promise<void> {
 export async function getGuestCredits(): Promise<number> {
   try {
     const creditsStr = await AsyncStorage.getItem(GUEST_CREDITS_KEY);
-    const credits = creditsStr ? parseInt(creditsStr, 10) : 5;
+    const credits = creditsStr ? parseInt(creditsStr, 10) : 50;
     console.log(`💰 Current credits: ${credits}`);
     return credits;
   } catch (error) {
@@ -68,7 +68,7 @@ export async function getGuestCredits(): Promise<number> {
 if (typeof window !== 'undefined') {
   (window as any).testUtils = {
     addCredits: (amount: number) => {
-      const current = parseInt(localStorage.getItem('@fashion_ai_guest_credits') || '5', 10);
+      const current = parseInt(localStorage.getItem('@fashion_ai_guest_credits') || '50', 10);
       const newAmount = Math.max(0, current + amount);
       localStorage.setItem('@fashion_ai_guest_credits', String(newAmount));
       console.log(`✅ Credits: ${current} → ${newAmount}. Refresh the page to see changes.`);
@@ -79,7 +79,7 @@ if (typeof window !== 'undefined') {
       console.log(`✅ Credits set to ${amount}. Refresh the page to see changes.`);
     },
     getCredits: () => {
-      const credits = parseInt(localStorage.getItem('@fashion_ai_guest_credits') || '5', 10);
+      const credits = parseInt(localStorage.getItem('@fashion_ai_guest_credits') || '50', 10);
       console.log(`💰 Current credits: ${credits}`);
       return credits;
     }
