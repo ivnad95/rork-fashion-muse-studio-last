@@ -32,7 +32,7 @@ export default function PremiumLiquidGlass({
       pointerEvents="box-none"
     >
       <LinearGradient
-        colors={['#e8f1f8', '#c8d9ed', '#a0b8d6', '#c8d9ed', '#e8f1f8']}
+        colors={['#f5f8fb', '#dce4ed', '#c0cfe0', '#dce4ed', '#f5f8fb']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.borderGradient, { borderRadius }]}
@@ -53,7 +53,7 @@ export default function PremiumLiquidGlass({
         )}
 
         <LinearGradient
-          colors={['rgba(220, 235, 255, 0.12)', 'rgba(220, 235, 255, 0.04)', 'rgba(220, 235, 255, 0.08)']}
+          colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.06)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={[styles.backgroundGradient, { borderRadius: borderRadius - 2 }]}
@@ -80,7 +80,7 @@ export default function PremiumLiquidGlass({
 
         {variant === 'primary' && (
           <LinearGradient
-            colors={['rgba(107, 160, 255, 0.25)', 'rgba(74, 126, 214, 0.15)', 'transparent']}
+            colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)', 'transparent']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.glowEffect, { borderRadius: borderRadius - 2 }]}

@@ -10,10 +10,10 @@ export default {
       '#121a22',
     ],
 
-    glass: 'rgba(240, 245, 255, 0.06)',
-    glassBorder: 'rgba(230, 238, 255, 0.22)',
+    glass: 'rgba(255, 255, 255, 0.06)',
+    glassBorder: 'rgba(255, 255, 255, 0.22)',
     glassHighlight: 'rgba(255, 255, 255, 0.32)',
-    glassWrapper: 'rgba(240, 245, 255, 0.1)',
+    glassWrapper: 'rgba(255, 255, 255, 0.1)',
     glassShadow: 'rgba(0, 0, 0, 0.45)',
 
     primary: '#a6e3a1',
@@ -36,15 +36,15 @@ export default {
     overlay: 'rgba(7, 10, 15, 0.96)',
     divider: 'rgba(230, 238, 255, 0.16)',
 
-    silver: '#e6eefc',
-    silverLight: '#f7fbff',
-    silverDark: '#c9d7ef',
-    silverMid: '#d6e2f7',
-    silverGlow: 'rgba(230, 238, 252, 0.75)',
+    silver: '#eeeeee',
+    silverLight: '#f8f8f8',
+    silverDark: '#d0d0d0',
+    silverMid: '#e0e0e0',
+    silverGlow: 'rgba(238, 238, 238, 0.75)',
 
-    liquidGradient: ['#f7fbff', '#e6eefc', '#d6e2f7', '#e6eefc'],
-    liquidGradientAlt: ['#f7fbff', '#e6eefc', '#d6e2f7'],
-    edgeGradient: ['#f7fbff', '#e6eefc', '#c9d7ef', '#e6eefc', '#f7fbff'],
+    liquidGradient: ['#f8f8f8', '#eeeeee', '#e0e0e0', '#eeeeee'],
+    liquidGradientAlt: ['#f8f8f8', '#eeeeee', '#e0e0e0'],
+    edgeGradient: ['#f8f8f8', '#eeeeee', '#d0d0d0', '#eeeeee', '#f8f8f8'],
     glowGradient: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0)'],
   },
 };

@@ -287,14 +287,16 @@ export default function HistoryScreen() {
                   style={styles.closeButton}
                   activeOpacity={0.8}
                 >
-                  <PremiumLiquidGlass style={styles.closeButtonGlass} variant="elevated" borderRadius={22}>
+                  <View style={styles.closeButtonContainer}>
                     <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
+                      colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)']}
                       style={styles.closeButtonGradient}
                     >
-                      <X size={24} color={Colors.dark.text} strokeWidth={2} />
+                      <View style={styles.closeButtonGlass}>
+                        <X size={24} color="#ffffff" strokeWidth={2.5} />
+                      </View>
                     </LinearGradient>
-                  </PremiumLiquidGlass>
+                  </View>
                 </TouchableOpacity>
               </>
             )}
@@ -441,17 +443,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   closeButton: {
-    width: 44,
-    height: 44,
-    marginTop: 12,
+    width: 52,
+    height: 52,
+    marginTop: 16,
   },
-  closeButtonGlass: {
+  closeButtonContainer: {
     width: '100%',
     height: '100%',
+    borderRadius: 26,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 22,
+    elevation: 12,
   },
   closeButtonGradient: {
     flex: 1,
+    padding: 2,
+  },
+  closeButtonGlass: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.35)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
+    borderRightColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
 });

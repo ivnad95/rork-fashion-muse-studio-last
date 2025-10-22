@@ -513,8 +513,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'portrait'
-                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
-                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
+                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -545,8 +545,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'square'
-                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
-                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
+                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -577,8 +577,8 @@ export default function SettingsScreen() {
                   <LinearGradient
                     colors={
                       aspectRatio === 'landscape'
-                        ? ['rgba(216, 233, 255, 0.22)', 'rgba(200, 220, 255, 0.12)']
-                        : ['rgba(220, 235, 255, 0.08)', 'rgba(220, 235, 255, 0.04)']
+                        ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']
+                        : ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.02)']
                     }
                     style={styles.formatOptionGradient}
                   />
@@ -944,20 +944,25 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   formatOptionActive: {
-    borderColor: 'rgba(216, 233, 255, 0.6)',
-    shadowColor: 'rgba(216, 233, 255, 0.5)',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 18,
-    elevation: 8,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    shadowColor: 'rgba(255, 255, 255, 0.4)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    elevation: 10,
   },
   formatOptionGradient: {
     position: 'absolute',
     inset: 0,
   },
   formatIcon: {
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
-    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    borderRadius: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   formatIconPortrait: {
     width: 24,
@@ -974,9 +979,10 @@ const styles = StyleSheet.create({
   formatText: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: Colors.dark.textSecondary,
+    color: Colors.dark.textMuted,
   },
   formatTextActive: {
-    color: '#d8e9ff',
+    color: Colors.dark.text,
+    fontWeight: '700' as const,
   },
 });
