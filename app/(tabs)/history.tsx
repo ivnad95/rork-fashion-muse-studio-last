@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
+import { Calendar, Trash2, X, Sparkles } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
@@ -69,14 +69,14 @@ export default function HistoryScreen() {
     }
   }, [selectedGeneration, fadeAnim, scaleAnim]);
 
-  const mockHistory: Array<{
+  const mockHistory: {
     id: string;
     imageUrls: string[];
     prompt: string;
     style: string;
     aspectRatio: 'portrait' | 'square' | 'landscape';
     createdAt: string;
-  }> = [];
+  }[] = [];
 
   const displayHistory = items.length > 0 ? items.map(h => ({
     id: h.id,

@@ -50,13 +50,53 @@ export default function GenerateScreen() {
       if (Platform.OS === 'web') alert(msg); else Alert.alert('No Image', msg);
       return;
     }
-    
+
     if (!user) {
       const msg = 'Please sign in to generate images.';
       if (Platform.OS === 'web') alert(msg); else Alert.alert('Authentication Required', msg);
       return;
     }
-    
+
+    // Check if user has enough credits
+    if (user.credits < generationCount) {
+      if (user.isGuest) {
+        // Guest user out of credits - prompt to sign in
+        const msg = `You need ${generationCount} credits but only have ${user.credits}. Sign in to get more credits and save your progress!`;
+        if (Platform.OS === 'web') {
+          if (confirm(msg + '\n\nGo to Sign In now?')) {
+            router.push('/auth/login');
+          }
+        } else {
+          Alert.alert(
+            'Credits Required',
+            msg,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Sign In', onPress: () => router.push('/auth/login') },
+            ]
+          );
+        }
+      } else {
+        // Authenticated user out of credits - go to plans
+        const msg = `You need ${generationCount} credits but only have ${user.credits}. Purchase more credits to continue.`;
+        if (Platform.OS === 'web') {
+          if (confirm(msg + '\n\nGo to Plans now?')) {
+            router.push('/plans');
+          }
+        } else {
+          Alert.alert(
+            'Insufficient Credits',
+            msg,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Buy Credits', onPress: () => router.push('/plans') },
+            ]
+          );
+        }
+      }
+      return;
+    }
+
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }

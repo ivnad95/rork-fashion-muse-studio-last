@@ -17,6 +17,7 @@ interface User {
   email: string;
   profileImage: string | null;
   credits: number;
+  isGuest?: boolean;
 }
 
 interface AuthState {
@@ -36,6 +37,8 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@fashion_ai_user_session';
+const GUEST_CREDITS_KEY = '@fashion_ai_guest_credits';
+const INITIAL_GUEST_CREDITS = 5;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -50,34 +53,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      // Initialize database
+      // Initialize database (safe on web - returns mock)
       await initDatabase();
-      
+
       // Load user session
       const sessionJson = await AsyncStorage.getItem(STORAGE_KEY);
       if (sessionJson) {
         const session = JSON.parse(sessionJson);
-        const dbUser = await getUserById(session.userId);
-        
-        if (dbUser) {
-          const user: User = {
-            id: dbUser.id,
-            name: dbUser.name,
-            email: dbUser.email,
-            profileImage: dbUser.profile_image,
-            credits: dbUser.credits,
+
+        // Check if guest user
+        if (session.isGuest) {
+          const creditsStr = await AsyncStorage.getItem(GUEST_CREDITS_KEY);
+          const credits = creditsStr ? parseInt(creditsStr, 10) : INITIAL_GUEST_CREDITS;
+
+          const guestUser: User = {
+            id: 'guest',
+            name: 'Guest',
+            email: '',
+            profileImage: null,
+            credits,
+            isGuest: true,
           };
-          setState({ user, isAuthenticated: true, isLoading: false });
+          setState({ user: guestUser, isAuthenticated: false, isLoading: false });
         } else {
-          // Session exists but user not in DB - clear session
-          await AsyncStorage.removeItem(STORAGE_KEY);
-          setState({ user: null, isAuthenticated: false, isLoading: false });
+          // Regular authenticated user
+          const dbUser = await getUserById(session.userId);
+
+          if (dbUser) {
+            const user: User = {
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              profileImage: dbUser.profile_image,
+              credits: dbUser.credits,
+            };
+            setState({ user, isAuthenticated: true, isLoading: false });
+          } else {
+            // Session exists but user not in DB - clear session and create guest
+            await AsyncStorage.removeItem(STORAGE_KEY);
+            await createGuestUser();
+          }
         }
       } else {
-        setState({ user: null, isAuthenticated: false, isLoading: false });
+        // No session - create guest user
+        await createGuestUser();
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
+      // Fallback to guest mode on error
+      await createGuestUser();
+    }
+  };
+
+  const createGuestUser = async () => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ isGuest: true }));
+      await AsyncStorage.setItem(GUEST_CREDITS_KEY, String(INITIAL_GUEST_CREDITS));
+
+      const guestUser: User = {
+        id: 'guest',
+        name: 'Guest',
+        email: '',
+        profileImage: null,
+        credits: INITIAL_GUEST_CREDITS,
+        isGuest: true,
+      };
+      setState({ user: guestUser, isAuthenticated: false, isLoading: false });
+    } catch (error) {
+      console.error('Error creating guest user:', error);
       setState({ user: null, isAuthenticated: false, isLoading: false });
     }
   };
@@ -179,9 +222,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!state.user) return;
 
     try {
-      // Update in database
-      const newCredits = await dbUpdateUserCredits(state.user.id, amount);
-      
+      const newCredits = Math.max(0, state.user.credits + amount);
+
+      // Update storage based on user type
+      if (state.user.isGuest) {
+        // Save guest credits to AsyncStorage
+        await AsyncStorage.setItem(GUEST_CREDITS_KEY, String(newCredits));
+      } else {
+        // Update database for authenticated user
+        await dbUpdateUserCredits(state.user.id, amount);
+      }
+
       const updatedUser = { ...state.user, credits: newCredits };
       setState((prev) => ({ ...prev, user: updatedUser }));
     } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,7 +15,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Moon, Zap, Bell, Cloud, Camera, CheckCircle, Star, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,162 @@ import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlowingButton from '@/components/GlowingButton';
 import GlassyTitle from '@/components/GlassyTitle';
+
+// Glowing section divider
+function GlowingDivider() {
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, [glowAnim]);
+
+  const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.8],
+  });
+
+  return (
+    <View style={styles.glowingDividerContainer}>
+      <Animated.View style={[styles.glowingDividerGlow, { opacity: glowOpacity }]}>
+        <LinearGradient
+          colors={['transparent', 'rgba(200, 220, 255, 0.4)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.glowingDividerGradient}
+        />
+      </Animated.View>
+      <View style={styles.glowingDividerLine} />
+    </View>
+  );
+}
+
+// Animated credit display
+function AnimatedCreditDisplay({ credits, isGuest }: { credits: number; isGuest?: boolean }) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (isGuest && credits <= 2) {
+      // Pulse animation for low credits
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [credits, isGuest, pulseAnim]);
+
+  return (
+    <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+      <View style={styles.animatedCreditBadge}>
+        <LinearGradient
+          colors={
+            isGuest && credits <= 2
+              ? ['rgba(255, 180, 100, 0.3)', 'rgba(255, 140, 60, 0.2)']
+              : ['rgba(74, 222, 128, 0.2)', 'rgba(34, 197, 94, 0.15)']
+          }
+          style={styles.animatedCreditGradient}
+        />
+        <Sparkles size={16} color={isGuest && credits <= 2 ? '#ffb464' : '#4ade80'} />
+        <Text style={[styles.animatedCreditText, isGuest && credits <= 2 && styles.animatedCreditTextWarning]}>
+          {credits}
+        </Text>
+      </View>
+    </Animated.View>
+  );
+}
+
+// Trial progress bar for guest users
+function TrialProgressBar({ used, total }: { used: number; total: number }) {
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const percentage = ((total - used) / total) * 100;
+
+  useEffect(() => {
+    Animated.spring(progressAnim, {
+      toValue: percentage,
+      friction: 8,
+      tension: 40,
+      useNativeDriver: false,
+    }).start();
+  }, [percentage, progressAnim]);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
+  return (
+    <View style={styles.progressContainer}>
+      <View style={styles.progressHeader}>
+        <Text style={styles.progressLabel}>Trial Credits</Text>
+        <Text style={styles.progressValue}>
+          {total - used} / {total} remaining
+        </Text>
+      </View>
+      <View style={styles.progressTrack}>
+        <Animated.View style={[styles.progressFill, { width: progressWidth }]}>
+          <LinearGradient
+            colors={
+              percentage > 50
+                ? ['rgba(74, 222, 128, 0.7)', 'rgba(34, 197, 94, 0.8)']
+                : percentage > 20
+                ? ['rgba(251, 191, 36, 0.7)', 'rgba(245, 158, 11, 0.8)']
+                : ['rgba(239, 68, 68, 0.7)', 'rgba(220, 38, 38, 0.8)']
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.progressGradient}
+          />
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
+// Benefits list for guest users
+function BenefitsList() {
+  const benefits = [
+    { icon: Star, text: '50 free credits on sign up' },
+    { icon: Cloud, text: 'Cloud sync across devices' },
+    { icon: Sparkles, text: 'Priority generation queue' },
+    { icon: CheckCircle, text: 'Save unlimited history' },
+  ];
+
+  return (
+    <View style={styles.benefitsContainer}>
+      <Text style={styles.benefitsTitle}>Sign up to unlock:</Text>
+      {benefits.map((benefit, index) => (
+        <View key={index} style={styles.benefitRow}>
+          <View style={styles.benefitIconWrapper}>
+            <benefit.icon size={16} color="#4ade80" strokeWidth={2.5} />
+          </View>
+          <Text style={styles.benefitText}>{benefit.text}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 function ToggleSwitch({
   enabled,
@@ -123,10 +280,25 @@ function ToggleSwitch({
   );
 }
 
-function SettingsRow({ label, children }: { label: string; children: React.ReactNode }) {
+function SettingsRow({
+  label,
+  icon: Icon,
+  children
+}: {
+  label: string;
+  icon?: React.ComponentType<{ size: number; color: string }>;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.settingRow}>
-      <Text style={styles.settingLabel}>{label}</Text>
+      <View style={styles.settingLeft}>
+        {Icon && (
+          <View style={styles.settingIconWrapper}>
+            <Icon size={18} color={Colors.dark.textSecondary} />
+          </View>
+        )}
+        <Text style={styles.settingLabel}>{label}</Text>
+      </View>
       {children}
     </View>
   );
@@ -398,37 +570,113 @@ export default function SettingsScreen() {
             </View>
           </PremiumLiquidGlass>
         ) : (
-          <PremiumLiquidGlass style={styles.creditsCard} variant="elevated" borderRadius={20}>
-            <View style={styles.creditsContent}>
-              <View style={styles.creditsInfo}>
-                <Text style={styles.creditsLabel}>Available Credits</Text>
-                <Text style={styles.creditsValue}>{user.credits}</Text>
+          <>
+            <PremiumLiquidGlass style={styles.creditsCard} variant="elevated" borderRadius={20}>
+              <View style={styles.creditsContent}>
+                <View style={styles.creditsInfo}>
+                  <Text style={styles.creditsLabel}>
+                    {user.isGuest ? 'Free Trial Credits' : 'Available Credits'}
+                  </Text>
+                  <View style={styles.creditsValueRow}>
+                    <AnimatedCreditDisplay credits={user.credits} isGuest={user.isGuest} />
+                  </View>
+                  {user.isGuest && user.credits > 0 && (
+                    <Text style={styles.guestHint}>
+                      Sign in to get more credits!
+                    </Text>
+                  )}
+                  {user.isGuest && user.credits === 0 && (
+                    <Text style={styles.guestHintWarning}>
+                      Trial credits used. Sign in to continue.
+                    </Text>
+                  )}
+                </View>
+                {!user.isGuest && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      router.push('/plans');
+                    }}
+                    style={styles.buyButton}
+                  >
+                    <CreditCard size={18} color="#d8e9ff" />
+                    <Text style={styles.buyButtonText}>Buy More</Text>
+                    <ChevronRight size={18} color="#d8e9ff" />
+                  </TouchableOpacity>
+                )}
               </View>
-              <TouchableOpacity
-                onPress={() => {
+            </PremiumLiquidGlass>
+
+            {user.isGuest && (
+              <>
+                <TrialProgressBar used={5 - user.credits} total={5} />
+                <BenefitsList />
+                <GlowingButton
+                  onPress={() => router.push('/auth/login')}
+                  text="Sign In to Get 50 Free Credits"
+                  variant="primary"
+                  style={{ marginBottom: 26 }}
+                />
+              </>
+            )}
+          </>
+        )}
+
+        {user && !user.isGuest && (
+        <View style={styles.profileSection}>
+          <View style={styles.avatarContainer}>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
                   if (Platform.OS !== 'web') {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
-                  router.push('/plans');
-                }}
-                style={styles.buyButton}
-              >
-                <CreditCard size={18} color="#d8e9ff" />
-                <Text style={styles.buyButtonText}>Buy More</Text>
-                <ChevronRight size={18} color="#d8e9ff" />
-              </TouchableOpacity>
-            </View>
-          </PremiumLiquidGlass>
-        )}
-
-        {user && (
-        <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatarBorder}>
-              <View style={styles.avatarInner}>
-                <User size={42} color="#d8e9ff" strokeWidth={1.5} />
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 1,
+                  });
+                  if (!result.canceled && result.assets[0]) {
+                    await updateProfile({ profileImage: result.assets[0].uri });
+                    if (Platform.OS === 'web') {
+                      alert('Profile photo updated!');
+                    } else {
+                      Alert.alert('Success', 'Profile photo updated!');
+                    }
+                  }
+                } catch {
+                  if (Platform.OS === 'web') {
+                    alert('Failed to update profile photo');
+                  } else {
+                    Alert.alert('Error', 'Failed to update profile photo');
+                  }
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.avatarBorder}>
+                <View style={styles.avatarInner}>
+                  {user.profileImage ? (
+                    <View style={styles.avatarImage}>
+                      {/* Image would render here if we had proper image display */}
+                      <User size={42} color="#d8e9ff" strokeWidth={1.5} />
+                    </View>
+                  ) : (
+                    <User size={42} color="#d8e9ff" strokeWidth={1.5} />
+                  )}
+                </View>
+                <View style={styles.avatarCameraButton}>
+                  <LinearGradient
+                    colors={['rgba(74, 222, 128, 0.9)', 'rgba(34, 197, 94, 0.9)']}
+                    style={styles.avatarCameraGradient}
+                  />
+                  <Camera size={14} color="#fff" strokeWidth={2.5} />
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.profileInfo}>
@@ -480,13 +728,13 @@ export default function SettingsScreen() {
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Preferences</Text>
 
-            <SettingsRow label="Dark Mode">
+            <SettingsRow label="Dark Mode" icon={Moon}>
               <ToggleSwitch enabled={darkMode} onChange={toggleDarkMode} label="Toggle dark mode" />
             </SettingsRow>
 
-            <View style={styles.divider} />
+            <GlowingDivider />
 
-            <SettingsRow label="Reduce Motion">
+            <SettingsRow label="Reduce Motion" icon={Zap}>
               <ToggleSwitch
                 enabled={reduceMotion}
                 onChange={toggleReduceMotion}
@@ -494,9 +742,9 @@ export default function SettingsScreen() {
               />
             </SettingsRow>
 
-            <View style={styles.divider} />
+            <GlowingDivider />
 
-            <SettingsRow label="Notifications">
+            <SettingsRow label="Notifications" icon={Bell}>
               <ToggleSwitch
                 enabled={notifications}
                 onChange={toggleNotifications}
@@ -504,9 +752,9 @@ export default function SettingsScreen() {
               />
             </SettingsRow>
 
-            <View style={styles.divider} />
+            <GlowingDivider />
 
-            <SettingsRow label="Cloud Storage">
+            <SettingsRow label="Cloud Storage" icon={Cloud}>
               <ToggleSwitch
                 enabled={cloudStorage}
                 onChange={toggleCloudStorage}
@@ -719,6 +967,18 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.35)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
+  },
+  guestHint: {
+    fontSize: 13,
+    color: 'rgba(200, 220, 255, 0.7)',
+    fontWeight: '500' as const,
+    marginTop: 4,
+  },
+  guestHintWarning: {
+    fontSize: 13,
+    color: 'rgba(255, 180, 100, 0.9)',
+    fontWeight: '600' as const,
+    marginTop: 4,
   },
   buyButton: {
     flexDirection: 'row',
@@ -1093,5 +1353,180 @@ const styles = StyleSheet.create({
   formatTextActive: {
     color: Colors.dark.text,
     fontWeight: '700' as const,
+  },
+  // Glowing divider styles
+  glowingDividerContainer: {
+    height: 20,
+    marginVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  glowingDividerGlow: {
+    position: 'absolute',
+    width: '100%',
+    height: 8,
+  },
+  glowingDividerGradient: {
+    flex: 1,
+    borderRadius: 4,
+  },
+  glowingDividerLine: {
+    width: '100%',
+    height: 1,
+    backgroundColor: 'rgba(200, 220, 255, 0.2)',
+  },
+  // Animated credit display styles
+  animatedCreditBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderTopColor: 'rgba(74, 222, 128, 0.4)',
+    borderLeftColor: 'rgba(74, 222, 128, 0.35)',
+    borderRightColor: 'rgba(74, 222, 128, 0.25)',
+    borderBottomColor: 'rgba(74, 222, 128, 0.2)',
+    overflow: 'hidden',
+  },
+  animatedCreditGradient: {
+    position: 'absolute',
+    inset: 0,
+  },
+  animatedCreditText: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: '#4ade80',
+  },
+  animatedCreditTextWarning: {
+    color: '#ffb464',
+  },
+  creditsValueRow: {
+    marginTop: 4,
+  },
+  // Trial progress bar styles
+  progressContainer: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressLabel: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.dark.text,
+  },
+  progressValue: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    color: Colors.dark.textSecondary,
+  },
+  progressTrack: {
+    height: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 6,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(0, 0, 0, 0.2)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressGradient: {
+    flex: 1,
+  },
+  // Benefits list styles
+  benefitsContainer: {
+    marginBottom: 24,
+    gap: 14,
+  },
+  benefitsTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: Colors.dark.text,
+    marginBottom: 4,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  benefitIconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(74, 222, 128, 0.35)',
+    borderLeftColor: 'rgba(74, 222, 128, 0.3)',
+    borderRightColor: 'rgba(74, 222, 128, 0.2)',
+    borderBottomColor: 'rgba(74, 222, 128, 0.15)',
+  },
+  benefitText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500' as const,
+    color: Colors.dark.text,
+  },
+  // Avatar camera button styles
+  avatarCameraButton: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2.5,
+    borderColor: Colors.dark.backgroundDeep,
+    shadowColor: 'rgba(74, 222, 128, 0.6)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  avatarCameraGradient: {
+    position: 'absolute',
+    inset: 0,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Settings row icon styles
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  settingIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(200, 220, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
 });

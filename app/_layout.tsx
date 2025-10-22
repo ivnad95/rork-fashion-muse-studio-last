@@ -25,13 +25,12 @@ function RootLayoutNav() {
 
     const inAuthGroup = segments[0] === 'auth';
 
-    if (!isAuthenticated && !inAuthGroup) {
-      // User is not signed in and not on an auth screen, redirect to login
-      router.replace('/auth/login');
-    } else if (isAuthenticated && inAuthGroup) {
+    // Only redirect away from auth screens if user is authenticated
+    if (isAuthenticated && inAuthGroup) {
       // User is signed in but on an auth screen, redirect to main app
       router.replace('/(tabs)/generate');
     }
+    // Allow guest users to access all screens without redirecting to login
   }, [isAuthenticated, isLoading, segments, router]);
 
   // Show splash screen while loading
