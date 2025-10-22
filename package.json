@@ -74,7 +74,10 @@
   },
   "expo": {
     "install": {
-      "exclude": ["expo-web-browser", "expo-sqlite"]
+      "exclude": [
+        "expo-web-browser",
+        "expo-sqlite"
+      ]
     }
   },
   "packageManager": "bun@1.2.20"
