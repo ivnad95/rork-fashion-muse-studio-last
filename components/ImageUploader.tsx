@@ -62,21 +62,19 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     color: COLORS.silverLight,                      // Spec: near-white primary text
-    fontSize: 16,
-    fontWeight: '700' as const,
-    letterSpacing: -0.3,
+    fontSize: 15,
+    fontWeight: '600' as const,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',         // Spec: neon-like glow effect
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowRadius: 8,
   },
   placeholderSubtext: {
     color: COLORS.silverMid,                        // Spec: secondary silver text
-    fontSize: 14,
-    marginTop: 8,
-    fontWeight: '600' as const,
-    letterSpacing: -0.2,
+    fontSize: 13,
+    marginTop: 6,
+    fontWeight: '500' as const,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
+    textShadowRadius: 4,
   },
 });

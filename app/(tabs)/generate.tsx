@@ -113,27 +113,12 @@ export default function GenerateScreen() {
         locations={[0, 0.35, 0.7, 1]}
         style={StyleSheet.absoluteFill}
       />
-
-      {/* Subtle radial glow overlay for depth */}
-      <LinearGradient
-        colors={[
-          'rgba(10, 118, 175, 0.08)',
-          'rgba(10, 118, 175, 0.04)',
-          'transparent',
-          'transparent',
-        ]}
-        locations={[0, 0.2, 0.5, 1]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-
       <View style={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 100 }]}>
         {/* Title */}
         <View style={styles.titleSection}>
           <GlassyTitle><Text>Generate</Text></GlassyTitle>
         </View>
+
 
         {/* Count Selector */}
         <View style={styles.selectorSection}>
@@ -170,10 +155,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   titleSection: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   selectorSection: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   uploaderSection: {
     flex: 1,
