@@ -277,7 +277,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#050b16', '#0a1428', '#11213f', '#1a2f58']}
+        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
         locations={[0, 0.35, 0.7, 1]}
         style={StyleSheet.absoluteFill}
       />

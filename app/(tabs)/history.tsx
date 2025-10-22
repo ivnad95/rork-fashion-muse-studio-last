@@ -149,7 +149,7 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#030711', '#060d1f', '#0d1736', '#121f4a']} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
       <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <GlassyTitle><Text>History</Text></GlassyTitle>
         {isLoading ? (

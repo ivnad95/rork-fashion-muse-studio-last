@@ -254,7 +254,7 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#030711', '#060d1f', '#0d1736', '#121f4a']} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
       <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
@@ -350,11 +350,11 @@ export default function ResultsScreen() {
                   >
                     <View style={styles.actionButtonContainer}>
                       <LinearGradient
-                        colors={['rgba(59, 130, 246, 0.35)', 'rgba(37, 99, 235, 0.25)']}
+                        colors={['rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.12)']}
                         style={styles.actionButtonGradient}
                       >
                         <View style={styles.actionButtonGlass}>
-                          <Share2 size={24} color="#60a5fa" strokeWidth={2.5} />
+                          <Share2 size={24} color="#e6eefc" strokeWidth={2.5} />
                         </View>
                       </LinearGradient>
                     </View>

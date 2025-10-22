@@ -103,9 +103,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(107, 160, 255, 0.5)',
-              'rgba(74, 126, 214, 0.7)',
-              'rgba(107, 160, 255, 0.5)',
+              'rgba(255, 255, 255, 0.45)',
+              'rgba(255, 255, 255, 0.7)',
+              'rgba(255, 255, 255, 0.45)',
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -123,7 +123,7 @@ export default function GlowingButton({
         style={styles.touchable}
       >
         <LinearGradient
-          colors={['#e8f1f8', '#c8d9ed', '#a0b8d6', '#c8d9ed', '#e8f1f8']}
+          colors={['#f7fbff', '#e6eefc', '#c9d7ef', '#e6eefc', '#f7fbff']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.borderGradient}
@@ -133,8 +133,8 @@ export default function GlowingButton({
           <LinearGradient
             colors={
               variant === 'primary'
-                ? ['rgba(74, 126, 214, 0.28)', 'rgba(51, 91, 168, 0.18)']
-                : ['rgba(220, 235, 255, 0.12)', 'rgba(220, 235, 255, 0.04)']
+                ? ['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.1)']
+                : ['rgba(240, 245, 255, 0.12)', 'rgba(240, 245, 255, 0.04)']
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   containerPrimary: {
-    shadowColor: Colors.dark.primaryGlow,
+    shadowColor: '#ffffff',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.85,
     shadowRadius: 32,
