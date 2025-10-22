@@ -175,6 +175,10 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
           base64Image = base64Image.split('base64,')[1];
         }
 
+        // Calculate dimensions based on aspect ratio (portrait: 3:4)
+        const width = 768;  // Portrait width
+        const height = 1024; // Portrait height (4:3 ratio)
+
         const requestBody = {
           prompt,
           images: [
@@ -183,6 +187,9 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
               image: base64Image,
             },
           ],
+          width,
+          height,
+          aspect_ratio: 'portrait', // Explicitly set portrait mode
         };
 
         console.log('Sending request to image edit API...');
