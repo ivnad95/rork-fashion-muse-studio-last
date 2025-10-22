@@ -1,8 +1,5 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '@/constants/colors';
 import CustomTabBar from '@/components/CustomTabBar';
 
 export default function TabLayout() {
@@ -21,5 +18,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({});

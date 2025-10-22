@@ -175,7 +175,8 @@ export default function LoginScreen() {
 
           <TouchableOpacity onPress={handleSignUpPress} style={styles.signUpButton}>
             <Text style={styles.signUpButtonText}>
-              Don't have an account? <Text style={styles.signUpButtonTextBold}>Sign Up</Text>
+              {"Don't have an account? "}
+              <Text style={styles.signUpButtonTextBold}>Sign Up</Text>
             </Text>
           </TouchableOpacity>
         </View>

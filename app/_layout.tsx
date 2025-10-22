@@ -13,7 +13,7 @@ import AuthSplash from '@/components/AuthSplash';
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -32,7 +32,7 @@ function RootLayoutNav() {
       // User is signed in but on an auth screen, redirect to main app
       router.replace('/(tabs)/generate');
     }
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, segments, router]);
 
   // Show splash screen while loading
   if (isLoading) {

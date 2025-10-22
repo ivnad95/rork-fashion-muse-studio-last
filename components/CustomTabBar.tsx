@@ -5,8 +5,6 @@ import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { glassStyles, COLORS } from '@/constants/glassStyles';
-import Colors from '@/constants/colors';
 
 const HomeIcon = ({ color }: { color: string }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">

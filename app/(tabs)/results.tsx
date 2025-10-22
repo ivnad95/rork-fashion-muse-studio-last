@@ -9,8 +9,6 @@ import * as Sharing from 'expo-sharing';
 import * as Haptics from 'expo-haptics';
 import { Download, Trash2, Share2, X } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
-import GlassPanel from '@/components/GlassPanel';
-import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
