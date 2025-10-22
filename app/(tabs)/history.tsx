@@ -6,9 +6,6 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Calendar, Trash2, X, Sparkles } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
-
-import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
-import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -145,8 +142,8 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
-      
-      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         <GlassyTitle><Text>History</Text></GlassyTitle>
         {isLoading ? (
           <View style={styles.messagePanel}>
@@ -372,9 +369,12 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
   scrollView: { flex: 1 },
+  scrollContent: {
+    padding: 24,
+  },
   messagePanel: {
     marginTop: 32,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   glassCard: {
     borderRadius: 32,
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
   },
-  historyList: { gap: 24 },
+  historyList: { gap: 28 },
   generationCard: {
     overflow: 'hidden',
   },

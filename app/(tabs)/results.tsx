@@ -9,7 +9,6 @@ import * as Sharing from 'expo-sharing';
 import * as Haptics from 'expo-haptics';
 import { Download, Trash2, Share2, X } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
-import { glassStyles } from '@/constants/glassStyles';
 import Colors from '@/constants/colors';
 import { useGeneration } from '@/contexts/GenerationContext';
 import ShimmerLoader from '@/components/ShimmerLoader';
@@ -298,7 +297,7 @@ export default function ResultsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
         <View style={styles.grid}>
@@ -494,12 +493,15 @@ export default function ResultsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
   scrollView: { flex: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 18, marginBottom: 16 },
+  scrollContent: {
+    padding: 24,
+  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, marginBottom: 24 },
   gridItem: {
-    width: SCREEN_WIDTH < 768 ? (SCREEN_WIDTH - 58) / 2 : (SCREEN_WIDTH - 200) / 3,
+    width: Platform.OS === 'ios' || SCREEN_WIDTH < 768 ? (SCREEN_WIDTH - 64) / 2 : (SCREEN_WIDTH - 200) / 3,
     aspectRatio: 3 / 4,
-    minWidth: 150,
-    maxWidth: 280,
+    minWidth: Platform.OS === 'ios' ? 160 : 150,
+    maxWidth: Platform.OS === 'ios' ? 200 : 280,
   },
   gridItemGradient: {
     flex: 1,

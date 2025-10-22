@@ -14,6 +14,12 @@ export const COLORS = {
   glassHighlight: 'rgba(255, 255, 255, 0.1)',
   glassReflection: 'rgba(255, 255, 255, 0.03)',
   glassShadow: 'rgba(0, 0, 0, 0.35)',
+
+  // Color-matched shadows for premium glass effects
+  shadowBlue: 'rgba(200, 220, 255, 0.5)',
+  shadowPurple: 'rgba(200, 150, 255, 0.5)',
+  shadowTeal: 'rgba(100, 220, 220, 0.5)',
+  shadowWarm: 'rgba(255, 200, 150, 0.5)',
 };
 
 export const glassStyles = StyleSheet.create({
@@ -153,5 +159,99 @@ export const glassStyles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Colored shadow variants for premium glass effects
+  shadowBlue: {
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 35,
+    elevation: 20,
+  },
+  shadowPurple: {
+    shadowColor: 'rgba(200, 150, 255, 0.5)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 35,
+    elevation: 20,
+  },
+  shadowTeal: {
+    shadowColor: 'rgba(100, 220, 220, 0.5)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 35,
+    elevation: 20,
+  },
+  shadowWarm: {
+    shadowColor: 'rgba(255, 200, 150, 0.5)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 35,
+    elevation: 20,
+  },
+
+  // Gradient border styles for colored glass variants
+  borderGradientBlue: {
+    borderTopColor: 'rgba(150, 180, 240, 0.35)',
+    borderLeftColor: 'rgba(150, 180, 240, 0.28)',
+    borderRightColor: 'rgba(150, 180, 240, 0.15)',
+    borderBottomColor: 'rgba(150, 180, 240, 0.08)',
+  },
+  borderGradientPurple: {
+    borderTopColor: 'rgba(180, 150, 240, 0.35)',
+    borderLeftColor: 'rgba(180, 150, 240, 0.28)',
+    borderRightColor: 'rgba(180, 150, 240, 0.15)',
+    borderBottomColor: 'rgba(180, 150, 240, 0.08)',
+  },
+  borderGradientTeal: {
+    borderTopColor: 'rgba(100, 220, 220, 0.35)',
+    borderLeftColor: 'rgba(100, 220, 220, 0.28)',
+    borderRightColor: 'rgba(100, 220, 220, 0.15)',
+    borderBottomColor: 'rgba(100, 220, 220, 0.08)',
+  },
+  borderGradientWarm: {
+    borderTopColor: 'rgba(240, 200, 150, 0.35)',
+    borderLeftColor: 'rgba(240, 200, 150, 0.28)',
+    borderRightColor: 'rgba(240, 200, 150, 0.15)',
+    borderBottomColor: 'rgba(240, 200, 150, 0.08)',
+  },
+
+  // Enhanced button variants with colored glows
+  buttonSuccess: {
+    backgroundColor: 'rgba(74, 222, 128, 0.12)',
+    borderTopColor: 'rgba(74, 222, 128, 0.35)',
+    borderLeftColor: 'rgba(74, 222, 128, 0.28)',
+    borderRightColor: 'rgba(74, 222, 128, 0.15)',
+    borderBottomColor: 'rgba(74, 222, 128, 0.08)',
+    shadowColor: 'rgba(74, 222, 128, 0.4)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 22,
+    elevation: 12,
+  },
+  buttonWarning: {
+    backgroundColor: 'rgba(251, 191, 36, 0.12)',
+    borderTopColor: 'rgba(251, 191, 36, 0.35)',
+    borderLeftColor: 'rgba(251, 191, 36, 0.28)',
+    borderRightColor: 'rgba(251, 191, 36, 0.15)',
+    borderBottomColor: 'rgba(251, 191, 36, 0.08)',
+    shadowColor: 'rgba(251, 191, 36, 0.4)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 22,
+    elevation: 12,
+  },
+  buttonDanger: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderTopColor: 'rgba(239, 68, 68, 0.35)',
+    borderLeftColor: 'rgba(239, 68, 68, 0.28)',
+    borderRightColor: 'rgba(239, 68, 68, 0.15)',
+    borderBottomColor: 'rgba(239, 68, 68, 0.08)',
+    shadowColor: 'rgba(239, 68, 68, 0.4)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 22,
+    elevation: 12,
   },
 });

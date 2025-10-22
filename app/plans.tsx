@@ -78,7 +78,7 @@ export default function PlansScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#030711', '#060d1f', '#0d1736', '#121f4a']}
+        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
         locations={[0, 0.35, 0.7, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -87,7 +87,7 @@ export default function PlansScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 },
+          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 100 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -101,14 +101,15 @@ export default function PlansScreen() {
         </View>
 
         <View style={styles.titleContainer}>
-          <View style={styles.iconContainer}>
-            <LinearGradient
-              colors={['#2a4d8c', '#3d6bb8', '#5a8fd6']}
-              style={styles.iconGradient}
-            >
-              <Sparkles size={32} color={Colors.dark.text} />
-            </LinearGradient>
-          </View>
+          <PremiumLiquidGlass
+            style={styles.iconContainer}
+            variant="primary"
+            borderRadius={36}
+          >
+            <View style={styles.iconContent}>
+              <Sparkles size={32} color={Colors.dark.text} strokeWidth={2} />
+            </View>
+          </PremiumLiquidGlass>
           <Text style={styles.title}>Choose Your Plan</Text>
           <Text style={styles.subtitle}>
             Unlock unlimited creativity with credits
@@ -130,39 +131,38 @@ export default function PlansScreen() {
               <PremiumLiquidGlass
                 style={[
                   styles.planCard,
-                  selectedPlan === plan.id && styles.planCardSelected,
                 ]}
-                variant={selectedPlan === plan.id ? 'primary' : 'elevated'}
-                borderRadius={24}
+                variant={selectedPlan === plan.id ? 'luxury' : 'elevated'}
+                colorTint={selectedPlan === plan.id ? 'blue' : 'none'}
+                borderRadius={28}
               >
                 {plan.popular && (
-                  <View style={styles.popularBadge}>
-                    <LinearGradient
-                      colors={['#2a4d8c', '#3d6bb8', '#5a8fd6']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.popularGradient}
-                    >
+                  <PremiumLiquidGlass
+                    style={styles.popularBadge}
+                    variant="accent"
+                    colorTint="purple"
+                    borderRadius={16}
+                  >
+                    <View style={styles.popularContent}>
                       <Text style={styles.popularText}>MOST POPULAR</Text>
-                    </LinearGradient>
-                  </View>
+                    </View>
+                  </PremiumLiquidGlass>
                 )}
 
                 <View style={styles.planContent}>
                   <View style={styles.planHeader}>
                     <Text style={styles.planName}>{plan.name}</Text>
-                    <View style={styles.checkContainer}>
-                      {selectedPlan === plan.id && (
-                        <View style={styles.checkCircle}>
-                          <LinearGradient
-                            colors={['#2a4d8c', '#3d6bb8', '#5a8fd6']}
-                            style={styles.checkGradient}
-                          >
-                            <Check size={16} color={Colors.dark.text} strokeWidth={3} />
-                          </LinearGradient>
+                    {selectedPlan === plan.id && (
+                      <PremiumLiquidGlass
+                        style={styles.checkContainer}
+                        variant="primary"
+                        borderRadius={14}
+                      >
+                        <View style={styles.checkContent}>
+                          <Check size={16} color={Colors.dark.text} strokeWidth={3} />
                         </View>
-                      )}
-                    </View>
+                      </PremiumLiquidGlass>
+                    )}
                   </View>
 
                   <View style={styles.priceContainer}>
@@ -170,13 +170,16 @@ export default function PlansScreen() {
                     <Text style={styles.credits}>{plan.credits} Credits</Text>
                   </View>
 
-                  <View style={styles.features}>
-                    {plan.features.map((feature, index) => (
-                      <View key={index} style={styles.featureRow}>
-                        <View style={styles.featureDot} />
-                        <Text style={styles.featureText}>{feature}</Text>
-                      </View>
-                    ))}
+                  <View style={styles.featuresSection}>
+                    <View style={styles.featuresDivider} />
+                    <View style={styles.features}>
+                      {plan.features.map((feature, index) => (
+                        <View key={index} style={styles.featureRow}>
+                          <View style={styles.featureDot} />
+                          <Text style={styles.featureText}>{feature}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
                 </View>
               </PremiumLiquidGlass>
@@ -220,12 +223,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: 12,
+    marginBottom: 20,
   },
   closeButton: {
     width: 44,
@@ -233,143 +236,158 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.dark.backgroundElevated,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 36,
+    marginBottom: 40,
   },
   iconContainer: {
     width: 72,
     height: 72,
-    borderRadius: 36,
-    overflow: 'hidden',
-    marginBottom: 20,
-    shadowColor: Colors.dark.primaryGlow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
+    marginBottom: 24,
   },
-  iconGradient: {
+  iconContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '700' as const,
     color: Colors.dark.text,
     letterSpacing: -1,
-    marginBottom: 8,
+    marginBottom: 12,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.dark.textSecondary,
     textAlign: 'center',
+    fontWeight: '500' as const,
+    letterSpacing: 0.3,
   },
   plansContainer: {
-    gap: 16,
+    gap: 24,
+    marginBottom: 32,
   },
   planWrapper: {
-    marginBottom: 4,
+    marginBottom: 0,
   },
   planCard: {
     minHeight: 200,
     position: 'relative',
   },
-  planCardSelected: {
-    borderWidth: 2,
-    borderColor: Colors.dark.primaryLight,
-  },
   popularBadge: {
     position: 'absolute',
-    top: -8,
-    right: 20,
-    borderRadius: 12,
-    overflow: 'hidden',
+    top: -12,
+    right: 24,
     zIndex: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
   },
-  popularGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+  popularContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   popularText: {
     fontSize: 11,
-    fontWeight: '700' as const,
+    fontWeight: '800' as const,
     color: Colors.dark.text,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   planContent: {
-    padding: 24,
+    padding: 28,
   },
   planHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   planName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700' as const,
     color: Colors.dark.text,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   },
   checkContainer: {
     width: 28,
     height: 28,
   },
-  checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  checkGradient: {
+  checkContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   priceContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   price: {
-    fontSize: 36,
+    fontSize: 40,
     fontWeight: '700' as const,
     color: Colors.dark.text,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   credits: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600' as const,
     color: Colors.dark.primaryLight,
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: 0.3,
+  },
+  featuresSection: {
+    gap: 16,
+  },
+  featuresDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: 4,
   },
   features: {
-    gap: 12,
+    gap: 14,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
   featureDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: Colors.dark.primaryLight,
+    shadowColor: Colors.dark.primaryLight,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+    elevation: 4,
   },
   featureText: {
-    fontSize: 15,
-    color: Colors.dark.textSecondary,
+    flex: 1,
+    fontSize: 16,
+    color: Colors.dark.text,
     fontWeight: '500' as const,
+    letterSpacing: 0.3,
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: 24,
-    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingHorizontal: 24,
   },
   footerGradient: {
     position: 'absolute',

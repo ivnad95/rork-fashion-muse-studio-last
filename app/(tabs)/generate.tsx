@@ -11,14 +11,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import GlassyTitle from '@/components/GlassyTitle';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
-import { glassStyles } from '@/constants/glassStyles';
 import GlowingButton from '@/components/GlowingButton';
+import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 
 export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
+  const { handleScroll } = useScrollNavbar();
   const [uploading, setUploading] = useState<boolean>(false);
 
   const handleImageSelect = async () => {
@@ -115,18 +116,32 @@ export default function GenerateScreen() {
       />
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[glassStyles.screenContent, { paddingTop: insets.top + 20, paddingBottom: 120 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <GlassyTitle><Text>Generate</Text></GlassyTitle>
-        <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
-        <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
-        <GlowingButton
-          onPress={handleGenerate}
-          disabled={isGenerating}
-          text={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
-          variant="primary"
-        />
+
+        {/* Count Selector with enhanced spacing */}
+        <View style={styles.selectorSection}>
+          <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
+        </View>
+
+        {/* Image Uploader with prominent spacing */}
+        <View style={styles.uploaderSection}>
+          <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
+        </View>
+
+        {/* Generate Button with emphasis */}
+        <View style={styles.buttonSection}>
+          <GlowingButton
+            onPress={handleGenerate}
+            disabled={isGenerating}
+            text={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
+            variant="primary"
+          />
+        </View>
       </ScrollView>
     </View>
   );
@@ -135,4 +150,16 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
   scrollView: { flex: 1 },
+  scrollContent: {
+    padding: 24,
+  },
+  selectorSection: {
+    marginBottom: 32,
+  },
+  uploaderSection: {
+    marginBottom: 32,
+  },
+  buttonSection: {
+    marginBottom: 24,
+  },
 });

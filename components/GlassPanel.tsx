@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { glassStyles } from '@/constants/glassStyles';
+import Colors from '@/constants/colors';
 
 interface GlassPanelProps {
   children: React.ReactNode;
@@ -13,7 +14,21 @@ interface GlassPanelProps {
 
 export default function GlassPanel({ children, style, radius = 28, intensity = 30, testID }: GlassPanelProps) {
   return (
-    <View style={[glassStyles.glass3DSurface, { borderRadius: radius }, style]} testID={testID ?? 'glass-panel'}>
+    <View
+      style={[
+        glassStyles.glass3DSurface,
+        {
+          borderRadius: radius,
+          shadowColor: Colors.dark.shadowBlue, // Blue-tinted shadow for premium glass effect
+          shadowOffset: { width: 0, height: 20 },
+          shadowOpacity: 0.8,
+          shadowRadius: 35,
+          elevation: 20,
+        },
+        style,
+      ]}
+      testID={testID ?? 'glass-panel'}
+    >
       {Platform.OS === 'web' ? (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: radius }]} />
       ) : (

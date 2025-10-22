@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Colors from '@/constants/colors';
 
 interface GlowingButtonProps {
   onPress?: () => void;
@@ -20,7 +19,7 @@ interface GlowingButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
-  variant?: 'default' | 'primary' | 'small';
+  variant?: 'default' | 'primary' | 'small' | 'success' | 'warning' | 'danger' | 'ghost';
   icon?: React.ReactNode;
   testID?: string;
 }
@@ -31,6 +30,7 @@ interface GlowingButtonProps {
  * - Frosted white glass background
  * - Active state uses lightColor3 (#0A76AF) accent
  * - Text: 14-18px semi-bold, silverLight color
+ * - Success/Warning/Danger variants with color-matched glows
  */
 export default function GlowingButton({
   onPress,
@@ -46,8 +46,56 @@ export default function GlowingButton({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.5)).current;
 
+  // Variant color configurations
+  const variantColors = {
+    default: {
+      glow: 'rgba(255, 255, 255, 0.6)',
+      shadow: 'rgba(255, 255, 255, 0.4)',
+      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'],
+      accentGradient: null,
+    },
+    primary: {
+      glow: 'rgba(10, 118, 175, 0.6)',
+      shadow: 'rgba(10, 118, 175, 0.4)',
+      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'],
+      accentGradient: ['rgba(10, 118, 175, 0.25)', 'rgba(10, 118, 175, 0.15)', 'rgba(10, 118, 175, 0.08)'],
+    },
+    success: {
+      glow: 'rgba(74, 222, 128, 0.6)',
+      shadow: 'rgba(74, 222, 128, 0.4)',
+      gradient: ['rgba(74, 222, 128, 0.25)', 'rgba(74, 222, 128, 0.15)', 'rgba(74, 222, 128, 0.08)'],
+      accentGradient: ['rgba(74, 222, 128, 0.30)', 'rgba(74, 222, 128, 0.18)', 'rgba(74, 222, 128, 0.10)'],
+    },
+    warning: {
+      glow: 'rgba(251, 191, 36, 0.6)',
+      shadow: 'rgba(251, 191, 36, 0.4)',
+      gradient: ['rgba(251, 191, 36, 0.25)', 'rgba(251, 191, 36, 0.15)', 'rgba(251, 191, 36, 0.08)'],
+      accentGradient: ['rgba(251, 191, 36, 0.30)', 'rgba(251, 191, 36, 0.18)', 'rgba(251, 191, 36, 0.10)'],
+    },
+    danger: {
+      glow: 'rgba(239, 68, 68, 0.6)',
+      shadow: 'rgba(239, 68, 68, 0.4)',
+      gradient: ['rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.08)'],
+      accentGradient: ['rgba(239, 68, 68, 0.30)', 'rgba(239, 68, 68, 0.18)', 'rgba(239, 68, 68, 0.10)'],
+    },
+    ghost: {
+      glow: 'rgba(255, 255, 255, 0.3)',
+      shadow: 'rgba(255, 255, 255, 0.2)',
+      gradient: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.01)'],
+      accentGradient: null,
+    },
+    small: {
+      glow: 'rgba(255, 255, 255, 0.6)',
+      shadow: 'rgba(255, 255, 255, 0.4)',
+      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'],
+      accentGradient: null,
+    },
+  };
+
+  const activeVariantColors = variantColors[variant] || variantColors.default;
+
   useEffect(() => {
-    if (!disabled && variant === 'primary') {
+    if (!disabled && ['primary', 'success', 'warning', 'danger'].includes(variant)) {
       const animation = Animated.loop(
         Animated.sequence([
           Animated.timing(glowAnim, {
@@ -87,6 +135,28 @@ export default function GlowingButton({
     styles.container,
     variant === 'small' && styles.containerSmall,
     variant === 'primary' && styles.containerPrimary,
+    variant === 'success' && {
+      shadowColor: activeVariantColors.shadow,
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.8,
+      shadowRadius: 32,
+      elevation: 16,
+    },
+    variant === 'warning' && {
+      shadowColor: activeVariantColors.shadow,
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.8,
+      shadowRadius: 32,
+      elevation: 16,
+    },
+    variant === 'danger' && {
+      shadowColor: activeVariantColors.shadow,
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.8,
+      shadowRadius: 32,
+      elevation: 16,
+    },
+    variant === 'ghost' && styles.containerGhost,
     style,
   ];
 
@@ -100,8 +170,8 @@ export default function GlowingButton({
       ]}
       testID={testID ?? 'glowing-button'}
     >
-      {/* Outer glow ring for primary variant */}
-      {variant === 'primary' && !disabled && (
+      {/* Outer glow ring for primary/success/warning/danger variants */}
+      {['primary', 'success', 'warning', 'danger'].includes(variant) && !disabled && (
         <Animated.View
           style={[
             styles.glowRing,
@@ -112,9 +182,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              'rgba(10, 118, 175, 0.4)',
-              'rgba(10, 118, 175, 0.6)',
-              'rgba(10, 118, 175, 0.4)',
+              activeVariantColors.glow.replace('0.6', '0.4'),
+              activeVariantColors.glow,
+              activeVariantColors.glow.replace('0.6', '0.4'),
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -144,24 +214,16 @@ export default function GlowingButton({
 
             {/* Base gradient overlay */}
             <LinearGradient
-              colors={[
-                'rgba(255, 255, 255, 0.12)',
-                'rgba(255, 255, 255, 0.06)',
-                'rgba(255, 255, 255, 0.03)',
-              ]}
+              colors={activeVariantColors.gradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.baseGradient}
             />
 
-            {/* Accent gradient for primary variant */}
-            {variant === 'primary' && (
+            {/* Accent gradient for colored variants */}
+            {activeVariantColors.accentGradient && (
               <LinearGradient
-                colors={[
-                  'rgba(10, 118, 175, 0.25)',
-                  'rgba(10, 118, 175, 0.15)',
-                  'rgba(10, 118, 175, 0.08)',
-                ]}
+                colors={activeVariantColors.accentGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.accentGradient}
@@ -212,6 +274,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 32,
     elevation: 16,
+  },
+  containerGhost: {
+    shadowColor: 'rgba(255, 255, 255, 0.2)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 6,
   },
   glowRing: {
     position: 'absolute',
