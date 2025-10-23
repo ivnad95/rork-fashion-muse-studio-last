@@ -57,5 +57,20 @@
         "track": "internal"
       }
     }
+  },
+  "notes": {
+    "ios_submission": "Before submitting to App Store, update the following in eas.json:",
+    "required_fields": [
+      "appleId: Your Apple Developer account email",
+      "ascAppId: Your App Store Connect app ID (found in App Store Connect)",
+      "appleTeamId: Your Apple Developer Team ID (found in developer.apple.com)"
+    ],
+    "additional_requirements": [
+      "Privacy Policy URL must be hosted and accessible",
+      "Terms of Service URL must be hosted and accessible",
+      "App screenshots prepared for all required device sizes",
+      "App Store description and metadata completed",
+      "TestFlight testing completed successfully"
+    ]
   }
 }

@@ -17,10 +17,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.liquid-glass-fashion-app-q7e9uo5m-ne13q4mt-86oegyng-z34avf6w-j4dba864",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
-        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos.",
+        "NSPhotoLibraryUsageDescription": "Fashion Muse Studio needs access to your photos to transform them into professional fashion photoshoots using AI",
+        "NSCameraUsageDescription": "Fashion Muse Studio needs camera access so you can take photos to transform into professional fashion images",
+        "NSPhotoLibraryAddUsageDescription": "Fashion Muse Studio needs permission to save your AI-generated fashion photos to your photo library",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -57,15 +56,15 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "Fashion Muse Studio needs access to your photos to transform them into professional fashion photoshoots using AI"
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-          "isAccessMediaLocationEnabled": true
+          "photosPermission": "Fashion Muse Studio needs access to your photos to transform them into professional fashion photoshoots using AI",
+          "savePhotosPermission": "Fashion Muse Studio needs permission to save your AI-generated fashion photos to your photo library",
+          "isAccessMediaLocationEnabled": false
         }
       ],
       [

@@ -17,7 +17,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
-import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles } from 'lucide-react-native';
+import * as WebBrowser from 'expo-web-browser';
+import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles, FileText, Shield } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
@@ -465,6 +466,40 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleOpenPrivacyPolicy = async () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    // TODO: Replace with actual hosted URL before App Store submission
+    const privacyUrl = 'https://yourwebsite.com/privacy-policy';
+    try {
+      await WebBrowser.openBrowserAsync(privacyUrl);
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        alert('Unable to open Privacy Policy. Please visit: ' + privacyUrl);
+      } else {
+        Alert.alert('Error', 'Unable to open Privacy Policy');
+      }
+    }
+  };
+
+  const handleOpenTerms = async () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    // TODO: Replace with actual hosted URL before App Store submission
+    const termsUrl = 'https://yourwebsite.com/terms-of-service';
+    try {
+      await WebBrowser.openBrowserAsync(termsUrl);
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        alert('Unable to open Terms of Service. Please visit: ' + termsUrl);
+      } else {
+        Alert.alert('Error', 'Unable to open Terms of Service');
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Deep Sea Glass 4-stop gradient background */}
@@ -881,6 +916,48 @@ export default function SettingsScreen() {
                 </View>
                 <Text style={styles.dangerText}>Delete All Data</Text>
               </View>
+            </TouchableOpacity>
+          </View>
+        </PremiumLiquidGlass>
+
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
+          <View style={styles.panelContent}>
+            <Text style={styles.sectionTitle}>Legal & Privacy</Text>
+
+            <TouchableOpacity
+              style={styles.legalRow}
+              onPress={handleOpenPrivacyPolicy}
+              activeOpacity={0.7}
+              accessibilityLabel="Privacy Policy"
+              accessibilityHint="Opens the privacy policy in your browser"
+              accessibilityRole="link"
+            >
+              <View style={styles.legalLeft}>
+                <View style={styles.iconWrapperLegal}>
+                  <Shield size={20} color={Colors.dark.textSecondary} />
+                </View>
+                <Text style={styles.legalText}>Privacy Policy</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.dark.textMuted} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              style={styles.legalRow}
+              onPress={handleOpenTerms}
+              activeOpacity={0.7}
+              accessibilityLabel="Terms of Service"
+              accessibilityHint="Opens the terms of service in your browser"
+              accessibilityRole="link"
+            >
+              <View style={styles.legalLeft}>
+                <View style={styles.iconWrapperLegal}>
+                  <FileText size={20} color={Colors.dark.textSecondary} />
+                </View>
+                <Text style={styles.legalText}>Terms of Service</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.dark.textMuted} />
             </TouchableOpacity>
           </View>
         </PremiumLiquidGlass>
@@ -1507,5 +1584,40 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(255, 255, 255, 0.15)',
     borderRightColor: 'rgba(255, 255, 255, 0.08)',
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  // Legal section styles
+  legalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  legalLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  iconWrapperLegal: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(200, 220, 255, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(200, 220, 255, 0.3)',
+    borderLeftColor: 'rgba(200, 220, 255, 0.25)',
+    borderRightColor: 'rgba(200, 220, 255, 0.15)',
+    borderBottomColor: 'rgba(200, 220, 255, 0.1)',
+    shadowColor: 'rgba(200, 220, 255, 0.25)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  legalText: {
+    fontSize: 16,
+    fontWeight: '500' as const,
+    color: Colors.dark.text,
   },
 });
