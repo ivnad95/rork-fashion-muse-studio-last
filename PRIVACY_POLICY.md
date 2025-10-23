@@ -171,7 +171,7 @@ By using Fashion Muse Studio, you consent to this Privacy Policy.
 
 If you have questions or concerns about this Privacy Policy or our practices:
 
-**Email:** support@fashionmusestudio.com (Update with actual support email)
+**Email:** help@fashionmusestudio.com
 **App Version:** 1.0.0
 **Developer:** Rork Platform (Update with actual developer name)
 
