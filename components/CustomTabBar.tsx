@@ -5,6 +5,7 @@ import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { COLORS, RADIUS, SPACING } from '@/constants/glassStyles';
 
 // Context for navbar visibility
 interface NavbarContextType {
@@ -127,8 +128,8 @@ function TabButton({
   });
 
   const getIcon = (routeName: string) => {
-    // Spec: Active state uses lightColor3 (#0A76AF), inactive uses silverMid (#C8CDD5)
-    const color = isFocused ? '#0A76AF' : '#C8CDD5';
+    // Active state: accent (#0A76AF), inactive: silverMid
+    const color = isFocused ? COLORS.accent : COLORS.silverMid;
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -233,11 +234,11 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 
           {/* Main glass panel with multi-stage borders */}
           <View style={styles.tabBarContainer}>
-            {/* Blur layer */}
+            {/* Blur layer (standardized intensity 28) */}
             {Platform.OS === 'web' ? (
               <View style={styles.tabBarBlurWeb} />
             ) : (
-              <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+              <BlurView intensity={28} tint="dark" style={StyleSheet.absoluteFill} />
             )}
 
             {/* Gradient overlay for depth */}
@@ -296,8 +297,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingBottom: SPACING.lg,                          // 20px bottom margin (floating effect)
+    paddingHorizontal: SPACING.lg,                      // 20px horizontal margin
   },
   topFadeGradient: {
     position: 'absolute',
@@ -317,26 +318,27 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: -4,
     borderRadius: 40,
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',        // Spec: accent color (#0A76AF) for active states
-    shadowColor: 'rgba(10, 118, 175, 0.6)',
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',        // Accent background tint
+    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.9,
+    shadowOpacity: 0.90,
     shadowRadius: 28,
     elevation: 12,
   },
   tabBarContainer: {
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: COLORS.glassBase,
     borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.25)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
     overflow: 'hidden',
-    shadowColor: '#000',
+    // 3-layer shadow system
+    shadowColor: COLORS.shadowBlack,
     shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.7,
+    shadowOpacity: 0.65,
     shadowRadius: 40,
     elevation: 20,
     position: 'relative',
@@ -375,10 +377,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: -10,
     borderRadius: 36,
-    backgroundColor: 'rgba(10, 118, 175, 0.25)',
-    shadowColor: 'rgba(10, 118, 175, 0.7)',
+    backgroundColor: 'rgba(10, 118, 175, 0.25)',        // Accent background tint
+    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.9,
+    shadowOpacity: 0.90,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -394,13 +396,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopColor: 'rgba(255, 255, 255, 0.20)',
     borderLeftColor: 'rgba(255, 255, 255, 0.15)',
     borderRightColor: 'rgba(255, 255, 255, 0.08)',
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    shadowColor: 'rgba(0, 0, 0, 0.4)',
+    shadowColor: COLORS.shadowBlack,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.45,
     shadowRadius: 8,
     elevation: 4,
   },

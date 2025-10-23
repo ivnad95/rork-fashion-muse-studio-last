@@ -9,7 +9,9 @@ import * as Sharing from 'expo-sharing';
 import * as Haptics from 'expo-haptics';
 import { Download, Trash2, Share2, X } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
-import Colors from '@/constants/colors';
+import GlassPanel from '@/components/GlassPanel';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import ShimmerLoader from '@/components/ShimmerLoader';
 
@@ -294,74 +296,71 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Multi-layer background with depth */}
-      <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      {/* Deep Sea Glass 4-stop gradient background */}
+      <LinearGradient
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        locations={[0, 0.35, 0.70, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: insets.top + 24,
+            paddingBottom: insets.bottom + 120,
+            paddingHorizontal: SPACING.lg  // 20px floating margins
+          }
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <GlassyTitle><Text>Results</Text></GlassyTitle>
 
-        <View style={styles.grid}>
-          {/* Show loading placeholders when generating */}
-          {loadingPlaceholders.map((_, i) => (
-            <View key={`loading-${i}`} style={styles.gridItem}>
-              <LinearGradient
-                colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gridItemGradient}
-              >
-                <View style={styles.gridItemInner}>
-                  <ShimmerLoader height={200} borderRadius={16} />
-                </View>
-              </LinearGradient>
-            </View>
-          ))}
+        {/* Latest Generation Section */}
+        {(isGenerating || generatedImages.length > 0) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>
+              {isGenerating ? 'GENERATING' : 'LATEST GENERATION'}
+            </Text>
+            <View style={styles.grid}>
+              {/* Show loading placeholders when generating */}
+              {loadingPlaceholders.map((_, i) => (
+                <GlassPanel key={`loading-${i}`} style={styles.imageCard}>
+                  <ShimmerLoader style={styles.cardImage} />
+                </GlassPanel>
+              ))}
 
-          {/* Show empty placeholders with logo when no images and not generating */}
-          {emptyPlaceholders.map((_, i) => (
-            <View key={`empty-${i}`} style={styles.gridItem}>
-              <LinearGradient
-                colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gridItemGradient}
-              >
-                <View style={styles.gridItemInner}>
-                  <EmptyPlaceholder />
-                </View>
-              </LinearGradient>
-            </View>
-          ))}
-
-          {/* Show generated images */}
-          {displayImages.map((img, i) => (
-            <View key={`image-${i}`} style={styles.gridItem}>
-              <LinearGradient
-                colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.06)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gridItemGradient}
-              >
-                <View style={styles.gridItemInner}>
+              {/* Show generated images */}
+              {displayImages.map((img, i) => (
+                <GlassPanel key={`image-${i}`} style={styles.imageCard}>
                   <TouchableOpacity
                     style={styles.imageWrapper}
                     activeOpacity={0.92}
                     onPress={() => handleImagePress(img, i)}
                     testID={`result-card-${i}`}
                   >
-                    <View style={styles.imageFrame}>
-                      <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
-                      <LinearGradient
-                        colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
-                        style={styles.imageOverlay}
-                      />
-                    </View>
+                    <Image
+                      source={{ uri: img }}
+                      style={styles.cardImage}
+                      resizeMode="cover"
+                    />
                   </TouchableOpacity>
-                </View>
-              </LinearGradient>
+                </GlassPanel>
+              ))}
             </View>
-          ))}
-        </View>
+          </View>
+        )}
+
+        {/* Empty State */}
+        {!isGenerating && generatedImages.length === 0 && (
+          <GlassPanel style={styles.emptyState}>
+            <Text style={styles.emptyText}>No results yet</Text>
+            <Text style={styles.emptySubtext}>
+              Generate your first photoshoot to see results here
+            </Text>
+          </GlassPanel>
+        )}
       </ScrollView>
 
       <Modal 
@@ -491,65 +490,60 @@ export default function ResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
-  scrollView: { flex: 1 },
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    padding: 24,
+    paddingBottom: SPACING.xxxl,            // Extra padding at bottom
+  },
+  section: {
+    marginBottom: SPACING.xxl,              // 32px between sections
+  },
+  sectionLabel: {
+    ...TEXT_STYLES.overlineSecondary,
+    textTransform: 'uppercase',
+    color: COLORS.silverMid,
+    marginBottom: SPACING.md,               // 16px
+    paddingLeft: SPACING.xxs,               // 4px
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 24,
-    justifyContent: 'space-between',
+    gap: SPACING.md,                        // 16px gap between cards
   },
-  gridItem: {
-    width: (SCREEN_WIDTH - 48 - 16) / 2,  // 2 columns: subtract padding (24*2) and gap (16), then divide by 2
+  imageCard: {
+    width: (SCREEN_WIDTH - 40 - 16) / 2,   // (screen - margins - gap) / 2 columns
     aspectRatio: 3 / 4,
-    minWidth: 150,
-  },
-  gridItemGradient: {
-    flex: 1,
-    borderRadius: 24,                                   // Spec: 24px border radius
-    padding: 3,
-    shadowColor: 'rgba(200, 220, 255, 0.45)',          // Spec: colored shadows for depth
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.7,
-    shadowRadius: 36,
-    elevation: 18,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',        // Spec: gradient borders
-    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  gridItemInner: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 20, 30, 0.6)',
-    borderRadius: 22,
+    padding: 0,                             // No internal padding (image fills panel)
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
-    borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: RADIUS.xl,                // 24px to match panel radius
   },
   imageWrapper: {
-    flex: 1,
-    position: 'relative',
+    width: '100%',
+    height: '100%',
   },
-  imageFrame: {
-    flex: 1,
-    borderRadius: 22,
-    overflow: 'hidden',
+  emptyState: {
+    marginTop: SPACING.xxxl,                // 48px
+    paddingVertical: SPACING.xxxl * 1.25,   // 60px
+    paddingHorizontal: SPACING.xxl,         // 32px
+    alignItems: 'center',
   },
-  resultImage: { width: '100%', height: '100%' },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '40%',
+  emptyText: {
+    ...TEXT_STYLES.h4Primary,
+    color: COLORS.silverLight,
+    marginBottom: SPACING.xs,               // 8px
+  },
+  emptySubtext: {
+    ...TEXT_STYLES.bodyRegularSecondary,
+    color: COLORS.silverMid,
+    textAlign: 'center',
   },
   loadingPlaceholder: {
     flex: 1,

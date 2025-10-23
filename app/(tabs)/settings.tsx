@@ -19,10 +19,13 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
+import GlassPanel from '@/components/GlassPanel';
 import GlowingButton from '@/components/GlowingButton';
 import GlassyTitle from '@/components/GlassyTitle';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
@@ -464,9 +467,10 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Deep Sea Glass 4-stop gradient background */}
       <LinearGradient
-        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
-        locations={[0, 0.35, 0.7, 1]}
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        locations={[0, 0.35, 0.70, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -474,7 +478,11 @@ export default function SettingsScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 40, paddingBottom: 120 },
+          {
+            paddingTop: insets.top + 24,
+            paddingBottom: insets.bottom + 120,
+            paddingHorizontal: SPACING.lg  // 20px floating margins
+          },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -486,7 +494,7 @@ export default function SettingsScreen() {
         <GlassyTitle><Text>Settings</Text></GlassyTitle>
 
         {!user ? (
-          <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
+          <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
             <View style={styles.panelContent}>
               <Text style={styles.sectionTitle}>Account</Text>
 
@@ -560,7 +568,7 @@ export default function SettingsScreen() {
           </PremiumLiquidGlass>
         ) : (
           <>
-            <PremiumLiquidGlass style={styles.creditsCard} variant="elevated" borderRadius={20}>
+            <PremiumLiquidGlass style={styles.creditsCard} variant="default" borderRadius={20}>
               <View style={styles.creditsContent}>
                 <View style={styles.creditsInfo}>
                   <Text style={styles.creditsLabel}>
@@ -713,7 +721,7 @@ export default function SettingsScreen() {
         />
         )}
 
-        <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Preferences</Text>
 
@@ -737,7 +745,7 @@ export default function SettingsScreen() {
           </View>
         </PremiumLiquidGlass>
 
-        <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Image Generation</Text>
 
@@ -847,7 +855,7 @@ export default function SettingsScreen() {
           </View>
         </PremiumLiquidGlass>
 
-        <PremiumLiquidGlass style={styles.settingsPanel} variant="elevated" borderRadius={24}>
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Account</Text>
 

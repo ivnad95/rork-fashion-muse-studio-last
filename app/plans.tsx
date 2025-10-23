@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { X, Check, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { TEXT_STYLES } from '@/constants/typography';
 import { useAuth } from '@/contexts/AuthContext';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlowingButton from '@/components/GlowingButton';
@@ -77,9 +79,10 @@ export default function PlansScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Deep Sea Glass 4-stop gradient background */}
       <LinearGradient
-        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
-        locations={[0, 0.35, 0.7, 1]}
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        locations={[0, 0.35, 0.70, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -87,7 +90,11 @@ export default function PlansScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 100 },
+          {
+            paddingTop: insets.top + 24,
+            paddingBottom: insets.bottom + 100,
+            paddingHorizontal: SPACING.lg  // 20px floating margins
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -96,7 +103,7 @@ export default function PlansScreen() {
             onPress={() => router.back()}
             style={styles.closeButton}
           >
-            <X size={24} color={Colors.dark.text} />
+            <X size={24} color={COLORS.silverLight} />
           </TouchableOpacity>
         </View>
 
@@ -107,7 +114,7 @@ export default function PlansScreen() {
             borderRadius={36}
           >
             <View style={styles.iconContent}>
-              <Sparkles size={32} color={Colors.dark.text} strokeWidth={2} />
+              <Sparkles size={32} color={COLORS.silverLight} strokeWidth={2} />
             </View>
           </PremiumLiquidGlass>
           <Text style={styles.title}>Choose Your Plan</Text>
@@ -130,15 +137,13 @@ export default function PlansScreen() {
             >
               <PremiumLiquidGlass
                 style={styles.planCard}
-                variant={selectedPlan === plan.id ? 'luxury' : 'elevated'}
-                colorTint={selectedPlan === plan.id ? 'blue' : 'none'}
+                variant={selectedPlan === plan.id ? 'primary' : 'default'}
                 borderRadius={28}
               >
                 {plan.popular && (
                   <PremiumLiquidGlass
                     style={styles.popularBadge}
-                    variant="accent"
-                    colorTint="purple"
+                    variant="primary"
                     borderRadius={16}
                   >
                     <View style={styles.popularContent}>
@@ -215,18 +220,17 @@ export default function PlansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDeep,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 24,
+    // Padding handled by contentContainerStyle
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: 20,
+    marginBottom: SPACING.lg,                   // 20px
   },
   closeButton: {
     width: 44,
@@ -234,16 +238,16 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: COLORS.glassBase,
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: SPACING.xxxl,                 // 48px
   },
   iconContainer: {
     width: 72,
     height: 72,
-    marginBottom: 24,
+    marginBottom: SPACING.xl,                   // 24px
   },
   iconContent: {
     flex: 1,
@@ -251,25 +255,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 34,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    letterSpacing: -1,
-    marginBottom: 12,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    ...TEXT_STYLES.h1Primary,
+    marginBottom: SPACING.sm,                   // 12px
   },
   subtitle: {
-    fontSize: 17,
-    color: Colors.dark.textSecondary,
+    ...TEXT_STYLES.bodyLargeSecondary,
     textAlign: 'center',
-    fontWeight: '500' as const,
-    letterSpacing: 0.3,
   },
   plansContainer: {
-    gap: 24,
-    marginBottom: 32,
+    gap: SPACING.xl,                            // 24px
+    marginBottom: SPACING.xxl,                  // 32px
   },
   planWrapper: {
     marginBottom: 0,
@@ -291,13 +286,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   popularText: {
-    fontSize: 11,
-    fontWeight: '800' as const,
-    color: Colors.dark.text,
-    letterSpacing: 1,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    ...TEXT_STYLES.overlinePrimary,
+    color: COLORS.silverLight,
   },
   planContent: {
     padding: 28,
@@ -309,13 +299,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   planName: {
-    fontSize: 28,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    letterSpacing: -0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 5,
+    ...TEXT_STYLES.h2Primary,
+    color: COLORS.silverLight,
   },
   checkContainer: {
     width: 28,
@@ -330,20 +315,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   price: {
-    fontSize: 40,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    letterSpacing: -1.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    ...TEXT_STYLES.display2Primary,
+    color: COLORS.silverLight,
   },
   credits: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.dark.primaryLight,
+    ...TEXT_STYLES.bodyRegularSecondary,
+    color: COLORS.accent,
     marginTop: 6,
-    letterSpacing: 0.3,
   },
   featuresSection: {
     gap: 16,
@@ -365,19 +343,17 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: Colors.dark.primaryLight,
-    shadowColor: Colors.dark.primaryLight,
+    backgroundColor: COLORS.accent,
+    shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.6,
     shadowRadius: 6,
     elevation: 4,
   },
   featureText: {
+    ...TEXT_STYLES.bodyRegularPrimary,
     flex: 1,
-    fontSize: 16,
-    color: Colors.dark.text,
-    fontWeight: '500' as const,
-    letterSpacing: 0.3,
+    color: COLORS.silverLight,
   },
   footer: {
     position: 'absolute',

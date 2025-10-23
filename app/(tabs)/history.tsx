@@ -6,7 +6,9 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Calendar, Trash2, X, Sparkles } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
-import Colors from '@/constants/colors';
+import GlassPanel from '@/components/GlassPanel';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
@@ -139,11 +141,44 @@ export default function HistoryScreen() {
     }
   };
 
+  // Group history by date
+  const groupedHistory = displayHistory.reduce((acc, item) => {
+    const date = item.createdAt.split(' ')[0]; // Extract date part
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(item);
+    return acc;
+  }, {} as Record<string, typeof displayHistory>);
+
+  const dateGroups = Object.keys(groupedHistory).map(date => ({
+    date,
+    items: groupedHistory[date]
+  }));
+
   return (
     <View style={styles.container}>
-      <LinearGradient colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
+      {/* Deep Sea Glass 4-stop gradient background */}
+      <LinearGradient
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        locations={[0, 0.35, 0.70, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: 120 }]} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: insets.top + 24,
+            paddingBottom: insets.bottom + 120,
+            paddingHorizontal: SPACING.lg  // 20px floating margins
+          }
+        ]}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         <GlassyTitle><Text>History</Text></GlassyTitle>
         {isLoading ? (
           <View style={styles.messagePanel}>
@@ -173,70 +208,70 @@ export default function HistoryScreen() {
             </LinearGradient>
           </View>
         ) : displayHistory.length === 0 ? (
-          <View style={styles.messagePanel}>
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.glassCard}
-            >
-              <View style={styles.glassInner}>
-                <Sparkles size={32} color="rgba(200, 220, 255, 0.8)" />
-                <Text style={styles.messageText}>
-                  <Text>{!user ? 'Sign in to view your generation history' : 'No generations yet. Start creating!'}</Text>
-                </Text>
-              </View>
-            </LinearGradient>
-          </View>
+          <GlassPanel style={styles.emptyState}>
+            <Sparkles size={32} color={COLORS.silverMid} />
+            <Text style={styles.emptyText}>No history yet</Text>
+            <Text style={styles.emptySubtext}>
+              {!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
+            </Text>
+          </GlassPanel>
         ) : (
           <View style={styles.historyList}>
-            {displayHistory.map((generation, index) => (
-              <TouchableOpacity
-                key={generation.id}
-                onPress={() => handleGenerationPress(generation)}
-                activeOpacity={0.92}
-              >
-                <Animated.View style={[styles.generationCard, { opacity: 1, transform: [{ scale: 1 }] }]}>
-                  <LinearGradient
-                    colors={['rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.cardGradient}
+            {dateGroups.map((group, groupIndex) => (
+              <View key={groupIndex} style={styles.dateGroup}>
+                {/* Date Header */}
+                <Text style={styles.dateLabel}>{group.date}</Text>
+
+                {/* History Items for this date */}
+                {group.items.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => handleGenerationPress(item)}
+                    activeOpacity={0.92}
                   >
-                    <View style={styles.cardContent}>
+                    <GlassPanel style={styles.historyCard}>
+                      {/* Header Row */}
                       <View style={styles.cardHeader}>
-                        <View style={styles.dateContainer}>
-                          <LinearGradient
-                            colors={['rgba(200, 220, 255, 0.25)', 'rgba(200, 220, 255, 0.12)']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.dateBadge}
+                        <Text style={styles.timeText}>{item.createdAt.split(' ').slice(1).join(' ')}</Text>
+                        {user && (
+                          <TouchableOpacity
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              setSelectedGeneration(item);
+                              setTimeout(() => handleDeleteGeneration(), 100);
+                            }}
+                            style={styles.deleteButtonSmall}
                           >
-                            <Calendar size={14} color="rgba(200, 220, 255, 0.9)" />
-                            <Text style={styles.dateText}><Text>{generation.createdAt}</Text></Text>
-                          </LinearGradient>
-                        </View>
+                            <Text style={styles.deleteText}>Delete</Text>
+                          </TouchableOpacity>
+                        )}
                       </View>
-                      <View style={styles.imageGrid}>
-                        {generation.imageUrls.slice(0, 4).map((url, imgIndex) => (
-                          <View key={imgIndex} style={styles.imageGridItem}>
-                            <View style={styles.imageFrame}>
-                              <Image source={{ uri: url }} style={styles.historyImage} resizeMode="cover" />
-                              <LinearGradient
-                                colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
-                                style={styles.imageOverlay}
-                              />
-                            </View>
+
+                      {/* Image Grid (horizontal scroll) */}
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.imageRow}
+                      >
+                        {item.imageUrls.map((url, imgIndex) => (
+                          <View key={imgIndex} style={styles.historyImage}>
+                            <Image
+                              source={{ uri: url }}
+                              style={styles.thumbnailImage}
+                              resizeMode="cover"
+                            />
                           </View>
                         ))}
+                      </ScrollView>
+
+                      {/* Footer */}
+                      <View style={styles.cardFooter}>
+                        <Text style={styles.countText}>{item.prompt}</Text>
                       </View>
-                      <View style={styles.generationInfo}>
-                        <Text style={styles.promptText} numberOfLines={2}><Text>{generation.prompt}</Text></Text>
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </Animated.View>
-              </TouchableOpacity>
+                    </GlassPanel>
+                  </TouchableOpacity>
+                ))}
+              </View>
             ))}
           </View>
         )}
@@ -367,14 +402,99 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark.backgroundDeep },
-  scrollView: { flex: 1 },
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    padding: 24,
+    paddingBottom: SPACING.xxxl,            // Extra padding at bottom
+  },
+  emptyState: {
+    marginTop: SPACING.xxxl,                // 48px
+    paddingVertical: SPACING.xxxl * 1.25,   // 60px
+    paddingHorizontal: SPACING.xxl,         // 32px
+    alignItems: 'center',
+    gap: SPACING.xs,                        // 8px
+  },
+  emptyText: {
+    ...TEXT_STYLES.h4Primary,
+    color: COLORS.silverLight,
+  },
+  emptySubtext: {
+    ...TEXT_STYLES.bodyRegularSecondary,
+    color: COLORS.silverMid,
+    textAlign: 'center',
+  },
+  historyList: {
+    gap: SPACING.xxl,                       // 32px between date groups
+  },
+  dateGroup: {
+    marginBottom: SPACING.xxl,              // 32px
+  },
+  dateLabel: {
+    ...TEXT_STYLES.overlineSecondary,
+    textTransform: 'uppercase',
+    color: COLORS.silverDark,               // Muted for date headers
+    marginBottom: SPACING.md,               // 16px
+    paddingLeft: SPACING.xxs,               // 4px
+  },
+  historyCard: {
+    marginBottom: SPACING.md,               // 16px between cards
+    padding: SPACING.md,                    // 16px internal padding
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,               // 12px
+  },
+  timeText: {
+    ...TEXT_STYLES.labelSecondary,
+    color: COLORS.silverMid,
+  },
+  deleteButtonSmall: {
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,          // 12px
+    borderRadius: SPACING.sm,               // 12px
+    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.30)',
+  },
+  deleteText: {
+    ...TEXT_STYLES.caption,
+    color: COLORS.error,
+    fontWeight: '600',
+  },
+  imageRow: {
+    gap: SPACING.sm,                        // 12px between images
+    paddingBottom: SPACING.xxs,             // 4px
+  },
+  historyImage: {
+    width: 100,
+    height: 133,                            // 3:4 aspect ratio
+    borderRadius: SPACING.md,               // 16px
+    overflow: 'hidden',
+    backgroundColor: COLORS.glassBase,
+  },
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardFooter: {
+    marginTop: SPACING.sm,                  // 12px
+    paddingTop: SPACING.sm,                 // 12px
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  countText: {
+    ...TEXT_STYLES.captionMuted,
+    color: COLORS.silverDark,
   },
   messagePanel: {
-    marginTop: 32,
-    marginBottom: 32,
+    marginTop: SPACING.xxl,                 // 32px
+    marginBottom: SPACING.xxl,              // 32px
   },
   glassCard: {
     borderRadius: 32,
@@ -421,116 +541,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
-  },
-  historyList: { gap: 28 },
-  generationCard: {
-    overflow: 'hidden',
-  },
-  cardGradient: {
-    borderRadius: 32,
-    padding: 3,
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.7,
-    shadowRadius: 40,
-    elevation: 20,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.45)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
-    borderRightColor: 'rgba(255, 255, 255, 0.22)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  cardContent: {
-    backgroundColor: 'rgba(15, 20, 30, 0.65)',
-    borderRadius: 30,
-    padding: 22,
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.18)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  dateContainer: {
-    overflow: 'hidden',
-    borderRadius: 16,
-  },
-  dateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(200, 220, 255, 0.35)',
-    borderLeftColor: 'rgba(200, 220, 255, 0.28)',
-    borderRightColor: 'rgba(200, 220, 255, 0.15)',
-    borderBottomColor: 'rgba(200, 220, 255, 0.1)',
-  },
-  dateText: {
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontSize: 13,
-    fontWeight: '700' as const,
-    letterSpacing: 0.4,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  imageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-  imageGridItem: {
-    width: (SCREEN_WIDTH - 110) / 2,
-    aspectRatio: 3 / 4,
-  },
-  imageFrame: {
-    flex: 1,
-    borderRadius: 22,
-    overflow: 'hidden',
-    borderWidth: 3,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: 'rgba(0, 0, 0, 0.6)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    elevation: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  historyImage: { width: '100%', height: '100%' },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '45%',
-  },
-  generationInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 6,
-  },
-  promptText: {
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontSize: 16,
-    fontWeight: '700' as const,
-    letterSpacing: 0.3,
-    lineHeight: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 5,
   },
   modalOverlay: {
     flex: 1,

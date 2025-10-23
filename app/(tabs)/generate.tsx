@@ -5,10 +5,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import Colors from '@/constants/colors';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import GlassyTitle from '@/components/GlassyTitle';
+import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
 import GlowingButton from '@/components/GlowingButton';
@@ -107,31 +109,37 @@ export default function GenerateScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Multi-layer background with depth */}
+      {/* Deep Sea Glass 4-stop gradient background */}
       <LinearGradient
-        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
-        locations={[0, 0.35, 0.7, 1]}
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        locations={[0, 0.35, 0.70, 1]}
         style={StyleSheet.absoluteFill}
       />
       <View style={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 100 }]}>
-        {/* Title */}
+        {/* Title with Credit Badge */}
         <View style={styles.titleSection}>
           <GlassyTitle><Text>Generate</Text></GlassyTitle>
+          {/* Credit Badge - top-right corner */}
+          <GlassPanel style={styles.creditBadge}>
+            <Text style={styles.creditText}>{user?.credits || 0} credits</Text>
+          </GlassPanel>
         </View>
 
-
-        {/* Count Selector */}
+        {/* Count Selector Section */}
         <View style={styles.selectorSection}>
+          <Text style={styles.sectionLabel}>NUMBER OF VARIATIONS</Text>
           <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
         </View>
 
-        {/* Image Uploader - takes remaining space */}
+        {/* Image Uploader Section - flex to fill remaining space */}
         <View style={styles.uploaderSection}>
+          <Text style={styles.sectionLabel}>UPLOAD PHOTO</Text>
           <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
         </View>
 
-        {/* Generate Button */}
+        {/* Generate Button Section */}
         <View style={styles.buttonSection}>
+          <Text style={styles.sectionLabel}>GENERATE</Text>
           <GlowingButton
             onPress={handleGenerate}
             disabled={isGenerating}
@@ -147,24 +155,40 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDeep
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,              // 20px floating margins
   },
   titleSection: {
-    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.xl,                   // 24px
+  },
+  creditBadge: {
+    paddingVertical: SPACING.xs,                // 8px
+    paddingHorizontal: SPACING.md,              // 16px
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  creditText: {
+    ...TEXT_STYLES.labelPrimary,
+    color: COLORS.silverLight,
+  },
+  sectionLabel: {
+    ...TEXT_STYLES.overlineSecondary,
+    textTransform: 'uppercase',
+    color: COLORS.silverMid,
+    marginBottom: SPACING.sm,                   // 12px
+    paddingLeft: SPACING.xxs,                   // 4px
   },
   selectorSection: {
-    marginBottom: 20,
+    marginBottom: SPACING.xl,                   // 24px
   },
   uploaderSection: {
     flex: 1,
-    marginBottom: 20,
-    minHeight: 280,
-    maxHeight: 420,
+    marginBottom: SPACING.xl,                   // 24px
   },
   buttonSection: {
     marginBottom: 0,

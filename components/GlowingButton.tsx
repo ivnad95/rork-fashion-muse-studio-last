@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { COLORS, RADIUS } from '@/constants/glassStyles';
 
 interface GlowingButtonProps {
   onPress?: () => void;
@@ -19,18 +20,26 @@ interface GlowingButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
-  variant?: 'default' | 'primary' | 'small' | 'success' | 'warning' | 'danger' | 'ghost';
+  variant?: 'default' | 'primary' | 'small' | 'ghost';
   icon?: React.ReactNode;
   testID?: string;
 }
 
 /**
  * GlowingButton - Deep Sea Glass button component
- * Matches design specification:
- * - Frosted white glass background
- * - Active state uses lightColor3 (#0A76AF) accent
- * - Text: 14-18px semi-bold, silverLight color
- * - Success/Warning/Danger variants with color-matched glows
+ *
+ * Variants:
+ * - default: Standard glass button with white borders
+ * - primary: Accent (#0A76AF) glow with animated pulse
+ * - small: Compact size for secondary actions
+ * - ghost: Ultra-minimal transparent variant
+ *
+ * Features:
+ * - Blur intensity 28 (standardized)
+ * - Multi-layer glass structure (outer border + inner surface + top highlight)
+ * - Animated scale on press (spring physics)
+ * - Haptic feedback on mobile
+ * - Accent glow animation (2-second loop) for primary variant
  */
 export default function GlowingButton({
   onPress,
@@ -46,47 +55,29 @@ export default function GlowingButton({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.5)).current;
 
-  // Variant color configurations
+  // Simplified variant configurations (only default, primary, ghost, small)
   const variantColors = {
     default: {
-      glow: 'rgba(255, 255, 255, 0.6)',
-      shadow: 'rgba(255, 255, 255, 0.4)',
+      glow: 'rgba(255, 255, 255, 0.60)',
+      shadow: 'rgba(0, 0, 0, 0.45)',
       gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
       accentGradient: null,
     },
     primary: {
-      glow: 'rgba(10, 118, 175, 0.6)',
-      shadow: 'rgba(10, 118, 175, 0.4)',
+      glow: 'rgba(10, 118, 175, 0.60)',     // Accent glow
+      shadow: 'rgba(10, 118, 175, 0.70)',   // Accent shadow
       gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
       accentGradient: ['rgba(10, 118, 175, 0.25)', 'rgba(10, 118, 175, 0.15)', 'rgba(10, 118, 175, 0.08)'] as const,
     },
-    success: {
-      glow: 'rgba(74, 222, 128, 0.6)',
-      shadow: 'rgba(74, 222, 128, 0.4)',
-      gradient: ['rgba(74, 222, 128, 0.25)', 'rgba(74, 222, 128, 0.15)', 'rgba(74, 222, 128, 0.08)'] as const,
-      accentGradient: ['rgba(74, 222, 128, 0.30)', 'rgba(74, 222, 128, 0.18)', 'rgba(74, 222, 128, 0.10)'] as const,
-    },
-    warning: {
-      glow: 'rgba(251, 191, 36, 0.6)',
-      shadow: 'rgba(251, 191, 36, 0.4)',
-      gradient: ['rgba(251, 191, 36, 0.25)', 'rgba(251, 191, 36, 0.15)', 'rgba(251, 191, 36, 0.08)'] as const,
-      accentGradient: ['rgba(251, 191, 36, 0.30)', 'rgba(251, 191, 36, 0.18)', 'rgba(251, 191, 36, 0.10)'] as const,
-    },
-    danger: {
-      glow: 'rgba(239, 68, 68, 0.6)',
-      shadow: 'rgba(239, 68, 68, 0.4)',
-      gradient: ['rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.08)'] as const,
-      accentGradient: ['rgba(239, 68, 68, 0.30)', 'rgba(239, 68, 68, 0.18)', 'rgba(239, 68, 68, 0.10)'] as const,
-    },
     ghost: {
-      glow: 'rgba(255, 255, 255, 0.3)',
-      shadow: 'rgba(255, 255, 255, 0.2)',
+      glow: 'rgba(255, 255, 255, 0.30)',
+      shadow: 'rgba(0, 0, 0, 0.30)',
       gradient: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.01)'] as const,
       accentGradient: null,
     },
     small: {
-      glow: 'rgba(255, 255, 255, 0.6)',
-      shadow: 'rgba(255, 255, 255, 0.4)',
+      glow: 'rgba(255, 255, 255, 0.60)',
+      shadow: 'rgba(0, 0, 0, 0.45)',
       gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
       accentGradient: null,
     },
@@ -94,8 +85,9 @@ export default function GlowingButton({
 
   const activeVariantColors = variantColors[variant] || variantColors.default;
 
+  // Animated glow pulse for primary variant only
   useEffect(() => {
-    if (!disabled && ['primary', 'success', 'warning', 'danger'].includes(variant)) {
+    if (!disabled && variant === 'primary') {
       const animation = Animated.loop(
         Animated.sequence([
           Animated.timing(glowAnim, {
@@ -143,27 +135,6 @@ export default function GlowingButton({
     styles.container,
     variant === 'small' && styles.containerSmall,
     variant === 'primary' && styles.containerPrimary,
-    variant === 'success' && {
-      shadowColor: activeVariantColors.shadow,
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.8,
-      shadowRadius: 32,
-      elevation: 16,
-    },
-    variant === 'warning' && {
-      shadowColor: activeVariantColors.shadow,
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.8,
-      shadowRadius: 32,
-      elevation: 16,
-    },
-    variant === 'danger' && {
-      shadowColor: activeVariantColors.shadow,
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.8,
-      shadowRadius: 32,
-      elevation: 16,
-    },
     variant === 'ghost' && styles.containerGhost,
     style,
   ];
@@ -178,8 +149,8 @@ export default function GlowingButton({
       ]}
       testID={testID ?? 'glowing-button'}
     >
-      {/* Outer glow ring for primary/success/warning/danger variants */}
-      {['primary', 'success', 'warning', 'danger'].includes(variant) && !disabled && (
+      {/* Outer glow ring for primary variant only */}
+      {variant === 'primary' && !disabled && (
         <Animated.View
           style={[
             styles.glowRing,
@@ -190,9 +161,9 @@ export default function GlowingButton({
         >
           <LinearGradient
             colors={[
-              activeVariantColors.glow.replace('0.6', '0.4'),
-              activeVariantColors.glow,
-              activeVariantColors.glow.replace('0.6', '0.4'),
+              'rgba(10, 118, 175, 0.40)', // Accent glow - edges
+              'rgba(10, 118, 175, 0.60)', // Accent glow - center
+              'rgba(10, 118, 175, 0.40)', // Accent glow - edges
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -213,11 +184,11 @@ export default function GlowingButton({
         <View style={styles.outerBorder}>
           {/* Inner glass surface */}
           <View style={styles.innerContainer}>
-            {/* Blur layer */}
+            {/* Blur layer (standardized intensity 28) */}
             {Platform.OS === 'web' ? (
               <View style={styles.blurLayerWeb} />
             ) : (
-              <BlurView intensity={25} tint="dark" style={styles.blurLayer} />
+              <BlurView intensity={28} tint="dark" style={styles.blurLayer} />
             )}
 
             {/* Base gradient overlay */}
@@ -268,7 +239,7 @@ export default function GlowingButton({
 const styles = StyleSheet.create({
   container: {
     minHeight: 64,
-    borderRadius: 32,
+    borderRadius: RADIUS.xxxl,              // 32px for buttons
     overflow: 'visible',
     position: 'relative',
   },
@@ -277,48 +248,48 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   containerPrimary: {
-    shadowColor: 'rgba(10, 118, 175, 0.6)',
+    shadowColor: COLORS.shadowAccent,       // Accent shadow for primary
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.90,
     shadowRadius: 32,
     elevation: 16,
   },
   containerGhost: {
-    shadowColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: COLORS.shadowBlack,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.30,
     shadowRadius: 16,
     elevation: 6,
   },
   glowRing: {
     position: 'absolute',
     inset: -10,
-    borderRadius: 40,
+    borderRadius: 42,                       // Slightly larger than container
     overflow: 'hidden',
   },
   glowGradient: {
     flex: 1,
-    borderRadius: 40,
+    borderRadius: 42,
   },
   touchable: {
     flex: 1,
     position: 'relative',
-    borderRadius: 32,
+    borderRadius: RADIUS.xxxl,
     overflow: 'hidden',
   },
   outerBorder: {
     flex: 1,
-    borderRadius: 32,
+    borderRadius: RADIUS.xxxl,
     padding: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: COLORS.glassBase,
     borderWidth: 2.5,
     borderTopColor: 'rgba(255, 255, 255, 0.30)',
     borderLeftColor: 'rgba(255, 255, 255, 0.24)',
     borderRightColor: 'rgba(255, 255, 255, 0.14)',
     borderBottomColor: 'rgba(255, 255, 255, 0.10)',
-    shadowColor: '#000',
+    shadowColor: COLORS.shadowBlack,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.45,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -378,14 +349,14 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   text: {
-    color: '#F5F7FA',
+    color: COLORS.silverLight,              // #F8FAFC primary text
     fontSize: 17,
     fontWeight: '700' as const,
     lineHeight: 22,
     letterSpacing: -0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.60)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   textSmall: {
     fontSize: 14,
@@ -393,11 +364,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   textPrimary: {
-    color: '#FFFFFF',
+    color: COLORS.silverLight,
     fontWeight: '800' as const,
     fontSize: 19,
     letterSpacing: -0.6,
-    textShadowColor: 'rgba(10, 118, 175, 0.8)',           // Spec: accent color glow for primary
+    textShadowColor: COLORS.accentGlow,     // Accent glow for primary button
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 16,
   },

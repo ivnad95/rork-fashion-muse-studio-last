@@ -1,8 +1,7 @@
 import React from 'react';
 import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { glassStyles } from '@/constants/glassStyles';
-import Colors from '@/constants/colors';
+import { glassStyles, COLORS, RADIUS } from '@/constants/glassStyles';
 
 interface GlassPanelProps {
   children: React.ReactNode;
@@ -12,48 +11,91 @@ interface GlassPanelProps {
   testID?: string;
 }
 
-export default function GlassPanel({ children, style, radius = 28, intensity = 30, testID }: GlassPanelProps) {
+/**
+ * GlassPanel - Deep Sea Glass surface component
+ *
+ * Features:
+ * - Standardized blur intensity (28) for authentic frosted glass
+ * - 3-layer shadow system (ambient, direct, contact)
+ * - Top highlight gradient (40% height) for glossy effect
+ * - Platform-specific blur handling (BlurView vs fallback)
+ *
+ * @param children - Content to render inside panel
+ * @param style - Additional custom styles
+ * @param radius - Border radius (default: 24px for panels)
+ * @param intensity - Blur intensity (default: 28)
+ * @param testID - Test identifier
+ */
+export default function GlassPanel({
+  children,
+  style,
+  radius = RADIUS.xl,
+  intensity = 28,
+  testID,
+}: GlassPanelProps) {
   return (
     <View
       style={[
         glassStyles.glass3DSurface,
         {
           borderRadius: radius,
-          shadowColor: Colors.dark.shadowBlue, // Blue-tinted shadow for premium glass effect
-          shadowOffset: { width: 0, height: 20 },
-          shadowOpacity: 0.8,
-          shadowRadius: 35,
-          elevation: 20,
         },
         style,
       ]}
       testID={testID ?? 'glass-panel'}
     >
+      {/* Blur layer (native) or fallback (web) */}
       {Platform.OS === 'web' ? (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: radius }]} />
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: COLORS.glassBase,
+              borderRadius: radius,
+            },
+          ]}
+        />
       ) : (
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        React.createElement(require('expo-blur').BlurView, { intensity, style: [StyleSheet.absoluteFill, { borderRadius: radius }] })
+        React.createElement(require('expo-blur').BlurView, {
+          intensity,
+          tint: 'dark',
+          style: [StyleSheet.absoluteFill, { borderRadius: radius }],
+        })
       )}
+
+      {/* Top highlight gradient (40% height, glossy shine effect) */}
       <LinearGradient
-        colors={['rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.03)', 'transparent']}
+        colors={[
+          'rgba(255, 255, 255, 0.35)', // Top - brightest
+          'rgba(255, 255, 255, 0.10)', // Mid - fading
+          'rgba(255, 255, 255, 0.05)', // Bottom - subtle
+          'transparent',                // Fade to nothing
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 0.5 }}
-        style={[styles.topHighlight, { borderTopLeftRadius: radius, borderTopRightRadius: radius }]}
+        style={[
+          styles.topHighlight,
+          {
+            borderTopLeftRadius: radius,
+            borderTopRightRadius: radius,
+          },
+        ]}
       />
+
+      {/* Inner gradient overlay (subtle depth) */}
       <LinearGradient
-        colors={['rgba(255, 255, 255, 0.18)', 'transparent', 'rgba(255, 255, 255, 0.12)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[styles.sideReflection, { borderRadius: radius }]}
-      />
-      <LinearGradient
-        colors={['transparent', 'rgba(0, 0, 0, 0.2)']}
+        colors={[
+          'rgba(255, 255, 255, 0.05)', // Top
+          'transparent',                // Mid
+          'rgba(0, 0, 0, 0.10)',       // Bottom - subtle shadow
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={[styles.innerShadow, { borderBottomLeftRadius: radius, borderBottomRightRadius: radius }]}
+        style={[styles.innerGradient, { borderRadius: radius }]}
       />
-      <View style={[styles.edgeHighlight, { borderRadius: radius }]} />
+
+      {/* Content layer */}
       <View style={styles.content}>{children}</View>
     </View>
   );
@@ -69,32 +111,15 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
+    height: '40%', // 40% height for glossy top shine
     zIndex: 1,
   },
-  sideReflection: {
+  innerGradient: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 2,
-  },
-  innerShadow: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '25%',
-    zIndex: 3,
-  },
-  edgeHighlight: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    zIndex: 4,
   },
 });

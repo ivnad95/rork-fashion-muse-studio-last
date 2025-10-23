@@ -1,262 +1,276 @@
 import { StyleSheet } from 'react-native';
 
+// Deep Sea Glass Color Constants
 export const COLORS = {
-  // Deep Sea Glass color palette
-  bgColor: '#0A133B',        // Deep navy blue background
-  lightColor1: '#002857',    // Gradient start
-  lightColor2: '#004b93',    // Gradient midpoint
-  lightColor3: '#0A76AF',    // Accent/Active state
-  silverLight: '#F5F7FA',    // Primary text/icons
-  silverMid: '#C8CDD5',      // Secondary text/icons
-  silverDark: '#8A92A0',     // Tertiary text/chips
-  silverGlow: 'rgba(245, 247, 250, 0.45)',
-  shadowColor: 'rgba(0,0,0,0.6)',
-  glassHighlight: 'rgba(255, 255, 255, 0.1)',
-  glassReflection: 'rgba(255, 255, 255, 0.03)',
-  glassShadow: 'rgba(0, 0, 0, 0.35)',
+  // Background colors
+  bgDeepest: '#060D28',
+  bgDeep: '#0A133B',
+  bgMid: '#0D1A48',
+  bgBase: '#0F2055',
 
-  // Color-matched shadows for premium glass effects
-  shadowBlue: 'rgba(200, 220, 255, 0.5)',
-  shadowPurple: 'rgba(200, 150, 255, 0.5)',
-  shadowTeal: 'rgba(100, 220, 220, 0.5)',
-  shadowWarm: 'rgba(255, 200, 150, 0.5)',
+  // Text colors (silver/white spectrum)
+  silverLight: '#F8FAFC',              // Primary text
+  silverMid: '#CBD5E1',                // Secondary text
+  silverDark: '#94A3B8',               // Tertiary text
+  silverGlow: 'rgba(248, 250, 252, 0.40)',
+
+  // Accent color (single accent only)
+  accent: '#0A76AF',
+  accentLight: '#38BDF8',
+  accentDark: '#075985',
+  accentGlow: 'rgba(10, 118, 175, 0.60)',
+
+  // Glass surface colors
+  glassBase: 'rgba(255, 255, 255, 0.03)',
+  glassHighlight: 'rgba(255, 255, 255, 0.35)',
+  glassReflection: 'rgba(255, 255, 255, 0.05)',
+
+  // Border colors (gradient from top to bottom)
+  borderTop: 'rgba(255, 255, 255, 0.25)',
+  borderLeft: 'rgba(255, 255, 255, 0.18)',
+  borderRight: 'rgba(255, 255, 255, 0.08)',
+  borderBottom: 'rgba(255, 255, 255, 0.04)',
+
+  // Shadow colors
+  shadowBlack: 'rgba(0, 0, 0, 0.45)',
+  shadowAccent: 'rgba(10, 118, 175, 0.70)',
+
+  // State colors
+  success: '#4ADE80',
+  warning: '#FCD34D',
+  error: '#F87171',
+};
+
+// Standardized spacing constants
+export const SPACING = {
+  xxs: 4,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 32,
+  xxxl: 48,
+};
+
+// Standardized border radius
+export const RADIUS = {
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 28,
+  xxxl: 32,
+  full: 9999,
 };
 
 export const glassStyles = StyleSheet.create({
+  // Main glass surface (panels, cards) with 3-layer shadow system
   glass3DSurface: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',  // Spec: extremely low opacity white
+    backgroundColor: COLORS.glassBase,
     borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.12)',    // Spec: subtle light border with gradient
-    borderLeftColor: 'rgba(255, 255, 255, 0.10)',
-    borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 24,                               // Spec: 24px border radius for main panels
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.65,
-    shadowRadius: 35,                               // Multiple shadow layers for depth
-    elevation: 20,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    borderRadius: RADIUS.xl,                        // 24px for main panels
+    // Layer 1: Ambient shadow (large, diffused)
+    shadowColor: COLORS.shadowBlack,
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 0.45,
+    shadowRadius: 48,
+    elevation: 24,
     overflow: 'hidden',
   },
+
+  // Interactive button surface with medium elevation
   glass3DButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 24,                               // Spec: 24px border radius for consistency
+    borderRadius: RADIUS.xxl,                       // 28px for buttons
     borderWidth: 2,
     borderTopColor: 'rgba(255, 255, 255, 0.32)',
     borderLeftColor: 'rgba(255, 255, 255, 0.24)',
     borderRightColor: 'rgba(255, 255, 255, 0.14)',
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: '#000',
+    // Layer 2: Direct shadow (medium elevation)
+    shadowColor: COLORS.shadowBlack,
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
-    shadowRadius: 22,
+    shadowOpacity: 0.60,
+    shadowRadius: 24,
     elevation: 12,
     overflow: 'hidden',
   },
+
+  // Default button text style
   buttonText: {
     color: COLORS.silverMid,
     fontWeight: '600' as const,
-    textShadowColor: COLORS.shadowColor,
+    textShadowColor: 'rgba(0, 0, 0, 0.60)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
+
+  // Active button state with accent glow
   activeButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    borderTopColor: 'rgba(255, 255, 255, 0.55)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.4)',
-    borderRightColor: 'rgba(255, 255, 255, 0.28)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.22)',
-    shadowColor: 'rgba(255, 255, 255, 0.85)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 20,
-    elevation: 15,
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',    // Accent background tint
+    borderTopColor: 'rgba(10, 118, 175, 0.55)',
+    borderLeftColor: 'rgba(10, 118, 175, 0.45)',
+    borderRightColor: 'rgba(10, 118, 175, 0.30)',
+    borderBottomColor: 'rgba(10, 118, 175, 0.20)',
+    // Accent glow shadow
+    shadowColor: COLORS.shadowAccent,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.90,
+    shadowRadius: 32,
+    elevation: 16,
   },
+
+  // Active button text with neon glow
   activeButtonText: {
     color: COLORS.silverLight,
-    textShadowColor: COLORS.silverGlow,
+    textShadowColor: COLORS.accentGlow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 16,
+  },
+  // Count selector chip (inactive)
+  numberChip: {
+    width: 56,
+    height: 56,
+    borderRadius: RADIUS.xxl,                       // 28px (circular)
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.22)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
+    borderRightColor: 'rgba(255, 255, 255, 0.10)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    // Layer 3: Contact shadow (small elements)
+    shadowColor: COLORS.shadowBlack,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.50,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+
+  // Count selector chip (active) - accent glow
+  activeNumberChip: {
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',
+    borderTopColor: 'rgba(10, 118, 175, 0.55)',
+    borderLeftColor: 'rgba(10, 118, 175, 0.45)',
+    borderRightColor: 'rgba(10, 118, 175, 0.30)',
+    borderBottomColor: 'rgba(10, 118, 175, 0.20)',
+    shadowColor: COLORS.shadowAccent,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.80,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+
+  // Active chip text
+  activeNumberChipText: {
+    color: COLORS.silverLight,
+    textShadowColor: COLORS.accentGlow,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 12,
   },
-  numberChip: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeNumberChip: {
-    backgroundColor: COLORS.silverDark,
-  },
-  activeNumberChipText: {
-    color: '#333',
-    textShadowColor: 'transparent',
-  },
+
+  // Primary button dimensions
   primaryButton: {
     height: 50,
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  // Primary button text
   primaryButtonText: {
     fontSize: 18,
+    fontWeight: '700' as const,
   },
+
+  // Delete button (error state)
   deleteButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 80, 80, 0.15)',
+    borderRadius: RADIUS.lg,
+    backgroundColor: 'rgba(248, 113, 113, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 150, 150, 0.15)'
+    borderColor: 'rgba(248, 113, 113, 0.25)',
   },
+
+  // Delete button text
   deleteButtonText: {
-    color: 'rgba(255, 150, 150, 1)',
+    color: COLORS.error,
+    fontWeight: '600' as const,
   },
+  // Screen layout styles
   screenContent: {
     flex: 1,
-    padding: 20,
+    padding: SPACING.lg,
     paddingBottom: 100,
   },
+
+  // Title section
   titleContainer: {
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 20,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderRadius: RADIUS.lg,
   },
+
+  // Title text with neon glow
   titleText: {
-    color: '#fff',
+    color: COLORS.silverLight,
     fontSize: 36,
     fontWeight: '700' as const,
     lineHeight: 40,
-    textShadowColor: 'rgba(0,0,0,0.35)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    letterSpacing: -1.0,
+    textShadowColor: COLORS.silverGlow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
+
+  // Panel container
   panelContainer: {
-    padding: 20,
-    borderRadius: 24,                               // Spec: 24px border radius for main panels
+    padding: SPACING.lg,
+    borderRadius: RADIUS.xl,
   },
+
+  // Image placeholder
   imagePlaceholder: {
     width: '100%',
     aspectRatio: 4 / 5,
-    borderRadius: 24,                               // Spec: 24px border radius for main panels
-    marginBottom: 16,
+    borderRadius: RADIUS.xl,
+    marginBottom: SPACING.md,
     overflow: 'hidden',
   },
+
+  // Image container
   imageContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  // Loading spinner
   loader: {
     width: 32,
     height: 32,
     borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderTopColor: COLORS.silverMid,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COLORS.accent,
     borderRadius: 16,
   },
+
+  // Loading overlay
   loadingPulse: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-
-  // Colored shadow variants for premium glass effects
-  shadowBlue: {
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.8,
-    shadowRadius: 35,
-    elevation: 20,
-  },
-  shadowPurple: {
-    shadowColor: 'rgba(200, 150, 255, 0.5)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.8,
-    shadowRadius: 35,
-    elevation: 20,
-  },
-  shadowTeal: {
-    shadowColor: 'rgba(100, 220, 220, 0.5)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.8,
-    shadowRadius: 35,
-    elevation: 20,
-  },
-  shadowWarm: {
-    shadowColor: 'rgba(255, 200, 150, 0.5)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.8,
-    shadowRadius: 35,
-    elevation: 20,
-  },
-
-  // Gradient border styles for colored glass variants
-  borderGradientBlue: {
-    borderTopColor: 'rgba(150, 180, 240, 0.35)',
-    borderLeftColor: 'rgba(150, 180, 240, 0.28)',
-    borderRightColor: 'rgba(150, 180, 240, 0.15)',
-    borderBottomColor: 'rgba(150, 180, 240, 0.08)',
-  },
-  borderGradientPurple: {
-    borderTopColor: 'rgba(180, 150, 240, 0.35)',
-    borderLeftColor: 'rgba(180, 150, 240, 0.28)',
-    borderRightColor: 'rgba(180, 150, 240, 0.15)',
-    borderBottomColor: 'rgba(180, 150, 240, 0.08)',
-  },
-  borderGradientTeal: {
-    borderTopColor: 'rgba(100, 220, 220, 0.35)',
-    borderLeftColor: 'rgba(100, 220, 220, 0.28)',
-    borderRightColor: 'rgba(100, 220, 220, 0.15)',
-    borderBottomColor: 'rgba(100, 220, 220, 0.08)',
-  },
-  borderGradientWarm: {
-    borderTopColor: 'rgba(240, 200, 150, 0.35)',
-    borderLeftColor: 'rgba(240, 200, 150, 0.28)',
-    borderRightColor: 'rgba(240, 200, 150, 0.15)',
-    borderBottomColor: 'rgba(240, 200, 150, 0.08)',
-  },
-
-  // Enhanced button variants with colored glows
-  buttonSuccess: {
-    backgroundColor: 'rgba(74, 222, 128, 0.12)',
-    borderTopColor: 'rgba(74, 222, 128, 0.35)',
-    borderLeftColor: 'rgba(74, 222, 128, 0.28)',
-    borderRightColor: 'rgba(74, 222, 128, 0.15)',
-    borderBottomColor: 'rgba(74, 222, 128, 0.08)',
-    shadowColor: 'rgba(74, 222, 128, 0.4)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.7,
-    shadowRadius: 22,
-    elevation: 12,
-  },
-  buttonWarning: {
-    backgroundColor: 'rgba(251, 191, 36, 0.12)',
-    borderTopColor: 'rgba(251, 191, 36, 0.35)',
-    borderLeftColor: 'rgba(251, 191, 36, 0.28)',
-    borderRightColor: 'rgba(251, 191, 36, 0.15)',
-    borderBottomColor: 'rgba(251, 191, 36, 0.08)',
-    shadowColor: 'rgba(251, 191, 36, 0.4)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.7,
-    shadowRadius: 22,
-    elevation: 12,
-  },
-  buttonDanger: {
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
-    borderTopColor: 'rgba(239, 68, 68, 0.35)',
-    borderLeftColor: 'rgba(239, 68, 68, 0.28)',
-    borderRightColor: 'rgba(239, 68, 68, 0.15)',
-    borderBottomColor: 'rgba(239, 68, 68, 0.08)',
-    shadowColor: 'rgba(239, 68, 68, 0.4)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.7,
-    shadowRadius: 22,
-    elevation: 12,
   },
 });

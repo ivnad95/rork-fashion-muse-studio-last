@@ -1,33 +1,36 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, Animated, Easing, ViewStyle, DimensionValue } from 'react-native';
+import { COLORS, RADIUS } from '@/constants/glassStyles';
 
 interface ShimmerLoaderProps {
-  width?: number | string;
-  height?: number;
+  width?: DimensionValue;
+  height?: DimensionValue;
   borderRadius?: number;
-  style?: any;
+  style?: ViewStyle;
 }
 
 export default function ShimmerLoader({
   width = '100%',
-  height = 200,
-  borderRadius = 20,
+  height = '100%',
+  borderRadius = RADIUS.xl,
   style,
 }: ShimmerLoaderProps) {
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // 2-second loop animation (1 second forward, 1 second back)
     const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(shimmerAnim, {
           toValue: 1,
           duration: 1500,
+          easing: Easing.linear,
           useNativeDriver: true,
         }),
         Animated.timing(shimmerAnim, {
           toValue: 0,
           duration: 1500,
+          easing: Easing.linear,
           useNativeDriver: true,
         }),
       ])
@@ -41,66 +44,24 @@ export default function ShimmerLoader({
     outputRange: [-300, 300],
   });
 
-  const opacity = shimmerAnim.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.3, 0.8, 0.3],
-  });
-
   return (
     <View
       style={[
         styles.container,
         {
-          width,
-          height,
           borderRadius,
         },
         style,
+        width !== undefined && { width },
+        height !== undefined && { height },
       ]}
     >
-      {/* Base gradient - Premium blue dark */}
-      <LinearGradient
-        colors={[
-          'rgba(20, 30, 50, 0.85)',
-          'rgba(30, 50, 80, 0.75)',
-          'rgba(40, 70, 110, 0.65)',
-          'rgba(30, 50, 80, 0.75)',
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-
-      {/* Animated shimmer overlay */}
+      {/* Animated shimmer sweep */}
       <Animated.View
         style={[
-          styles.shimmerOverlay,
+          styles.shimmer,
           {
-            opacity,
             transform: [{ translateX }],
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={[
-            'transparent',
-            'rgba(160, 200, 255, 0.15)',
-            'rgba(180, 210, 255, 0.25)',
-            'rgba(160, 200, 255, 0.15)',
-            'transparent',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.shimmerGradient}
-        />
-      </Animated.View>
-
-      {/* Glass effect borders */}
-      <View
-        style={[
-          styles.border,
-          {
-            borderRadius,
           },
         ]}
       />
@@ -110,28 +71,19 @@ export default function ShimmerLoader({
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: COLORS.glassBase,          // 'rgba(255, 255, 255, 0.03)'
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    position: 'relative',
-  },
-  shimmerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: -100,
-    right: -100,
-    bottom: 0,
-    width: '120%',
-  },
-  shimmerGradient: {
-    flex: 1,
-  },
-  border: {
-    position: 'absolute',
-    inset: 0,
+    // Subtle border to match glass panels
     borderWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.15)',
     borderLeftColor: 'rgba(255, 255, 255, 0.12)',
     borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  shimmer: {
+    width: 300,
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',  // Shimmer sweep color
+    transform: [{ skewX: '-20deg' }],
   },
 });
