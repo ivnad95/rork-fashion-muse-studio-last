@@ -229,7 +229,7 @@ We may modify these Terms at any time. When we make changes:
 ## Dispute Resolution
 
 ### Governing Law
-These Terms are governed by and construed in accordance with the laws of [Your Jurisdiction] (Update with actual jurisdiction), without regard to conflict of law principles.
+These Terms are governed by and construed in accordance with the laws of the State of California, United States, without regard to conflict of law principles.
 
 ### Informal Resolution
 Before filing a claim, you agree to try to resolve disputes informally by contacting us at support@fashionmusestudio.com (Update with actual email).
