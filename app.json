@@ -20,7 +20,19 @@
         "NSPhotoLibraryUsageDescription": "Fashion Muse Studio needs access to your photos to transform them into professional fashion photoshoots using AI",
         "NSCameraUsageDescription": "Fashion Muse Studio needs camera access so you can take photos to transform into professional fashion images",
         "NSPhotoLibraryAddUsageDescription": "Fashion Muse Studio needs permission to save your AI-generated fashion photos to your photo library",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
+      },
+      "entitlements": {
+        "com": {
+          "apple": {
+            "security": {
+              "application-groups": [
+                "group.com.myapp"
+              ]
+            }
+          }
+        }
       }
     },
     "android": {
@@ -40,7 +52,16 @@
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
         "android.permission.ACCESS_MEDIA_LOCATION",
         "android.permission.INTERNET",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_VISUAL_USER_SELECTED",
+        "ACCESS_MEDIA_LOCATION"
       ]
     },
     "web": {
