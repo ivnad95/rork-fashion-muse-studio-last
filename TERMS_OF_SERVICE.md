@@ -277,7 +277,7 @@ We shall not be liable for any failure or delay in performance due to circumstan
 
 If you have questions, concerns, or disputes regarding these Terms:
 
-**Email:** support@fashionmusestudio.com (Update with actual support email)
+**Email:** help@fashionmusestudio.com
 **App Version:** 1.0.0
 **Developer:** Rork Platform (Update with actual developer name)
 **Address:** [Update with actual business address if applicable]
