@@ -470,8 +470,7 @@ export default function SettingsScreen() {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // TODO: Replace with actual hosted URL before App Store submission
-    const privacyUrl = 'https://yourwebsite.com/privacy-policy';
+    const privacyUrl = 'https://fashion-muse-studio-6377.taskade.app/privacy-policy';
     try {
       await WebBrowser.openBrowserAsync(privacyUrl);
     } catch (error) {
@@ -487,8 +486,7 @@ export default function SettingsScreen() {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // TODO: Replace with actual hosted URL before App Store submission
-    const termsUrl = 'https://yourwebsite.com/terms-of-service';
+    const termsUrl = 'https://fashion-muse-studio-6377.taskade.app/terms-of-service';
     try {
       await WebBrowser.openBrowserAsync(termsUrl);
     } catch (error) {

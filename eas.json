@@ -48,9 +48,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "YOUR_ASC_APP_ID",
-        "appleTeamId": "YOUR_TEAM_ID"
+        "appleId": "viniciusivan95@gmail.com",
+        "ascAppId": "6754341478",
+        "appleTeamId": "4H392MY238"
       },
       "android": {
         "serviceAccountKeyPath": "./path/to/api-key.json",
@@ -58,4 +58,23 @@
       }
     }
   },
+  "notes": {
+    "ios_submission": "Apple credentials configured. Remaining requirements before App Store submission:",
+    "configured": [
+      "✅ appleId: viniciusivan95@gmail.com",
+      "✅ ascAppId: 6754341478",
+      "✅ appleTeamId: 4H392MY238",
+      "✅ Privacy Policy URL: https://fashion-muse-studio-6377.taskade.app/privacy-policy",
+      "✅ Terms of Service URL: https://fashion-muse-studio-6377.taskade.app/terms-of-service"
+    ],
+    "remaining_requirements": [
+      "⏳ Host Privacy Policy at the configured URL",
+      "⏳ Host Terms of Service at the configured URL",
+      "⏳ Create app screenshots for 6.7\", 6.5\", 5.5\" displays (3-10 each)",
+      "⏳ Complete App Store metadata in App Store Connect",
+      "⏳ Complete device testing (iPhone SE, iPhone 15 Pro Max)",
+      "⏳ Submit to TestFlight for beta testing",
+      "⏳ Submit for App Store review"
+    ]
+  }
 }
