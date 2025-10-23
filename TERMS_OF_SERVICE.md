@@ -232,7 +232,7 @@ We may modify these Terms at any time. When we make changes:
 These Terms are governed by and construed in accordance with the laws of the State of California, United States, without regard to conflict of law principles.
 
 ### Informal Resolution
-Before filing a claim, you agree to try to resolve disputes informally by contacting us at support@fashionmusestudio.com (Update with actual email).
+Before filing a claim, you agree to try to resolve disputes informally by contacting us at help@fashionmusestudio.com.
 
 ### Arbitration Agreement (If Applicable)
 [Add arbitration clause if applicable in your jurisdiction]
