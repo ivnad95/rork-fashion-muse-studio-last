@@ -14,6 +14,7 @@ import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
 import GlowingButton from '@/components/GlowingButton';
+import StyleSelector from '@/components/StyleSelector';
 import * as haptics from '@/utils/haptics';
 
 export default function GenerateScreen() {
@@ -23,6 +24,7 @@ export default function GenerateScreen() {
   const { showToast } = useToast();
   const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
   const [uploading, setUploading] = useState<boolean>(false);
+  const [selectedStyleId, setSelectedStyleId] = useState<string>('casual');
 
   const handleImageSelect = async () => {
     try {
@@ -97,6 +99,12 @@ export default function GenerateScreen() {
             <Text style={styles.creditText}>{user?.credits || 0} credits</Text>
           </GlassPanel>
         </View>
+
+        {/* Style Selector Section */}
+        <StyleSelector
+          selectedStyleId={selectedStyleId}
+          onSelectStyle={setSelectedStyleId}
+        />
 
         {/* Count Selector Section */}
         <View style={styles.selectorSection}>

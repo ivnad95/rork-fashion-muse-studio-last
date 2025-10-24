@@ -28,6 +28,7 @@ import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlassPanel from '@/components/GlassPanel';
 import GlowingButton from '@/components/GlowingButton';
 import GlassyTitle from '@/components/GlassyTitle';
+import ThemePicker from '@/components/ThemePicker';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 import * as haptics from '@/utils/haptics';
 
@@ -325,6 +326,7 @@ export default function SettingsScreen() {
   const [authPassword, setAuthPassword] = useState('');
   const [authName, setAuthName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState('ocean');
 
   const toggleNotifications = () => {
     haptics.light();
@@ -701,6 +703,20 @@ export default function SettingsScreen() {
                 label="Toggle cloud storage"
               />
             </SettingsRow>
+          </View>
+        </PremiumLiquidGlass>
+
+        <PremiumLiquidGlass style={styles.settingsPanel} variant="default" borderRadius={24}>
+          <View style={styles.panelContent}>
+            <Text style={styles.sectionTitle}>Appearance</Text>
+            <ThemePicker
+              selectedThemeId={selectedTheme}
+              onSelectTheme={(themeId) => {
+                haptics.medium();
+                setSelectedTheme(themeId);
+                showToast(`Theme changed to ${themeId}`, 'success');
+              }}
+            />
           </View>
         </PremiumLiquidGlass>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,6 +8,8 @@ import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import EmptyState from '@/components/EmptyState';
 import FavoriteButton from '@/components/FavoriteButton';
+import SearchBar from '@/components/SearchBar';
+import FilterChips, { FilterOption } from '@/components/FilterChips';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
@@ -18,6 +20,13 @@ import * as haptics from '@/utils/haptics';
 import { downloadImage, shareImage } from '@/utils/download';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const FILTER_OPTIONS: FilterOption[] = [
+  { id: 'all', label: 'All', color: '#60A5FA' },
+  { id: 'today', label: 'Today', color: '#10B981' },
+  { id: 'week', label: 'This Week', color: '#8B5CF6' },
+  { id: 'month', label: 'This Month', color: '#F59E0B' },
+];
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
@@ -30,6 +39,8 @@ export default function HistoryScreen() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
@@ -93,6 +104,41 @@ export default function HistoryScreen() {
     aspectRatio: 'portrait' as const,
     createdAt: `${h.date} ${h.time}`,
   })) : (!user ? mockHistory : []);
+
+  // Filter history based on search and filter
+  const filteredHistory = useMemo(() => {
+    let filtered = displayHistory;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.createdAt.toLowerCase().includes(query) ||
+        item.prompt.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply date filter
+    if (selectedFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.createdAt);
+
+        if (selectedFilter === 'today') {
+          return itemDate.toDateString() === now.toDateString();
+        } else if (selectedFilter === 'week') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return itemDate >= weekAgo;
+        } else if (selectedFilter === 'month') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          return itemDate >= monthAgo;
+        }
+        return true;
+      });
+    }
+
+    return filtered;
+  }, [displayHistory, searchQuery, selectedFilter]);
 
   const handleGenerationPress = (generation: typeof displayHistory[0]) => {
     haptics.light();
@@ -167,14 +213,14 @@ export default function HistoryScreen() {
   };
 
   // Group history by date
-  const groupedHistory = displayHistory.reduce((acc, item) => {
+  const groupedHistory = filteredHistory.reduce((acc, item) => {
     const date = item.createdAt.split(' ')[0]; // Extract date part
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(item);
     return acc;
-  }, {} as Record<string, typeof displayHistory>);
+  }, {} as Record<string, typeof filteredHistory>);
 
   const dateGroups = Object.keys(groupedHistory).map(date => ({
     date,
@@ -208,6 +254,21 @@ export default function HistoryScreen() {
         scrollEventThrottle={16}
       >
         <GlassyTitle><Text>History</Text></GlassyTitle>
+
+        {/* Search Bar */}
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search history..."
+        />
+
+        {/* Filter Chips */}
+        <FilterChips
+          options={FILTER_OPTIONS}
+          selectedId={selectedFilter}
+          onSelect={setSelectedFilter}
+        />
+
         {isLoading ? (
           <View style={styles.messagePanel}>
             <LinearGradient
@@ -235,7 +296,7 @@ export default function HistoryScreen() {
               </View>
             </LinearGradient>
           </View>
-        ) : displayHistory.length === 0 ? (
+        ) : filteredHistory.length === 0 ? (
           <EmptyState
             icon={Sparkles}
             title="No history yet"
