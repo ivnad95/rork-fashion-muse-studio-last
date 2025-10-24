@@ -128,8 +128,8 @@ function TabButton({
   });
 
   const getIcon = (routeName: string) => {
-    // Active state: updated accent, inactive: more subtle
-    const color = isFocused ? COLORS.accent : 'rgba(226, 232, 240, 0.5)';  // More muted inactive
+    // Active state: accent (#0A76AF), inactive: silverMid
+    const color = isFocused ? COLORS.accent : COLORS.silverMid;
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -316,31 +316,31 @@ const styles = StyleSheet.create({
   },
   outerGlow: {
     position: 'absolute',
-    inset: -3,                                          // Reduced from -4
-    borderRadius: 39,
-    backgroundColor: 'rgba(14, 165, 233, 0.10)',        // Updated accent, more subtle
-    shadowColor: COLORS.shadowAccent,                   // Updated accent shadow
-    shadowOffset: { width: 0, height: 8 },              // Reduced from 12
-    shadowOpacity: 0.60,                                // Reduced from 0.90
-    shadowRadius: 20,                                   // Reduced from 28
-    elevation: 10,
+    inset: -4,
+    borderRadius: 40,
+    backgroundColor: 'rgba(10, 118, 175, 0.15)',        // Accent background tint
+    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.90,
+    shadowRadius: 28,
+    elevation: 12,
   },
   tabBarContainer: {
-    height: 68,                                         // Slightly reduced from 72
-    borderRadius: 34,                                   // Adjusted
+    height: 72,
+    borderRadius: 36,
     backgroundColor: COLORS.glassBase,
-    borderWidth: 1,                                     // Reduced from 2.5
+    borderWidth: 2.5,
     borderTopColor: COLORS.borderTop,
     borderLeftColor: COLORS.borderLeft,
     borderRightColor: COLORS.borderRight,
     borderBottomColor: COLORS.borderBottom,
     overflow: 'hidden',
-    // Simplified shadow
+    // 3-layer shadow system
     shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 12 },             // Reduced from 20
-    shadowOpacity: 0.60,                                // Reduced from 0.65
-    shadowRadius: 28,                                   // Reduced from 40
-    elevation: 14,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.65,
+    shadowRadius: 40,
+    elevation: 20,
     position: 'relative',
   },
   tabBarBlurWeb: {
@@ -375,35 +375,35 @@ const styles = StyleSheet.create({
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -8,                                          // Reduced from -10
-    borderRadius: 34,
-    backgroundColor: 'rgba(14, 165, 233, 0.18)',        // Updated accent, more subtle
-    shadowColor: COLORS.shadowAccent,                   // Updated accent shadow
-    shadowOffset: { width: 0, height: 3 },              // Reduced from 4
-    shadowOpacity: 0.70,                                // Reduced from 0.90
-    shadowRadius: 12,                                   // Reduced from 16
-    elevation: 6,
+    inset: -10,
+    borderRadius: 36,
+    backgroundColor: 'rgba(10, 118, 175, 0.25)',        // Accent background tint
+    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.90,
+    shadowRadius: 16,
+    elevation: 8,
   },
   glowInner: {
     flex: 1,
-    borderRadius: 34,
+    borderRadius: 36,
   },
   buttonContainer: {
-    width: 48,                                          // Reduced from 52
-    height: 48,                                         // Reduced from 52
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',       // More subtle
-    borderWidth: 1,                                     // Reduced from 1.5
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',        // More subtle
-    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
-    borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.20)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 3 },              // Reduced from 4
-    shadowOpacity: 0.40,                                // Reduced from 0.45
-    shadowRadius: 6,                                    // Reduced from 8
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });
