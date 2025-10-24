@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Colors from '@/constants/colors';
 import { GenerationProvider } from '@/contexts/GenerationContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AuthSplash from '@/components/AuthSplash';
 
@@ -66,13 +67,15 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <GenerationProvider>
-          <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.dark.backgroundDeep }}>
-            <RootLayoutNav />
-          </GestureHandlerRootView>
-        </GenerationProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <GenerationProvider>
+            <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.dark.backgroundDeep }}>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
+          </GenerationProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }

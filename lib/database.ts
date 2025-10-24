@@ -119,11 +119,23 @@ async function createTables() {
       created_at INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
-    
+
+    -- Favorites table
+    CREATE TABLE IF NOT EXISTS favorites (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      image_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
+      UNIQUE(user_id, image_id)
+    );
+
     -- Create indexes for better performance
     CREATE INDEX IF NOT EXISTS idx_images_user_id ON images(user_id);
     CREATE INDEX IF NOT EXISTS idx_history_user_id ON history(user_id);
     CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
   `);
 }
 
@@ -164,6 +176,13 @@ export interface Transaction {
   amount: number;
   type: 'purchase' | 'deduction' | 'refund';
   description: string | null;
+  created_at: number;
+}
+
+export interface Favorite {
+  id: string;
+  user_id: string;
+  image_id: string;
   created_at: number;
 }
 
@@ -503,4 +522,82 @@ export async function verifyPassword(password: string, stored: string): Promise<
     password + salt
   );
   return passwordHash === hash;
+}
+
+// Favorites operations
+export async function addFavorite(userId: string, imageId: string): Promise<Favorite> {
+  if (!isDatabaseSupported()) {
+    throw new Error('Favorites are not supported on web platform.');
+  }
+  const db = getDatabase();
+  const id = await generateId('fav');
+  const now = Date.now();
+
+  await db.runAsync(
+    `INSERT INTO favorites (id, user_id, image_id, created_at)
+     VALUES (?, ?, ?, ?)`,
+    [id, userId, imageId, now]
+  );
+
+  return {
+    id,
+    user_id: userId,
+    image_id: imageId,
+    created_at: now,
+  };
+}
+
+export async function removeFavorite(userId: string, imageId: string): Promise<void> {
+  if (!isDatabaseSupported()) {
+    throw new Error('Favorites are not supported on web platform.');
+  }
+  const db = getDatabase();
+
+  await db.runAsync(
+    `DELETE FROM favorites WHERE user_id = ? AND image_id = ?`,
+    [userId, imageId]
+  );
+}
+
+export async function isFavorite(userId: string, imageId: string): Promise<boolean> {
+  if (!isDatabaseSupported()) {
+    return false;
+  }
+  const db = getDatabase();
+
+  const result = await db.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM favorites WHERE user_id = ? AND image_id = ?`,
+    [userId, imageId]
+  );
+
+  return (result?.count ?? 0) > 0;
+}
+
+export async function getUserFavorites(userId: string): Promise<(Favorite & { image: Image })[]> {
+  if (!isDatabaseSupported()) {
+    return [];
+  }
+  const db = getDatabase();
+
+  const favorites = await db.getAllAsync<Favorite & { image: Image }>(
+    `SELECT f.*, i.*
+     FROM favorites f
+     JOIN images i ON f.image_id = i.id
+     WHERE f.user_id = ?
+     ORDER BY f.created_at DESC`,
+    [userId]
+  );
+
+  return favorites;
+}
+
+export async function toggleFavorite(userId: string, imageId: string): Promise<boolean> {
+  const isFav = await isFavorite(userId, imageId);
+  if (isFav) {
+    await removeFavorite(userId, imageId);
+    return false;
+  } else {
+    await addFavorite(userId, imageId);
+    return true;
+  }
 }
