@@ -1,0 +1,265 @@
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { 
+  initDatabase, 
+  getUserByEmail, 
+  getUserById, 
+  createUser as dbCreateUser, 
+  updateUser as dbUpdateUser,
+  updateUserCredits as dbUpdateUserCredits,
+  hashPassword,
+  verifyPassword,
+} from '@/lib/database';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  profileImage: string | null;
+  credits: number;
+  isGuest?: boolean;
+}
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+interface AuthContextType extends AuthState {
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<User>) => Promise<void>;
+  updateCredits: (amount: number) => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const STORAGE_KEY = '@fashion_ai_user_session';
+const GUEST_CREDITS_KEY = '@fashion_ai_guest_credits';
+const INITIAL_GUEST_CREDITS = 50;
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+  });
+
+  useEffect(() => {
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = async () => {
+    try {
+      // Initialize database (safe on web - returns mock)
+      await initDatabase();
+
+      // Load user session
+      const sessionJson = await AsyncStorage.getItem(STORAGE_KEY);
+      if (sessionJson) {
+        const session = JSON.parse(sessionJson);
+
+        // Check if guest user
+        if (session.isGuest) {
+          const creditsStr = await AsyncStorage.getItem(GUEST_CREDITS_KEY);
+          const credits = creditsStr ? parseInt(creditsStr, 10) : INITIAL_GUEST_CREDITS;
+
+          const guestUser: User = {
+            id: 'guest',
+            name: 'Guest',
+            email: '',
+            profileImage: null,
+            credits,
+            isGuest: true,
+          };
+          setState({ user: guestUser, isAuthenticated: false, isLoading: false });
+        } else {
+          // Regular authenticated user
+          const dbUser = await getUserById(session.userId);
+
+          if (dbUser) {
+            const user: User = {
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              profileImage: dbUser.profile_image,
+              credits: dbUser.credits,
+            };
+            setState({ user, isAuthenticated: true, isLoading: false });
+          } else {
+            // Session exists but user not in DB - clear session and create guest
+            await AsyncStorage.removeItem(STORAGE_KEY);
+            await createGuestUser();
+          }
+        }
+      } else {
+        // No session - create guest user
+        await createGuestUser();
+      }
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+      // Fallback to guest mode on error
+      await createGuestUser();
+    }
+  };
+
+  const createGuestUser = async () => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ isGuest: true }));
+      await AsyncStorage.setItem(GUEST_CREDITS_KEY, String(INITIAL_GUEST_CREDITS));
+
+      const guestUser: User = {
+        id: 'guest',
+        name: 'Guest',
+        email: '',
+        profileImage: null,
+        credits: INITIAL_GUEST_CREDITS,
+        isGuest: true,
+      };
+      setState({ user: guestUser, isAuthenticated: false, isLoading: false });
+    } catch (error) {
+      console.error('Error creating guest user:', error);
+      setState({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  };
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    setState((prev) => ({ ...prev, isLoading: true }));
+    
+    try {
+      // Get user from database
+      const dbUser = await getUserByEmail(email);
+      
+      if (!dbUser) {
+        throw new Error('Invalid email or password');
+      }
+      
+      // Verify password
+      const isValid = await verifyPassword(password, dbUser.password_hash);
+      if (!isValid) {
+        throw new Error('Invalid email or password');
+      }
+      
+      const user: User = {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        profileImage: dbUser.profile_image,
+        credits: dbUser.credits,
+      };
+
+      // Save session
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: user.id }));
+      setState({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      setState((prev) => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
+  const signUp = useCallback(async (name: string, email: string, password: string) => {
+    setState((prev) => ({ ...prev, isLoading: true }));
+    
+    try {
+      // Check if user already exists
+      const existingUser = await getUserByEmail(email);
+      if (existingUser) {
+        throw new Error('Email already registered');
+      }
+      
+      // Create user in database
+      const passwordHash = await hashPassword(password);
+      const dbUser = await dbCreateUser(name, email, passwordHash);
+      
+      const user: User = {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        profileImage: dbUser.profile_image,
+        credits: dbUser.credits,
+      };
+
+      // Save session
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ userId: user.id }));
+      setState({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      setState((prev) => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      setState({ user: null, isAuthenticated: false, isLoading: false });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (updates: Partial<User>) => {
+    if (!state.user) return;
+
+    try {
+      // Update in database
+      await dbUpdateUser(state.user.id, {
+        name: updates.name,
+        profile_image: updates.profileImage,
+      });
+      
+      const updatedUser = { ...state.user, ...updates };
+      setState((prev) => ({ ...prev, user: updatedUser }));
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }, [state.user]);
+
+  const updateCredits = useCallback(async (amount: number) => {
+    if (!state.user) return;
+
+    try {
+      const newCredits = Math.max(0, state.user.credits + amount);
+
+      // Update storage based on user type
+      if (state.user.isGuest) {
+        // Save guest credits to AsyncStorage
+        await AsyncStorage.setItem(GUEST_CREDITS_KEY, String(newCredits));
+      } else {
+        // Update database for authenticated user
+        await dbUpdateUserCredits(state.user.id, amount);
+      }
+
+      const updatedUser = { ...state.user, credits: newCredits };
+      setState((prev) => ({ ...prev, user: updatedUser }));
+    } catch (error) {
+      console.error('Error updating credits:', error);
+      throw error;
+    }
+  }, [state.user]);
+
+  const value = useMemo(
+    () => ({
+      ...state,
+      signIn,
+      signUp,
+      signOut,
+      updateProfile,
+      updateCredits,
+    }),
+    [state, signIn, signUp, signOut, updateProfile, updateCredits]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}
