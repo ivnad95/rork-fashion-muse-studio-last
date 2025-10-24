@@ -102,6 +102,7 @@ export default function HistoryScreen() {
   const displayHistory = items.length > 0 ? items.map(h => ({
     id: h.id,
     imageUrls: h.results.length > 0 ? h.results : [h.thumbnail],
+    imageIds: h.imageIds || [],
     prompt: `${h.count} images generated`,
     style: '',
     aspectRatio: 'portrait' as const,
@@ -493,10 +494,10 @@ export default function HistoryScreen() {
                               resizeMode="contain"
                             />
                             {/* Favorite Button */}
-                            {user && (
+                            {user && selectedGeneration.imageIds && selectedGeneration.imageIds[index] && (
                               <View style={styles.modalFavoriteButton}>
                                 <FavoriteButton
-                                  imageId={`history-${selectedGeneration.id}-${index}`}
+                                  imageId={selectedGeneration.imageIds[index]}
                                   size={24}
                                 />
                               </View>

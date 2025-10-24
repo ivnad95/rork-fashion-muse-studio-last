@@ -16,6 +16,7 @@ export interface HistoryItem {
   count: number;
   thumbnail: string;
   results: string[];
+  imageIds: string[];
 }
 
 interface GenerationState {
@@ -24,6 +25,7 @@ interface GenerationState {
   aspectRatio: AspectRatio;
   selectedStyleId: string;
   generatedImages: string[];
+  generatedImageIds: string[];
   isGenerating: boolean;
   error: string | null;
   history: HistoryItem[];
@@ -61,6 +63,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
     aspectRatio: 'portrait',
     selectedStyleId: 'casual',
     generatedImages: [],
+    generatedImageIds: [],
     isGenerating: false,
     error: null,
     history: [],
@@ -83,13 +86,14 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearResults = useCallback(() => {
-    setState((prev) => ({ ...prev, generatedImages: [], error: null }));
+    setState((prev) => ({ ...prev, generatedImages: [], generatedImageIds: [], error: null }));
   }, []);
 
   const deleteImage = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
       generatedImages: prev.generatedImages.filter((_, i) => i !== index),
+      generatedImageIds: prev.generatedImageIds.filter((_, i) => i !== index),
     }));
   }, []);
 
@@ -147,7 +151,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setState((prev) => ({ ...prev, isGenerating: true, error: null, generatedImages: [] }));
+    setState((prev) => ({ ...prev, isGenerating: true, error: null, generatedImages: [], generatedImageIds: [] }));
 
     try {
       const results: string[] = [];
@@ -331,6 +335,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
         ...prev,
         isGenerating: false,
         generatedImages: results,
+        generatedImageIds: imageIds,
         history: historyItems,
       }));
       

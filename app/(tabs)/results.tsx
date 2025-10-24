@@ -136,7 +136,7 @@ export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { generatedImages, isGenerating, generationCount, deleteImage } = useGeneration();
+  const { generatedImages, generatedImageIds, isGenerating, generationCount, deleteImage } = useGeneration();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -177,8 +177,8 @@ export default function ResultsScreen() {
     haptics.light();
     setSelectedImage(img);
     setSelectedImageIndex(index);
-    // Generate a simple image ID from index for favorites
-    setSelectedImageId(`result-${index}-${Date.now()}`);
+    // Use the real database ID from generatedImageIds
+    setSelectedImageId(generatedImageIds[index] || null);
   };
 
   const handleCloseModal = () => {
@@ -297,10 +297,10 @@ export default function ResultsScreen() {
                       resizeMode="cover"
                     />
                     {/* Favorite Button Overlay */}
-                    {user && (
+                    {user && generatedImageIds[i] && (
                       <View style={styles.favoriteOverlay}>
                         <FavoriteButton
-                          imageId={`result-${i}`}
+                          imageId={generatedImageIds[i]}
                           size={20}
                         />
                       </View>

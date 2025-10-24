@@ -404,32 +404,33 @@ export async function getUserHistory(userId: string): Promise<{
   count: number;
   thumbnail: string;
   results: string[];
+  imageIds: string[];  // Add image IDs array
 }[]> {
   if (!isDatabaseSupported()) {
     return [];
   }
   const db = getDatabase();
-  
+
   // Get all history records
   const histories = await db.getAllAsync<History>(
     'SELECT * FROM history WHERE user_id = ? ORDER BY created_at DESC',
     [userId]
   );
-  
+
   // Get images for each history
   const result = [];
   for (const history of histories) {
-    const images = await db.getAllAsync<{ image_data: string }>(
-      `SELECT i.image_data 
-       FROM history_images hi 
-       JOIN images i ON hi.image_id = i.id 
-       WHERE hi.history_id = ? 
+    const images = await db.getAllAsync<{ id: string; image_data: string }>(
+      `SELECT i.id, i.image_data
+       FROM history_images hi
+       JOIN images i ON hi.image_id = i.id
+       WHERE hi.history_id = ?
        ORDER BY hi.order_index`,
       [history.id]
     );
-    
+
     const thumbnail = await getImageById(history.thumbnail_image_id);
-    
+
     result.push({
       id: history.id,
       date: history.date,
@@ -437,9 +438,10 @@ export async function getUserHistory(userId: string): Promise<{
       count: history.count,
       thumbnail: thumbnail?.image_data || '',
       results: images.map(img => img.image_data),
+      imageIds: images.map(img => img.id),  // Include image IDs
     });
   }
-  
+
   return result;
 }
 
