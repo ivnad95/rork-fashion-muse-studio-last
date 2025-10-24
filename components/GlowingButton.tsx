@@ -55,30 +55,30 @@ export default function GlowingButton({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.5)).current;
 
-  // Simplified variant configurations (only default, primary, ghost, small)
+  // Simplified and more subtle variant configurations
   const variantColors = {
     default: {
-      glow: 'rgba(255, 255, 255, 0.60)',
-      shadow: 'rgba(0, 0, 0, 0.45)',
-      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
+      glow: 'rgba(255, 255, 255, 0.40)',
+      shadow: 'rgba(0, 0, 0, 0.50)',
+      gradient: ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.02)'] as const,
       accentGradient: null,
     },
     primary: {
-      glow: 'rgba(10, 118, 175, 0.60)',     // Accent glow
-      shadow: 'rgba(10, 118, 175, 0.70)',   // Accent shadow
-      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
-      accentGradient: ['rgba(10, 118, 175, 0.25)', 'rgba(10, 118, 175, 0.15)', 'rgba(10, 118, 175, 0.08)'] as const,
+      glow: 'rgba(14, 165, 233, 0.45)',     // Updated accent
+      shadow: 'rgba(14, 165, 233, 0.50)',   // Updated accent
+      gradient: ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.02)'] as const,
+      accentGradient: ['rgba(14, 165, 233, 0.18)', 'rgba(14, 165, 233, 0.12)', 'rgba(14, 165, 233, 0.06)'] as const,
     },
     ghost: {
-      glow: 'rgba(255, 255, 255, 0.30)',
-      shadow: 'rgba(0, 0, 0, 0.30)',
-      gradient: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.01)'] as const,
+      glow: 'rgba(255, 255, 255, 0.20)',
+      shadow: 'rgba(0, 0, 0, 0.25)',
+      gradient: ['rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.02)', 'rgba(255, 255, 255, 0.01)'] as const,
       accentGradient: null,
     },
     small: {
-      glow: 'rgba(255, 255, 255, 0.60)',
-      shadow: 'rgba(0, 0, 0, 0.45)',
-      gradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const,
+      glow: 'rgba(255, 255, 255, 0.40)',
+      shadow: 'rgba(0, 0, 0, 0.50)',
+      gradient: ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)', 'rgba(255, 255, 255, 0.02)'] as const,
       accentGradient: null,
     },
   };
@@ -280,29 +280,29 @@ const styles = StyleSheet.create({
   outerBorder: {
     flex: 1,
     borderRadius: RADIUS.xxxl,
-    padding: 3,
+    padding: 2,                                     // Reduced from 3
     backgroundColor: COLORS.glassBase,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.30)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.24)',
-    borderRightColor: 'rgba(255, 255, 255, 0.14)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,                                 // Reduced from 2.5
+    borderTopColor: 'rgba(255, 255, 255, 0.20)',    // Simplified
+    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
+    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },          // Reduced from 8
+    shadowOpacity: 0.50,
+    shadowRadius: 12,                               // Reduced from 16
+    elevation: 6,
   },
   innerContainer: {
     flex: 1,
-    borderRadius: 29,
+    borderRadius: 30,                               // Adjusted
     overflow: 'hidden',
-    backgroundColor: 'rgba(20, 25, 35, 0.6)',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
-    borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(20, 25, 35, 0.5)',       // More transparent
+    borderWidth: 1,                                 // Reduced from 1.5
+    borderTopColor: 'rgba(255, 255, 255, 0.10)',    // More subtle
+    borderLeftColor: 'rgba(255, 255, 255, 0.08)',
+    borderRightColor: 'rgba(255, 255, 255, 0.04)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.02)',
     position: 'relative',
   },
   blurLayer: {
@@ -331,11 +331,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    borderTopLeftRadius: 29,
-    borderTopRightRadius: 29,
-    opacity: 0.6,
+    height: '35%',                                  // Reduced from 40%
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',   // More subtle
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    opacity: 0.5,                                   // More subtle
     zIndex: 4,
   },
   content: {
@@ -349,27 +349,27 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   text: {
-    color: COLORS.silverLight,              // #F8FAFC primary text
-    fontSize: 17,
-    fontWeight: '700' as const,
+    color: COLORS.silverLight,              // Pure white primary text
+    fontSize: 16,                           // Reduced from 17
+    fontWeight: '600' as const,             // Lighter weight
     lineHeight: 22,
-    letterSpacing: -0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.60)',
+    letterSpacing: -0.3,                    // Less tight
+    textShadowColor: 'rgba(0, 0, 0, 0.40)', // More subtle shadow
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 2,                    // Reduced from 3
   },
   textSmall: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: '500' as const,             // Lighter weight
     lineHeight: 18,
   },
   textPrimary: {
     color: COLORS.silverLight,
-    fontWeight: '800' as const,
-    fontSize: 19,
-    letterSpacing: -0.6,
-    textShadowColor: COLORS.accentGlow,     // Accent glow for primary button
+    fontWeight: '700' as const,             // Reduced from 800
+    fontSize: 17,                           // Reduced from 19
+    letterSpacing: -0.4,                    // Less tight
+    textShadowColor: COLORS.accentGlow,     // Updated accent glow
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 16,
+    textShadowRadius: 12,                   // Reduced from 16
   },
 });

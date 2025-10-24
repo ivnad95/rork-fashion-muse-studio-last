@@ -37,13 +37,13 @@ export default function GlassyTitle({ children, style }: GlassyTitleProps) {
 
   return (
     <View style={[styles.container, style]}>
-      {/* Animated glow layer */}
+      {/* Subtle animated glow layer */}
       <Animated.View style={[styles.glowLayer, { opacity: glowOpacity }]}>
         <LinearGradient
           colors={[
-            'rgba(10, 118, 175, 0.3)',                      // Spec: accent color glow
-            'rgba(10, 118, 175, 0.5)',
-            'rgba(10, 118, 175, 0.3)',
+            'rgba(14, 165, 233, 0.20)',                     // Updated refined accent
+            'rgba(14, 165, 233, 0.30)',
+            'rgba(14, 165, 233, 0.20)',
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -52,27 +52,27 @@ export default function GlassyTitle({ children, style }: GlassyTitleProps) {
       </Animated.View>
 
       <GlassPanel style={styles.panel} radius={24}>
-        {/* Gradient overlay for depth */}
+        {/* Subtle gradient overlay */}
         <LinearGradient
           colors={[
-            'rgba(255, 255, 255, 0.05)',
-            'rgba(255, 255, 255, 0.02)',
+            'rgba(255, 255, 255, 0.03)',                    // More subtle
             'rgba(255, 255, 255, 0.01)',
+            'transparent',
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientOverlay}
         />
 
-        {/* Title text with premium styling */}
+        {/* Title text with refined styling */}
         <Text style={styles.titleText}>{children}</Text>
 
-        {/* Gradient text effect overlay (simulated) */}
+        {/* Minimal accent gradient overlay */}
         <LinearGradient
           colors={[
-            'rgba(10, 118, 175, 0.15)',
+            'rgba(14, 165, 233, 0.10)',                     // Updated accent
             'transparent',
-            'rgba(10, 118, 175, 0.10)',
+            'rgba(14, 165, 233, 0.06)',
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -87,23 +87,23 @@ export default function GlassyTitle({ children, style }: GlassyTitleProps) {
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
-    marginBottom: 8,
+    marginBottom: 12,                                   // Increased spacing
   },
   glowLayer: {
     position: 'absolute',
-    inset: -6,
-    borderRadius: 30,
+    inset: -4,                                          // Reduced from -6
+    borderRadius: 28,
     zIndex: 0,
   },
   panel: {
-    padding: 20,
+    padding: 18,                                        // Reduced from 20
     position: 'relative',
     zIndex: 1,
-    shadowColor: 'rgba(10, 118, 175, 0.4)',              // Spec: accent color shadow
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowColor: 'rgba(14, 165, 233, 0.30)',            // Updated accent, more subtle
+    shadowOffset: { width: 0, height: 8 },              // Reduced from 12
+    shadowOpacity: 0.50,                                // Reduced from 0.6
+    shadowRadius: 20,                                   // Reduced from 24
+    elevation: 10,
   },
   gradientOverlay: {
     position: 'absolute',
@@ -112,16 +112,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   titleText: {
-    color: COLORS.silverLight,                            // Spec: near-white text
-    fontSize: 38,
-    fontWeight: '800' as const,
-    lineHeight: 44,
-    letterSpacing: -1.5,
+    color: COLORS.silverLight,                          // Pure white text
+    fontSize: 34,                                       // Reduced from 38
+    fontWeight: '700' as const,                         // Reduced from 800
+    lineHeight: 40,                                     // Adjusted
+    letterSpacing: -1.2,                                // Less tight
     textAlign: 'center',
     zIndex: 10,
-    textShadowColor: 'rgba(10, 118, 175, 0.6)',         // Spec: accent color glow
+    textShadowColor: 'rgba(14, 165, 233, 0.40)',        // Updated accent, more subtle
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 14,                               // Reduced from 20
   },
   textGradientOverlay: {
     position: 'absolute',

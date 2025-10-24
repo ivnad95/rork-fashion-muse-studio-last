@@ -18,136 +18,143 @@ export const FONT_WEIGHTS = {
   extrabold: '800' as const,
 };
 
-// Type scale definitions
+// Refined type scale - better hierarchy for minimalist design
 export const TYPE_SCALE = {
-  // Display (hero text)
+  // Display (hero text) - slightly reduced for elegance
   display1: {
-    fontSize: 48,
+    fontSize: 44,                                   // Reduced from 48
     fontWeight: FONT_WEIGHTS.extrabold,
-    lineHeight: 52,
-    letterSpacing: -1.2,
+    lineHeight: 48,
+    letterSpacing: -1.4,                           // Tighter
   },
   display2: {
-    fontSize: 40,
+    fontSize: 36,                                   // Reduced from 40
     fontWeight: FONT_WEIGHTS.extrabold,
-    lineHeight: 44,
-    letterSpacing: -1.0,
+    lineHeight: 40,
+    letterSpacing: -1.2,
   },
 
-  // Headings
+  // Headings - refined sizing
   h1: {
-    fontSize: 32,
+    fontSize: 30,                                   // Reduced from 32
     fontWeight: FONT_WEIGHTS.bold,
-    lineHeight: 38,
-    letterSpacing: -0.8,
+    lineHeight: 36,
+    letterSpacing: -1.0,
   },
   h2: {
-    fontSize: 28,
+    fontSize: 26,                                   // Reduced from 28
     fontWeight: FONT_WEIGHTS.bold,
-    lineHeight: 34,
-    letterSpacing: -0.7,
+    lineHeight: 32,
+    letterSpacing: -0.8,
   },
   h3: {
-    fontSize: 24,
+    fontSize: 22,                                   // Reduced from 24
     fontWeight: FONT_WEIGHTS.bold,
-    lineHeight: 30,
+    lineHeight: 28,
     letterSpacing: -0.6,
   },
   h4: {
-    fontSize: 20,
+    fontSize: 18,                                   // Reduced from 20
     fontWeight: FONT_WEIGHTS.semibold,
-    lineHeight: 26,
+    lineHeight: 24,
     letterSpacing: -0.4,
   },
 
-  // Body text
+  // Body text - better readability
   bodyLarge: {
-    fontSize: 18,
+    fontSize: 17,                                   // Reduced from 18
     fontWeight: FONT_WEIGHTS.regular,
-    lineHeight: 26,
+    lineHeight: 28,                                 // Increased for better readability (despite reduced font size)
     letterSpacing: -0.2,
   },
   bodyRegular: {
-    fontSize: 16,
+    fontSize: 15,                                   // Reduced from 16
     fontWeight: FONT_WEIGHTS.regular,
     lineHeight: 24,
     letterSpacing: -0.1,
   },
   bodySmall: {
-    fontSize: 14,
+    fontSize: 13,                                   // Reduced from 14
     fontWeight: FONT_WEIGHTS.regular,
     lineHeight: 20,
     letterSpacing: 0,
   },
 
-  // UI elements
+  // UI elements - cleaner sizing
   buttonLarge: {
-    fontSize: 19,
-    fontWeight: FONT_WEIGHTS.extrabold,
+    fontSize: 17,                                   // Reduced from 19
+    fontWeight: FONT_WEIGHTS.bold,                 // Changed from extrabold
     lineHeight: 22,
-    letterSpacing: -0.6,
+    letterSpacing: -0.4,
   },
   buttonRegular: {
-    fontSize: 17,
-    fontWeight: FONT_WEIGHTS.bold,
+    fontSize: 16,                                   // Reduced from 17
+    fontWeight: FONT_WEIGHTS.semibold,             // Changed from bold
     lineHeight: 22,
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
   buttonSmall: {
     fontSize: 14,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontWeight: FONT_WEIGHTS.medium,               // Changed from semibold
     lineHeight: 18,
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
 
   label: {
     fontSize: 13,
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontWeight: FONT_WEIGHTS.medium,               // Changed from semibold
     lineHeight: 18,
-    letterSpacing: -0.1,
+    letterSpacing: 0,
   },
   caption: {
     fontSize: 12,
-    fontWeight: FONT_WEIGHTS.medium,
+    fontWeight: FONT_WEIGHTS.regular,              // Changed from medium
     lineHeight: 16,
-    letterSpacing: 0,
+    letterSpacing: 0.2,
   },
   overline: {
-    fontSize: 11,
-    fontWeight: FONT_WEIGHTS.bold,
+    fontSize: 10,                                   // Reduced from 11
+    fontWeight: FONT_WEIGHTS.semibold,             // Changed from bold
     lineHeight: 16,
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,                            // Reduced from 1.5
   },
 };
 
-// Text shadow definitions
+// Refined text shadows - more subtle for minimalist design
 export const TEXT_SHADOWS = {
-  // Primary glow (for headings and important text)
+  // Subtle glow (for headings)
   primaryGlow: {
     textShadowColor: COLORS.silverGlow,
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    textShadowRadius: 6,                          // Reduced from 8
   },
 
-  // Secondary depth (for body text)
+  // Minimal depth (for body text)
   secondaryDepth: {
-    textShadowColor: 'rgba(0, 0, 0, 0.60)',
+    textShadowColor: 'rgba(0, 0, 0, 0.40)',       // More subtle
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 2,                          // Reduced from 3
   },
 
-  // Accent glow (for active states)
+  // Refined accent glow (for active states)
   accentGlow: {
     textShadowColor: COLORS.accentGlow,
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 16,
+    textShadowRadius: 12,                         // Reduced from 16
   },
 
-  // Strong neon glow (for primary CTAs)
+  // Medium accent glow (for primary CTAs)
   strongGlow: {
     textShadowColor: COLORS.accentGlow,
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 24,
+    textShadowRadius: 16,                         // Reduced from 24
+  },
+
+  // No shadow (for clean minimalist text)
+  none: {
+    textShadowColor: 'transparent',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 0,
   },
 };
 
