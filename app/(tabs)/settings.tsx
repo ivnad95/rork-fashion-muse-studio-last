@@ -18,7 +18,9 @@ import * as ImagePicker from 'expo-image-picker';
 import * as WebBrowser from 'expo-web-browser';
 import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles, FileText, Shield } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import { NEU_COLORS, NEU_SPACING, NEU_RADIUS, neumorphicStyles } from '@/constants/neumorphicStyles';
+import { COLORS, SPACING, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
+import GlassContainer from '@/components/GlassContainer';
+import GlassButton from '@/components/GlassButton';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -430,6 +432,12 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={GRADIENTS.background as any}
+        style={StyleSheet.absoluteFill}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -437,7 +445,7 @@ export default function SettingsScreen() {
           {
             paddingTop: insets.top + 24,
             paddingBottom: insets.bottom + 120,
-            paddingHorizontal: NEU_SPACING.lg
+            paddingHorizontal: SPACING.lg
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -447,7 +455,7 @@ export default function SettingsScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[glassStyles.titleText, styles.title]}>Settings</Text>
 
         {!user ? (
           <NeumorphicPanel style={styles.settingsPanel}>
@@ -889,9 +897,9 @@ const styles = StyleSheet.create({
     // Padding added via paddingTop, paddingBottom, paddingHorizontal in the component
   },
   title: {
-    ...neumorphicStyles.neuTitle,
+    ...glassStyles.titleText,
     fontSize: 36,
-    marginBottom: NEU_SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   mainTitle: {
     fontSize: 36,
@@ -919,7 +927,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   creditsLabel: {
-    ...neumorphicStyles.neuTextSecondary,
+    ...glassStyles.textSecondary,
   },
   creditsValue: {
     fontSize: 32,
@@ -1008,7 +1016,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     minHeight: 56,
-    marginBottom: NEU_SPACING.sm,               // 12px between inputs
+    marginBottom: SPACING.sm,               // 12px between inputs
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -1040,11 +1048,11 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   panelContent: {
-    padding: NEU_SPACING.xl,                    // 24px
+    padding: SPACING.xl,                    // 24px
   },
   sectionTitle: {
-    ...neumorphicStyles.neuTextPrimary,
-    marginBottom: NEU_SPACING.lg,               // 20px
+    ...glassStyles.textPrimary,
+    marginBottom: SPACING.lg,               // 20px
   },
   settingRow: {
     flexDirection: 'row',
@@ -1053,12 +1061,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   settingLabel: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
   },
   divider: {
     height: 1,
     backgroundColor: Colors.dark.divider,
-    marginVertical: NEU_SPACING.md,             // 16px
+    marginVertical: SPACING.md,             // 16px
   },
   toggle: {
     width: 80,
@@ -1173,7 +1181,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   logoutText: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
     color: '#d8e9ff',
   },
   dangerRow: {
@@ -1206,8 +1214,8 @@ const styles = StyleSheet.create({
     elevation: 7,
   },
   dangerText: {
-    ...neumorphicStyles.neuTextPrimary,
-    color: NEU_COLORS.error,
+    ...glassStyles.textPrimary,
+    color: COLORS.error,
   },
   footer: {
     alignItems: 'center',
@@ -1215,11 +1223,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   footerText: {
-    ...neumorphicStyles.neuTextSecondary,
+    ...glassStyles.textSecondary,
     fontWeight: '500' as const,
   },
   footerSubtext: {
-    ...neumorphicStyles.neuTextMuted,
+    ...glassStyles.textMuted,
   },
   settingSection: {
     gap: 14,
@@ -1507,6 +1515,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   legalText: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
   },
 });

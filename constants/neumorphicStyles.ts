@@ -1,6 +1,29 @@
 import { StyleSheet } from 'react-native';
 
+/**
+ * @deprecated This file is deprecated. Use glassStyles.ts instead.
+ *
+ * All exports from this file are deprecated and will be removed in a future version.
+ * Please migrate to the new unified design system in constants/glassStyles.ts
+ *
+ * Migration guide:
+ * - NEU_COLORS → COLORS
+ * - NEU_SPACING → SPACING
+ * - NEU_RADIUS → RADIUS
+ * - neumorphicStyles → glassStyles
+ *
+ * Specific mappings:
+ * - NEU_COLORS.accentStart → COLORS.accent
+ * - NEU_COLORS.base → COLORS.bgDeep
+ * - NEU_COLORS.textPrimary → COLORS.textPrimary
+ * - NEU_COLORS.textSecondary → COLORS.textSecondary
+ * - NEU_COLORS.textMuted → COLORS.textMuted
+ * - neumorphicStyles.neuTextPrimary → glassStyles.textPrimary
+ * - neumorphicStyles.neuTitle → glassStyles.titleText
+ */
+
 // Premium Glass Morphism Blue Color Palette - iOS 26 Liquid Glass Style
+/** @deprecated Use COLORS from glassStyles.ts instead */
 export const NEU_COLORS = {
   // Deep blue gradient backgrounds - ultra dark, premium
   bgDeepest: '#0D1929',         // Deepest background - near black blue
@@ -68,6 +91,7 @@ export const NEU_COLORS = {
 };
 
 // Spacing constants
+/** @deprecated Use SPACING from glassStyles.ts instead */
 export const NEU_SPACING = {
   xxs: 4,
   xs: 8,
@@ -80,6 +104,7 @@ export const NEU_SPACING = {
 };
 
 // Border radius (softer, rounder for neumorphic)
+/** @deprecated Use RADIUS from glassStyles.ts instead */
 export const NEU_RADIUS = {
   sm: 12,
   md: 16,
@@ -90,10 +115,11 @@ export const NEU_RADIUS = {
   full: 9999,
 };
 
+/** @deprecated Use glassStyles from glassStyles.ts instead */
 export const neumorphicStyles = StyleSheet.create({
   // Base neumorphic surface (raised/extruded)
   neuSurface: {
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: NEU_COLORS.bgBase,
     borderRadius: NEU_RADIUS.xl,
     // Light shadow (top-left) - creates highlight
     shadowColor: NEU_COLORS.shadowLight,
@@ -121,7 +147,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Neumorphic button (raised)
   neuButton: {
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: NEU_COLORS.bgBase,
     borderRadius: NEU_RADIUS.xxl,
     paddingVertical: 16,
     paddingHorizontal: 32,
@@ -147,7 +173,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Pressed button state (inset/carved)
   neuButtonPressed: {
-    backgroundColor: NEU_COLORS.baseDarker,
+    backgroundColor: NEU_COLORS.bgDeepest,
     // Invert shadows for pressed effect
     shadowColor: NEU_COLORS.innerShadowDark,
     shadowOffset: { width: 2, height: 2 },
@@ -158,7 +184,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Active/selected button with gradient
   neuButtonActive: {
-    backgroundColor: NEU_COLORS.accentStart,
+    backgroundColor: NEU_COLORS.accentStart || '#58A9E6',
     shadowColor: NEU_COLORS.accentGlow,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
@@ -168,7 +194,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Card/panel container
   neuCard: {
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: NEU_COLORS.bgBase,
     borderRadius: NEU_RADIUS.xl,
     padding: NEU_SPACING.lg,
     shadowColor: NEU_COLORS.shadowLight,
@@ -195,7 +221,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Inset/carved panel (for inputs, displays)
   neuInset: {
-    backgroundColor: NEU_COLORS.baseDarker,
+    backgroundColor: NEU_COLORS.bgDeepest,
     borderRadius: NEU_RADIUS.lg,
     padding: NEU_SPACING.md,
     // Inner shadows
@@ -208,7 +234,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Small chip/badge
   neuChip: {
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: NEU_COLORS.bgBase,
     borderRadius: NEU_RADIUS.full,
     width: 56,
     height: 56,
@@ -237,12 +263,12 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Active chip
   neuChipActive: {
-    backgroundColor: NEU_COLORS.accentStart,
+    backgroundColor: NEU_COLORS.accentStart || '#58A9E6',
   },
 
   // Pressed chip
   neuChipPressed: {
-    backgroundColor: NEU_COLORS.baseDarker,
+    backgroundColor: NEU_COLORS.bgDeepest,
     shadowColor: NEU_COLORS.innerShadowDark,
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
@@ -290,7 +316,7 @@ export const neumorphicStyles = StyleSheet.create({
   // Container styles
   neuContainer: {
     flex: 1,
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: NEU_COLORS.bgBase,
   },
 
   neuScrollContent: {
@@ -361,7 +387,7 @@ export const neumorphicStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: NEU_COLORS.depthLayer1,
+    backgroundColor: NEU_COLORS.gradient1,
     borderRadius: NEU_RADIUS.xl,
     pointerEvents: 'none',
   },
@@ -373,7 +399,7 @@ export const neumorphicStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: '50%',
-    backgroundColor: NEU_COLORS.depthLayer2,
+    backgroundColor: NEU_COLORS.gradient2,
     borderTopLeftRadius: NEU_RADIUS.xl,
     borderTopRightRadius: NEU_RADIUS.xl,
     pointerEvents: 'none',
@@ -386,7 +412,7 @@ export const neumorphicStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: NEU_COLORS.depthLayer3,
+    backgroundColor: NEU_COLORS.gradient3,
     borderBottomLeftRadius: NEU_RADIUS.xl,
     borderBottomRightRadius: NEU_RADIUS.xl,
     pointerEvents: 'none',
@@ -427,7 +453,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Pressed glass button (inset)
   glassButtonPressed: {
-    backgroundColor: NEU_COLORS.baseDarker,
+    backgroundColor: NEU_COLORS.bgDeepest,
     borderTopColor: 'rgba(0, 0, 0, 0.2)',
     borderLeftColor: 'rgba(0, 0, 0, 0.15)',
     borderRightColor: NEU_COLORS.glassHighlight,
@@ -441,7 +467,7 @@ export const neumorphicStyles = StyleSheet.create({
 
   // Glass inset (for inputs, carved areas)
   glassInset: {
-    backgroundColor: NEU_COLORS.baseDarker,
+    backgroundColor: NEU_COLORS.bgDeepest,
     borderRadius: NEU_RADIUS.lg,
     borderWidth: 1.5,
     borderTopColor: 'rgba(0, 0, 0, 0.2)',

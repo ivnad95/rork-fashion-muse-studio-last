@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Platform, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { NEU_COLORS, NEU_SPACING, neumorphicStyles } from '@/constants/neumorphicStyles';
+import { COLORS, SPACING, GRADIENTS, glassStyles } from '@/constants/glassStyles';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import NeumorphicPanel from '@/components/NeumorphicPanel';
-import NeumorphicButton from '@/components/NeumorphicButton';
+import GlassContainer from '@/components/GlassContainer';
+import GlassButton from '@/components/GlassButton';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
 import StyleSelector from '@/components/StyleSelector';
@@ -76,14 +77,20 @@ export default function GenerateScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={GRADIENTS.background as any}
+        style={StyleSheet.absoluteFill}
+      />
+
       {/* Fixed Header - Title + Credit Badge */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Text style={styles.title}>Generate</Text>
-        <NeumorphicPanel style={styles.creditBadge} noPadding>
+        <Text style={[glassStyles.titleText, styles.title]}>Generate</Text>
+        <GlassContainer variant="card" noPadding style={styles.creditBadge}>
           <View style={styles.creditBadgeInner}>
-            <Text style={styles.creditText}>{user?.credits || 0}</Text>
+            <Text style={[glassStyles.textPrimary, styles.creditText]}>{user?.credits || 0}</Text>
           </View>
-        </NeumorphicPanel>
+        </GlassContainer>
       </View>
 
       {/* Main Content - Flex Fill */}
@@ -107,14 +114,14 @@ export default function GenerateScreen() {
 
         {/* Count Selector - Compact */}
         <View style={styles.selectorSection}>
-          <Text style={styles.sectionLabel}>VARIATIONS</Text>
+          <Text style={[glassStyles.textMuted, styles.sectionLabel]}>VARIATIONS</Text>
           <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
         </View>
       </View>
 
       {/* Fixed Footer - Generate Button */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-        <NeumorphicButton
+        <GlassButton
           title={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
           onPress={handleGenerate}
           disabled={isGenerating}
@@ -130,17 +137,15 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: NEU_COLORS.base,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: NEU_SPACING.lg,
-    paddingBottom: NEU_SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   title: {
-    ...neumorphicStyles.neuTitle,
     fontSize: 32,
     letterSpacing: -1,
   },
@@ -148,18 +153,17 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   creditBadgeInner: {
-    paddingVertical: NEU_SPACING.xs,
-    paddingHorizontal: NEU_SPACING.md,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
   },
   creditText: {
-    ...neumorphicStyles.neuTextPrimary,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '700' as const,
   },
   content: {
     flex: 1,
-    paddingHorizontal: NEU_SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     justifyContent: 'space-evenly',
   },
   styleSection: {
@@ -175,16 +179,15 @@ const styles = StyleSheet.create({
     flex: 0,
   },
   sectionLabel: {
-    ...neumorphicStyles.neuTextMuted,
-    textTransform: 'uppercase',
-    marginBottom: NEU_SPACING.xs,
-    paddingLeft: NEU_SPACING.xxs,
+    textTransform: 'uppercase' as const,
+    marginBottom: SPACING.xs,
+    paddingLeft: SPACING.xxs,
     fontSize: 9,
     letterSpacing: 1.2,
-    fontWeight: '700',
+    fontWeight: '700' as const,
   },
   footer: {
-    paddingHorizontal: NEU_SPACING.lg,
-    paddingTop: NEU_SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
   },
 });

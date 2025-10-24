@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from 'expo-system-ui';
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { NEU_COLORS } from '@/constants/neumorphicStyles';
+import { COLORS } from '@/constants/glassStyles';
 import { GenerationProvider } from '@/contexts/GenerationContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
@@ -25,7 +25,7 @@ function RootLayoutNav() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: NEU_COLORS.base },
+        contentStyle: { backgroundColor: COLORS.bgDeepest },
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -36,8 +36,8 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    // Set system UI to match neumorphic theme
-    SystemUI.setBackgroundColorAsync(NEU_COLORS.base);
+    // Set system UI to match deep blue theme
+    SystemUI.setBackgroundColorAsync(COLORS.bgDeepest);
     SplashScreen.hideAsync();
   }, []);
 
@@ -47,7 +47,7 @@ export default function RootLayout() {
         <ToastProvider>
           <AuthProvider>
             <GenerationProvider>
-              <GestureHandlerRootView style={{ flex: 1, backgroundColor: NEU_COLORS.base }}>
+              <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.bgDeepest }}>
                 <RootLayoutNav />
               </GestureHandlerRootView>
             </GenerationProvider>

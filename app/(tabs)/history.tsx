@@ -10,7 +10,8 @@ import SearchBar from '@/components/SearchBar';
 import FilterChips, { FilterOption } from '@/components/FilterChips';
 import DateRangeFilter, { DateRange } from '@/components/DateRangeFilter';
 import NeumorphicPanel from '@/components/NeumorphicPanel';
-import { NEU_COLORS, NEU_SPACING, NEU_RADIUS, neumorphicStyles } from '@/constants/neumorphicStyles';
+import { COLORS, SPACING, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
+import GlassContainer from '@/components/GlassContainer';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -243,6 +244,12 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={GRADIENTS.background as any}
+        style={StyleSheet.absoluteFill}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -250,7 +257,7 @@ export default function HistoryScreen() {
           {
             paddingTop: insets.top + 24,
             paddingBottom: insets.bottom + 120,
-            paddingHorizontal: NEU_SPACING.lg
+            paddingHorizontal: SPACING.lg
           }
         ]}
         showsVerticalScrollIndicator={false}
@@ -298,7 +305,7 @@ export default function HistoryScreen() {
           <View style={styles.messagePanel}>
             <NeumorphicPanel style={styles.messageCard}>
               <View style={styles.messageContent}>
-                <Sparkles size={32} color={NEU_COLORS.accentStart} />
+                <Sparkles size={32} color={COLORS.accent} />
                 <Text style={styles.messageText}><Text>Loading history...</Text></Text>
               </View>
             </NeumorphicPanel>
@@ -572,30 +579,30 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: COLORS.bgDeep,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: NEU_SPACING.xxxl,
+    paddingBottom: SPACING.xxxl,
   },
   title: {
-    ...neumorphicStyles.neuTitle,
+    ...glassStyles.titleText,
     fontSize: 36,
-    marginBottom: NEU_SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   emptyStateContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: NEU_SPACING.xxxl * 2,
-    paddingHorizontal: NEU_SPACING.xl,
+    paddingTop: SPACING.xxxl * 2,
+    paddingHorizontal: SPACING.xl,
   },
   emptyLogoCard: {
     width: 180,
     height: 180,
-    marginBottom: NEU_SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   emptyLogoWrapper: {
     flex: 1,
@@ -608,88 +615,88 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   emptyTitle: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
     fontSize: 24,
     fontWeight: '600' as const,
-    marginBottom: NEU_SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   emptyDescription: {
-    ...neumorphicStyles.neuTextSecondary,
+    ...glassStyles.textSecondary,
     fontSize: 14,
     textAlign: 'center',
     maxWidth: 300,
     lineHeight: 20,
   },
   historyList: {
-    gap: NEU_SPACING.xxl,
+    gap: SPACING.xxl,
   },
   dateGroup: {
-    marginBottom: NEU_SPACING.xxl,
+    marginBottom: SPACING.xxl,
   },
   dateLabel: {
-    ...neumorphicStyles.neuTextMuted,
+    ...glassStyles.textMuted,
     textTransform: 'uppercase',
-    marginBottom: NEU_SPACING.md,
-    paddingLeft: NEU_SPACING.xxs,
+    marginBottom: SPACING.md,
+    paddingLeft: SPACING.xxs,
     fontSize: 10,
     letterSpacing: 1.5,
     fontWeight: '700',
   },
   historyCard: {
-    marginBottom: NEU_SPACING.md,               // 16px between cards
-    padding: NEU_SPACING.md,                    // 16px internal padding
+    marginBottom: SPACING.md,               // 16px between cards
+    padding: SPACING.md,                    // 16px internal padding
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: NEU_SPACING.sm,               // 12px
+    marginBottom: SPACING.sm,               // 12px
   },
   timeText: {
-    ...neumorphicStyles.neuTextSecondary,
-    color: NEU_COLORS.textSecondary,
+    ...glassStyles.textSecondary,
+    color: COLORS.textSecondary,
   },
   deleteButtonSmall: {
     paddingVertical: 6,
-    paddingHorizontal: NEU_SPACING.sm,          // 12px
-    borderRadius: NEU_SPACING.sm,               // 12px
+    paddingHorizontal: SPACING.sm,          // 12px
+    borderRadius: SPACING.sm,               // 12px
     backgroundColor: 'rgba(248, 113, 113, 0.15)',
     borderWidth: 1,
     borderColor: 'rgba(248, 113, 113, 0.30)',
   },
   deleteText: {
-    ...neumorphicStyles.neuTextMuted,
-    color: NEU_COLORS.error,
+    ...glassStyles.textMuted,
+    color: COLORS.error,
     fontWeight: '600',
   },
   imageRow: {
-    gap: NEU_SPACING.sm,                        // 12px between images
-    paddingBottom: NEU_SPACING.xxs,             // 4px
+    gap: SPACING.sm,                        // 12px between images
+    paddingBottom: SPACING.xxs,             // 4px
   },
   historyImage: {
     width: 100,
     height: 133,                            // 3:4 aspect ratio
-    borderRadius: NEU_SPACING.md,               // 16px
+    borderRadius: SPACING.md,               // 16px
     overflow: 'hidden',
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: COLORS.bgDeep,
   },
   thumbnailImage: {
     width: '100%',
     height: '100%',
   },
   cardFooter: {
-    marginTop: NEU_SPACING.sm,                  // 12px
-    paddingTop: NEU_SPACING.sm,                 // 12px
+    marginTop: SPACING.sm,                  // 12px
+    paddingTop: SPACING.sm,                 // 12px
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
   countText: {
-    ...neumorphicStyles.neuTextMuted,
-    color: NEU_COLORS.textMuted,
+    ...glassStyles.textMuted,
+    color: COLORS.textMuted,
   },
   messagePanel: {
-    marginTop: NEU_SPACING.xxl,                 // 32px
-    marginBottom: NEU_SPACING.xxl,              // 32px
+    marginTop: SPACING.xxl,                 // 32px
+    marginBottom: SPACING.xxl,              // 32px
   },
   messageCard: {
     padding: 48,
@@ -726,7 +733,7 @@ const styles = StyleSheet.create({
   },
   modalBlur: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5, 8, 12, 0.95)',
+    backgroundColor: COLORS.overlay,
   },
   modalContent: {
     width: '100%',
@@ -858,8 +865,8 @@ const styles = StyleSheet.create({
   },
   modalFavoriteButton: {
     position: 'absolute',
-    top: NEU_SPACING.md,
-    right: NEU_SPACING.md,
+    top: SPACING.md,
+    right: SPACING.md,
     zIndex: 10,
   },
   actionButtons: {

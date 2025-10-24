@@ -81,7 +81,7 @@ export default function PlansScreen() {
     <View style={styles.container}>
       {/* Deep Sea Glass 4-stop gradient background */}
       <LinearGradient
-        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
+        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgLight]}
         locations={[0, 0.35, 0.70, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -103,7 +103,7 @@ export default function PlansScreen() {
             onPress={() => router.back()}
             style={styles.closeButton}
           >
-            <X size={24} color={COLORS.silverLight} />
+            <X size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
         </View>
 
@@ -114,7 +114,7 @@ export default function PlansScreen() {
             borderRadius={36}
           >
             <View style={styles.iconContent}>
-              <Sparkles size={32} color={COLORS.silverLight} strokeWidth={2} />
+              <Sparkles size={32} color={COLORS.textPrimary} strokeWidth={2} />
             </View>
           </PremiumLiquidGlass>
           <Text style={styles.title}>Choose Your Plan</Text>
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.glassBase,
+    backgroundColor: COLORS.glassLight,
   },
   titleContainer: {
     alignItems: 'center',
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   popularText: {
     ...TEXT_STYLES.overlinePrimary,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
   },
   planContent: {
     padding: 28,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   planName: {
     ...TEXT_STYLES.h2Primary,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
   },
   checkContainer: {
     width: 28,
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   },
   price: {
     ...TEXT_STYLES.display2Primary,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
   },
   credits: {
     ...TEXT_STYLES.bodyRegularSecondary,
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   featureText: {
     ...TEXT_STYLES.bodyRegularPrimary,
     flex: 1,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
   },
   footer: {
     position: 'absolute',

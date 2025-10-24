@@ -1,48 +1,87 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
-// Deep Sea Glass Color Constants
+// ============================================================================
+// UNIFIED GLASS DESIGN SYSTEM
+// Premium Deep Blue Liquid Glass Aesthetic
+// ============================================================================
+
+// ============================================================================
+// COLOR PALETTE
+// ============================================================================
+
 export const COLORS = {
-  // Background colors - darker, more premium
-  bgDeepest: '#020815',
-  bgDeep: '#030B1F',
-  bgMid: '#050E28',
-  bgBase: '#071235',
+  // Background Gradients (Deep Blue Theme)
+  bgDeepest: '#0A0F1C',        // Darkest - near black blue
+  bgDeep: '#0D1929',           // Deep background - dark navy
+  bgMid: '#1A2F4F',            // Mid background - medium blue
+  bgLight: '#2A3F5F',          // Lighter surface - soft blue
 
-  // Text colors (silver/white spectrum)
-  silverLight: '#F8FAFC',              // Primary text
-  silverMid: '#CBD5E1',                // Secondary text
-  silverDark: '#94A3B8',               // Tertiary text
-  silverGlow: 'rgba(248, 250, 252, 0.40)',
+  // Glass Surface Colors (Transparent with Blue Tint)
+  glassUltraLight: 'rgba(58, 89, 130, 0.15)',     // Ultra-light glass overlay
+  glassLight: 'rgba(42, 73, 114, 0.25)',          // Light glass surface
+  glassMedium: 'rgba(26, 57, 98, 0.35)',          // Medium glass depth
+  glassDark: 'rgba(13, 25, 42, 0.50)',            // Dark glass shadow
 
-  // Accent color (single accent only)
-  accent: '#0A76AF',
-  accentLight: '#38BDF8',
-  accentDark: '#075985',
-  accentGlow: 'rgba(10, 118, 175, 0.60)',
+  // Glass Highlights & Reflections
+  glassHighlight: 'rgba(255, 255, 255, 0.25)',    // Strong top highlight
+  glassShine: 'rgba(255, 255, 255, 0.18)',        // Glossy shine effect
+  glassReflection: 'rgba(200, 220, 255, 0.10)',   // Blue-tinted reflection
+  glassStroke: 'rgba(255, 255, 255, 0.12)',       // Subtle edge stroke
 
-  // Glass surface colors - more refined
-  glassBase: 'rgba(255, 255, 255, 0.02)',
-  glassHighlight: 'rgba(255, 255, 255, 0.45)',
-  glassReflection: 'rgba(255, 255, 255, 0.08)',
-  glassStroke: 'rgba(255, 255, 255, 0.12)',
+  // Border Colors (Light-to-Shadow Gradient)
+  borderTop: 'rgba(255, 255, 255, 0.25)',         // Brightest - top edge
+  borderLeft: 'rgba(255, 255, 255, 0.18)',        // Bright - left edge
+  borderRight: 'rgba(255, 255, 255, 0.08)',       // Subtle - right edge
+  borderBottom: 'rgba(255, 255, 255, 0.04)',      // Darkest - bottom edge
 
-  // Border colors (gradient from top to bottom)
-  borderTop: 'rgba(255, 255, 255, 0.25)',
-  borderLeft: 'rgba(255, 255, 255, 0.18)',
-  borderRight: 'rgba(255, 255, 255, 0.08)',
-  borderBottom: 'rgba(255, 255, 255, 0.04)',
+  // Text Colors (Silver/White Spectrum)
+  textPrimary: '#F8FAFC',          // Primary text - almost white
+  textSecondary: '#CBD5E1',        // Secondary text - light silver
+  textMuted: '#94A3B8',            // Muted text - mid silver
+  textGlow: 'rgba(248, 250, 252, 0.40)',  // Text glow effect
 
-  // Shadow colors
-  shadowBlack: 'rgba(0, 0, 0, 0.45)',
-  shadowAccent: 'rgba(10, 118, 175, 0.70)',
+  // Accent Colors (Bright Sky Blue with Glow)
+  accent: '#38BDF8',               // Primary accent - bright sky blue
+  accentLight: '#7DD3FC',          // Light accent
+  accentDark: '#0EA5E9',           // Dark accent
+  accentGlow: 'rgba(56, 189, 248, 0.70)',  // Accent glow effect
+  accentShadow: 'rgba(56, 189, 248, 0.60)', // Accent shadow
 
-  // State colors
-  success: '#4ADE80',
-  warning: '#FCD34D',
-  error: '#F87171',
+  // Shadow Colors (Layered Depth)
+  shadowLight: 'rgba(88, 122, 166, 0.40)',  // Ambient light shadow
+  shadowMedium: 'rgba(58, 89, 130, 0.60)',  // Medium direct shadow
+  shadowDark: 'rgba(13, 25, 42, 0.80)',     // Deep contact shadow
+  shadowBlack: 'rgba(0, 0, 0, 0.50)',       // Pure black shadow
+
+  // Inner Shadow (Inset/Pressed States)
+  innerShadow: 'rgba(0, 0, 0, 0.35)',
+
+  // State Colors
+  success: '#4ADE80',              // Green
+  warning: '#FCD34D',              // Yellow
+  error: '#F87171',                // Red
+
+  // Overlay Colors
+  overlay: 'rgba(10, 15, 28, 0.92)',        // Dark overlay
+  overlayLight: 'rgba(13, 25, 41, 0.85)',   // Lighter overlay
+
+  // Legacy aliases (for backward compatibility - will be removed in future version)
+  /** @deprecated Use textPrimary instead */
+  silverLight: '#F8FAFC',
+  /** @deprecated Use textSecondary instead */
+  silverMid: '#CBD5E1',
+  /** @deprecated Use textMuted instead */
+  silverDark: '#94A3B8',
+  /** @deprecated Use glassLight instead */
+  glassBase: 'rgba(42, 73, 114, 0.25)',
+  /** @deprecated Use accentShadow instead */
+  shadowAccent: 'rgba(56, 189, 248, 0.60)',
 };
 
-// Standardized spacing constants
+// ============================================================================
+// SPACING SCALE
+// ============================================================================
+
 export const SPACING = {
   xxs: 4,
   xs: 8,
@@ -54,224 +93,628 @@ export const SPACING = {
   xxxl: 48,
 };
 
-// Standardized border radius
+// ============================================================================
+// BORDER RADIUS
+// ============================================================================
+
 export const RADIUS = {
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 28,
-  xxxl: 32,
-  full: 9999,
+  sm: 12,      // Small chips/badges
+  md: 16,      // Small cards
+  lg: 20,      // Medium panels
+  xl: 24,      // Large panels/cards
+  xxl: 28,     // Buttons
+  xxxl: 32,    // Extra large elements
+  full: 9999,  // Circular
 };
 
+// ============================================================================
+// BLUR INTENSITY (Standardized)
+// ============================================================================
+
+export const BLUR = {
+  light: 18,       // Subtle blur for overlays
+  medium: 28,      // Standard glass blur
+  heavy: 40,       // Strong blur for modals
+};
+
+// ============================================================================
+// SHADOW ELEVATION (iOS & Android)
+// ============================================================================
+
+export const SHADOW = {
+  // Low elevation (small elements like chips)
+  low: {
+    shadowColor: COLORS.shadowBlack,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.40,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  // Medium elevation (buttons, small cards)
+  medium: {
+    shadowColor: COLORS.shadowBlack,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.50,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  // High elevation (panels, large cards)
+  high: {
+    shadowColor: COLORS.shadowBlack,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.60,
+    shadowRadius: 32,
+    elevation: 16,
+  },
+  // Accent glow shadow (for active/primary states)
+  accentGlow: {
+    shadowColor: COLORS.accentShadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.80,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+};
+
+// ============================================================================
+// ANIMATION TIMINGS
+// ============================================================================
+
+export const ANIMATION = {
+  // Duration (milliseconds)
+  fast: 150,
+  medium: 300,
+  slow: 500,
+  verySlow: 1000,
+
+  // Spring Physics
+  spring: {
+    // Snappy bounce (buttons, chips)
+    snappy: {
+      friction: 8,
+      tension: 300,
+    },
+    // Smooth bounce (panels, modals)
+    smooth: {
+      friction: 6,
+      tension: 200,
+    },
+    // Gentle bounce (large elements)
+    gentle: {
+      friction: 10,
+      tension: 150,
+    },
+  },
+};
+
+// ============================================================================
+// PLATFORM-SPECIFIC HELPERS
+// ============================================================================
+
+/**
+ * Returns blur configuration or fallback for platform
+ * @param intensity - Blur intensity value (default: 28)
+ * @returns BlurView props or fallback background color
+ */
+export const getBlurStyle = (intensity: number = BLUR.medium) => {
+  if (Platform.OS === 'web') {
+    return {
+      backgroundColor: COLORS.glassMedium,
+      backdropFilter: `blur(${intensity / 2}px)`, // CSS fallback
+    };
+  }
+  return {
+    intensity,
+    tint: 'dark' as const,
+  };
+};
+
+/**
+ * Returns shadow style for platform
+ * iOS: shadowColor, shadowOffset, shadowOpacity, shadowRadius
+ * Android: elevation (automatically converted)
+ */
+export const getPlatformShadow = (
+  elevation: 'low' | 'medium' | 'high' | 'accentGlow'
+) => {
+  return SHADOW[elevation];
+};
+
+// ============================================================================
+// COMPONENT STYLE TEMPLATES
+// ============================================================================
+
 export const glassStyles = StyleSheet.create({
-  // Main glass surface (panels, cards) with 3-layer shadow system
-  glass3DSurface: {
-    backgroundColor: COLORS.glassBase,
+  // --------------------------------------------------------------------------
+  // GLASS PANELS & CARDS
+  // --------------------------------------------------------------------------
+
+  /**
+   * Standard glass panel/card surface
+   * Use for: Main content containers, cards, sections
+   */
+  glassPanel: {
+    backgroundColor: COLORS.glassLight,
+    borderRadius: RADIUS.xl,
     borderWidth: 1.5,
     borderTopColor: COLORS.borderTop,
     borderLeftColor: COLORS.borderLeft,
     borderRightColor: COLORS.borderRight,
     borderBottomColor: COLORS.borderBottom,
-    borderRadius: RADIUS.xl,                        // 24px for main panels
-    // Layer 1: Ambient shadow (large, diffused)
-    shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 24 },
-    shadowOpacity: 0.45,
-    shadowRadius: 48,
-    elevation: 24,
+    ...SHADOW.high,
     overflow: 'hidden',
   },
 
-  // Interactive button surface with medium elevation
-  glass3DButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: RADIUS.xxl,                       // 28px for buttons
+  /**
+   * Compact glass card (smaller padding, medium elevation)
+   * Use for: List items, thumbnails, small info cards
+   */
+  glassCard: {
+    backgroundColor: COLORS.glassLight,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1.5,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    ...SHADOW.medium,
+    overflow: 'hidden',
+    padding: SPACING.md,
+  },
+
+  /**
+   * Inset glass surface (for inputs, carved areas)
+   * Use for: Text inputs, search bars, embedded content
+   */
+  glassInset: {
+    backgroundColor: COLORS.glassDark,
+    borderRadius: RADIUS.md,
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(0, 0, 0, 0.20)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.15)',
+    borderRightColor: COLORS.glassHighlight,
+    borderBottomColor: COLORS.glassHighlight,
+    shadowColor: COLORS.innerShadow,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
+    padding: SPACING.sm,
+  },
+
+  // --------------------------------------------------------------------------
+  // BUTTONS
+  // --------------------------------------------------------------------------
+
+  /**
+   * Standard glass button
+   * Use for: Primary actions, CTAs, navigation buttons
+   */
+  glassButton: {
+    backgroundColor: COLORS.glassLight,
+    borderRadius: RADIUS.xxl,
     borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.32)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.24)',
-    borderRightColor: 'rgba(255, 255, 255, 0.14)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-    // Layer 2: Direct shadow (medium elevation)
-    shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.60,
-    shadowRadius: 24,
-    elevation: 12,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    ...SHADOW.medium,
     overflow: 'hidden',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  // Default button text style
+  /**
+   * Active/selected button state with accent glow
+   * Use for: Selected buttons, active tabs, primary CTAs
+   */
+  glassButtonActive: {
+    backgroundColor: COLORS.glassUltraLight,
+    borderTopColor: `${COLORS.accent}40`,  // 25% opacity
+    borderLeftColor: `${COLORS.accent}30`,
+    borderRightColor: `${COLORS.accent}20`,
+    borderBottomColor: `${COLORS.accent}15`,
+    ...SHADOW.accentGlow,
+  },
+
+  /**
+   * Pressed button state (inset appearance)
+   * Use for: onPressIn state, disabled state
+   */
+  glassButtonPressed: {
+    backgroundColor: COLORS.glassDark,
+    borderTopColor: 'rgba(0, 0, 0, 0.20)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.15)',
+    borderRightColor: COLORS.glassHighlight,
+    borderBottomColor: COLORS.glassHighlight,
+    shadowColor: COLORS.innerShadow,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  /**
+   * Small button variant
+   * Use for: Secondary actions, chips, compact controls
+   */
+  glassButtonSmall: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.lg,
+  },
+
+  /**
+   * Ghost button variant (ultra-minimal)
+   * Use for: Tertiary actions, cancel buttons, subtle controls
+   */
+  glassButtonGhost: {
+    backgroundColor: COLORS.glassUltraLight,
+    borderWidth: 1,
+    ...SHADOW.low,
+  },
+
+  // --------------------------------------------------------------------------
+  // CHIPS & BADGES
+  // --------------------------------------------------------------------------
+
+  /**
+   * Circular chip/badge (e.g., count selector)
+   * Use for: Numeric selectors, circular icons, avatars
+   */
+  glassChip: {
+    width: 56,
+    height: 56,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.glassLight,
+    borderWidth: 2,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    ...SHADOW.low,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /**
+   * Active chip with accent glow
+   */
+  glassChipActive: {
+    backgroundColor: COLORS.glassUltraLight,
+    borderTopColor: `${COLORS.accent}55`,
+    borderLeftColor: `${COLORS.accent}45`,
+    borderRightColor: `${COLORS.accent}30`,
+    borderBottomColor: `${COLORS.accent}20`,
+    ...SHADOW.accentGlow,
+  },
+
+  // --------------------------------------------------------------------------
+  // LAYER EFFECTS (Absolute Positioned Overlays)
+  // --------------------------------------------------------------------------
+
+  /**
+   * Top highlight gradient (glossy 3D effect)
+   * Apply as absolute positioned child (top 35% of parent)
+   */
+  topHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '35%',
+    pointerEvents: 'none',
+  },
+
+  /**
+   * Light refraction layer (blue-tinted glass reflection)
+   * Apply as absolute positioned child
+   */
+  lightRefraction: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: COLORS.glassReflection,
+    pointerEvents: 'none',
+  },
+
+  /**
+   * Edge glow (soft inner glow for premium feel)
+   * Apply as absolute positioned child matching parent bounds
+   */
+  edgeGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: RADIUS.xl,
+    shadowColor: 'rgba(255, 255, 255, 0.1)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    pointerEvents: 'none',
+  },
+
+  // --------------------------------------------------------------------------
+  // TEXT STYLES
+  // --------------------------------------------------------------------------
+
+  textPrimary: {
+    color: COLORS.textPrimary,
+    fontWeight: '700' as const,
+  },
+
+  textSecondary: {
+    color: COLORS.textSecondary,
+    fontWeight: '600' as const,
+  },
+
+  textMuted: {
+    color: COLORS.textMuted,
+    fontWeight: '400' as const,
+  },
+
+  /**
+   * Button text with subtle shadow
+   */
   buttonText: {
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
+    fontSize: 16,
     fontWeight: '600' as const,
     textShadowColor: 'rgba(0, 0, 0, 0.60)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
 
-  // Active button state with accent glow
-  activeButton: {
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',    // Accent background tint
-    borderTopColor: 'rgba(10, 118, 175, 0.55)',
-    borderLeftColor: 'rgba(10, 118, 175, 0.45)',
-    borderRightColor: 'rgba(10, 118, 175, 0.30)',
-    borderBottomColor: 'rgba(10, 118, 175, 0.20)',
-    // Accent glow shadow
-    shadowColor: COLORS.shadowAccent,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.90,
-    shadowRadius: 32,
-    elevation: 16,
-  },
-
-  // Active button text with neon glow
-  activeButtonText: {
-    color: COLORS.silverLight,
-    textShadowColor: COLORS.accentGlow,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 16,
-  },
-  // Count selector chip (inactive)
-  numberChip: {
-    width: 56,
-    height: 56,
-    borderRadius: RADIUS.xxl,                       // 28px (circular)
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.22)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.18)',
-    borderRightColor: 'rgba(255, 255, 255, 0.10)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
-    // Layer 3: Contact shadow (small elements)
-    shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.50,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-
-  // Count selector chip (active) - accent glow
-  activeNumberChip: {
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',
-    borderTopColor: 'rgba(10, 118, 175, 0.55)',
-    borderLeftColor: 'rgba(10, 118, 175, 0.45)',
-    borderRightColor: 'rgba(10, 118, 175, 0.30)',
-    borderBottomColor: 'rgba(10, 118, 175, 0.20)',
-    shadowColor: COLORS.shadowAccent,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.80,
-    shadowRadius: 24,
-    elevation: 12,
-  },
-
-  // Active chip text
-  activeNumberChipText: {
-    color: COLORS.silverLight,
+  /**
+   * Active button text with accent glow
+   */
+  buttonTextActive: {
+    color: COLORS.textPrimary,
+    fontWeight: '700' as const,
     textShadowColor: COLORS.accentGlow,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 12,
   },
 
-  // Primary button dimensions
-  primaryButton: {
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Primary button text
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-  },
-
-  // Delete button (error state)
-  deleteButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(248, 113, 113, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.25)',
-  },
-
-  // Delete button text
-  deleteButtonText: {
-    color: COLORS.error,
-    fontWeight: '600' as const,
-  },
-  // Screen layout styles
-  screenContent: {
-    flex: 1,
-    padding: SPACING.lg,
-    paddingBottom: 100,
-  },
-
-  // Title section
-  titleContainer: {
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    borderRadius: RADIUS.lg,
-  },
-
-  // Title text with neon glow
+  /**
+   * Large title text with glow effect
+   */
   titleText: {
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     fontSize: 36,
     fontWeight: '700' as const,
     lineHeight: 40,
     letterSpacing: -1.0,
-    textShadowColor: COLORS.silverGlow,
+    textShadowColor: COLORS.textGlow,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
 
-  // Panel container
-  panelContainer: {
+  // --------------------------------------------------------------------------
+  // LAYOUT HELPERS
+  // --------------------------------------------------------------------------
+
+  /**
+   * Screen content container
+   */
+  screenContent: {
+    flex: 1,
     padding: SPACING.lg,
-    borderRadius: RADIUS.xl,
+    paddingBottom: 100, // Tab bar clearance
   },
 
-  // Image placeholder
-  imagePlaceholder: {
-    width: '100%',
-    aspectRatio: 4 / 5,
-    borderRadius: RADIUS.xl,
-    marginBottom: SPACING.md,
-    overflow: 'hidden',
-  },
-
-  // Image container
-  imageContainer: {
+  /**
+   * Centered container
+   */
+  centerContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Loading spinner
-  loader: {
-    width: 32,
-    height: 32,
-    borderWidth: 4,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    borderTopColor: COLORS.accent,
-    borderRadius: 16,
-  },
+  // --------------------------------------------------------------------------
+  // LOADING & OVERLAYS
+  // --------------------------------------------------------------------------
 
-  // Loading overlay
-  loadingPulse: {
+  /**
+   * Loading overlay (dark semi-transparent)
+   */
+  loadingOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: COLORS.overlay,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  /**
+   * Modal backdrop
+   */
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: COLORS.overlay,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // --------------------------------------------------------------------------
+  // LEGACY COMPATIBILITY (For gradual migration)
+  // --------------------------------------------------------------------------
+
+  /**
+   * @deprecated Use glassPanel instead
+   */
+  glass3DSurface: {
+    backgroundColor: COLORS.glassLight,
+    borderRadius: RADIUS.xl,
+    borderWidth: 1.5,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    ...SHADOW.high,
+    overflow: 'hidden',
+  },
+
+  /**
+   * @deprecated Use glassButton instead
+   */
+  glass3DButton: {
+    backgroundColor: COLORS.glassLight,
+    borderRadius: RADIUS.xxl,
+    borderWidth: 2,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
+    ...SHADOW.medium,
+    overflow: 'hidden',
+  },
+
+  /**
+   * @deprecated Use glassButtonActive instead
+   */
+  activeButton: {
+    backgroundColor: COLORS.glassUltraLight,
+    borderTopColor: `${COLORS.accent}40`,
+    borderLeftColor: `${COLORS.accent}30`,
+    borderRightColor: `${COLORS.accent}20`,
+    borderBottomColor: `${COLORS.accent}15`,
+    ...SHADOW.accentGlow,
+  },
+
+  /**
+   * @deprecated Use buttonTextActive instead
+   */
+  activeButtonText: {
+    color: COLORS.textPrimary,
+    fontWeight: '700' as const,
+    textShadowColor: COLORS.accentGlow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
+  },
 });
+
+// ============================================================================
+// GRADIENT PRESETS (For LinearGradient components)
+// ============================================================================
+
+export const GRADIENTS = {
+  /**
+   * Background gradient (full-screen)
+   * Use with LinearGradient for app backgrounds
+   */
+  background: [COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid] as const,
+
+  /**
+   * Glass panel gradient (top-to-bottom depth)
+   * Use inside glass components for added depth
+   */
+  glassDepth: [
+    COLORS.glassUltraLight,
+    COLORS.glassLight,
+    COLORS.glassMedium,
+  ] as const,
+
+  /**
+   * Top highlight gradient (glossy shine)
+   * Use for topHighlight layer
+   */
+  topShine: [
+    'rgba(255, 255, 255, 0.25)',
+    'rgba(255, 255, 255, 0.08)',
+    'rgba(255, 255, 255, 0.02)',
+    'transparent',
+  ] as const,
+
+  /**
+   * Inner gradient (subtle depth within glass)
+   */
+  innerDepth: [
+    'rgba(255, 255, 255, 0.04)',
+    'transparent',
+    'rgba(0, 0, 0, 0.15)',
+  ] as const,
+
+  /**
+   * Accent gradient (for active/selected states)
+   */
+  accent: [COLORS.accentLight, COLORS.accent, COLORS.accentDark] as const,
+
+  /**
+   * Accent glow gradient (pulsing animation)
+   */
+  accentGlow: [
+    COLORS.accentGlow,
+    `${COLORS.accent}60`,
+    COLORS.accentGlow,
+  ] as const,
+};
+
+// ============================================================================
+// USAGE EXAMPLES (for documentation)
+// ============================================================================
+
+/*
+ * EXAMPLE 1: Glass Panel Component
+ *
+ * import { glassStyles, COLORS, RADIUS, BLUR, GRADIENTS } from '@/constants/glassStyles';
+ * import { BlurView } from 'expo-blur';
+ * import { LinearGradient } from 'expo-linear-gradient';
+ *
+ * <View style={glassStyles.glassPanel}>
+ *   {Platform.OS !== 'web' && (
+ *     <BlurView
+ *       intensity={BLUR.medium}
+ *       tint="dark"
+ *       style={StyleSheet.absoluteFill}
+ *     />
+ *   )}
+ *
+ *   <LinearGradient
+ *     colors={GRADIENTS.topShine}
+ *     style={glassStyles.topHighlight}
+ *   />
+ *
+ *   <View style={{ zIndex: 10 }}>
+ *     {children}
+ *   </View>
+ * </View>
+ *
+ *
+ * EXAMPLE 2: Glass Button Component
+ *
+ * <TouchableOpacity
+ *   style={[
+ *     glassStyles.glassButton,
+ *     isActive && glassStyles.glassButtonActive
+ *   ]}
+ *   onPress={handlePress}
+ * >
+ *   <Text style={[
+ *     glassStyles.buttonText,
+ *     isActive && glassStyles.buttonTextActive
+ *   ]}>
+ *     {title}
+ *   </Text>
+ * </TouchableOpacity>
+ *
+ *
+ * EXAMPLE 3: Glass Chip Component
+ *
+ * <View style={[
+ *   glassStyles.glassChip,
+ *   isSelected && glassStyles.glassChipActive
+ * ]}>
+ *   <Text style={glassStyles.textPrimary}>{count}</Text>
+ * </View>
+ */

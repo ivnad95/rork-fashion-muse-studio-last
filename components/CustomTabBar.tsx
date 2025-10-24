@@ -5,7 +5,7 @@ import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { NEU_COLORS, NEU_RADIUS, NEU_SPACING } from '@/constants/neumorphicStyles';
+import { COLORS, BLUR, RADIUS, SPACING, GRADIENTS, SHADOW } from '@/constants/glassStyles';
 
 // Context for navbar visibility
 interface NavbarContextType {
@@ -129,7 +129,7 @@ function TabButton({
 
   const getIcon = (routeName: string) => {
     // Active state: bright accent, inactive: muted silver
-    const color = isFocused ? NEU_COLORS.accentStart : NEU_COLORS.textMuted;
+    const color = isFocused ? COLORS.accent : COLORS.textSecondary;
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -214,40 +214,27 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
-        {/* Premium glass tab bar container */}
+        {/* Premium glass tab bar container - SIMPLIFIED TO 3 LAYERS */}
         <View style={styles.tabBarOuter}>
           {Platform.OS !== 'web' ? (
-            // Native: Heavy blur with glass layers
-            <BlurView intensity={40} tint="dark" style={styles.blurContainer}>
-              {/* Multi-layer gradient for depth */}
+            // Native: Heavy blur with simplified glass layers
+            <BlurView intensity={BLUR.heavy} tint="dark" style={styles.blurContainer}>
+              {/* Layer 2: Single gradient for depth */}
               <LinearGradient
-                colors={[
-                  NEU_COLORS.gradient1,
-                  NEU_COLORS.gradient2,
-                  NEU_COLORS.gradient3,
-                ]}
+                colors={GRADIENTS.glassDepth}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 0, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
 
-              {/* Light refraction layer (top 40%) */}
+              {/* Layer 3: Top highlight only */}
               <LinearGradient
-                colors={[
-                  NEU_COLORS.refractionLight,
-                  NEU_COLORS.refractionMid,
-                  'transparent',
-                ]}
+                colors={GRADIENTS.topShine}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.refractionLayer}
+                end={{ x: 0, y: 1 }}
+                style={styles.topShine}
+                pointerEvents="none"
               />
-
-              {/* Top shine highlight */}
-              <View style={styles.topShine} />
-
-              {/* Border highlights */}
-              <View style={styles.borderHighlights} />
 
               {/* Tab buttons container */}
               <View style={styles.tabBarInner}>
@@ -279,37 +266,24 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
               </View>
             </BlurView>
           ) : (
-            // Web: Fallback with glass gradients
+            // Web: Fallback with simplified glass gradients
             <View style={styles.webGlassContainer}>
-              {/* Base glass gradient */}
+              {/* Layer 2: Single gradient for depth */}
               <LinearGradient
-                colors={[
-                  NEU_COLORS.gradient1,
-                  NEU_COLORS.gradient2,
-                  NEU_COLORS.gradient3,
-                ]}
+                colors={GRADIENTS.glassDepth}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 0, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
 
-              {/* Light refraction layer */}
+              {/* Layer 3: Top highlight only */}
               <LinearGradient
-                colors={[
-                  NEU_COLORS.refractionLight,
-                  NEU_COLORS.refractionMid,
-                  'transparent',
-                ]}
+                colors={GRADIENTS.topShine}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.refractionLayer}
+                end={{ x: 0, y: 1 }}
+                style={styles.topShine}
+                pointerEvents="none"
               />
-
-              {/* Top shine highlight */}
-              <View style={styles.topShine} />
-
-              {/* Border highlights */}
-              <View style={styles.borderHighlights} />
 
               {/* Tab buttons container */}
               <View style={styles.tabBarInner}>
@@ -353,70 +327,45 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: NEU_SPACING.xl,
-    paddingHorizontal: NEU_SPACING.lg,
+    paddingBottom: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
   },
   tabBarOuter: {
     position: 'relative',
     height: 70,
     borderRadius: 35,
     // Floating depth shadow
-    shadowColor: NEU_COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    elevation: 16,
+    ...SHADOW.high,
   },
   blurContainer: {
     height: 70,
     borderRadius: 35,
     overflow: 'hidden',
     borderWidth: 1.5,
-    borderTopColor: NEU_COLORS.borderTop,
-    borderLeftColor: NEU_COLORS.borderLeft,
-    borderRightColor: NEU_COLORS.borderRight,
-    borderBottomColor: NEU_COLORS.borderBottom,
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
   },
   webGlassContainer: {
     height: 70,
     borderRadius: 35,
     overflow: 'hidden',
-    backgroundColor: NEU_COLORS.glassBase,
+    backgroundColor: COLORS.glassMedium,
     borderWidth: 1.5,
-    borderTopColor: NEU_COLORS.borderTop,
-    borderLeftColor: NEU_COLORS.borderLeft,
-    borderRightColor: NEU_COLORS.borderRight,
-    borderBottomColor: NEU_COLORS.borderBottom,
-  },
-  refractionLayer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '40%',
-    pointerEvents: 'none',
+    borderTopColor: COLORS.borderTop,
+    borderLeftColor: COLORS.borderLeft,
+    borderRightColor: COLORS.borderRight,
+    borderBottomColor: COLORS.borderBottom,
   },
   topShine: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 1,
-    backgroundColor: NEU_COLORS.glassShine,
-    pointerEvents: 'none',
-  },
-  borderHighlights: {
-    position: 'absolute',
-    top: 1,
-    left: 1,
-    right: 1,
-    bottom: 1,
-    borderRadius: 34,
-    borderWidth: 0.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.08)',
-    borderRightColor: 'transparent',
-    borderBottomColor: 'transparent',
+    height: '35%',
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
     pointerEvents: 'none',
   },
   tabBarInner: {
@@ -426,7 +375,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     position: 'relative',
-    zIndex: 2,
+    zIndex: 10,
   },
   navButton: {
     width: 50,
@@ -439,9 +388,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: -8,
     borderRadius: 33,
-    shadowColor: NEU_COLORS.accentGlow,
+    shadowColor: COLORS.accentShadow,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.9,
     shadowRadius: 16,
     elevation: 10,
   },

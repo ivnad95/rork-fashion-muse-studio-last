@@ -124,7 +124,7 @@ export const TYPE_SCALE = {
 export const TEXT_SHADOWS = {
   // Primary glow (for headings and important text)
   primaryGlow: {
-    textShadowColor: COLORS.silverGlow,
+    textShadowColor: COLORS.textGlow,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
@@ -156,130 +156,130 @@ export const TEXT_STYLES: Record<string, TextStyle> = {
   // Display styles
   display1Primary: {
     ...TYPE_SCALE.display1,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.primaryGlow,
   },
   display2Primary: {
     ...TYPE_SCALE.display2,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.primaryGlow,
   },
 
   // Heading styles
   h1Primary: {
     ...TYPE_SCALE.h1,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.primaryGlow,
   },
   h2Primary: {
     ...TYPE_SCALE.h2,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.primaryGlow,
   },
   h3Primary: {
     ...TYPE_SCALE.h3,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.primaryGlow,
   },
   h4Primary: {
     ...TYPE_SCALE.h4,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
 
   // Body styles
   bodyLargePrimary: {
     ...TYPE_SCALE.bodyLarge,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   bodyLargeSecondary: {
     ...TYPE_SCALE.bodyLarge,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   bodyRegularPrimary: {
     ...TYPE_SCALE.bodyRegular,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   bodyRegularSecondary: {
     ...TYPE_SCALE.bodyRegular,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   bodySmallSecondary: {
     ...TYPE_SCALE.bodySmall,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   bodySmallMuted: {
     ...TYPE_SCALE.bodySmall,
-    color: COLORS.silverDark,
+    color: COLORS.textMuted,
     ...TEXT_SHADOWS.secondaryDepth,
   },
 
   // Button styles
   buttonLargePrimary: {
     ...TYPE_SCALE.buttonLarge,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.accentGlow,
   },
   buttonRegularPrimary: {
     ...TYPE_SCALE.buttonRegular,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.accentGlow,
   },
   buttonRegularSecondary: {
     ...TYPE_SCALE.buttonRegular,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   buttonSmallSecondary: {
     ...TYPE_SCALE.buttonSmall,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
 
   // Label styles
   labelPrimary: {
     ...TYPE_SCALE.label,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   labelSecondary: {
     ...TYPE_SCALE.label,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   labelMuted: {
     ...TYPE_SCALE.label,
-    color: COLORS.silverDark,
+    color: COLORS.textMuted,
     ...TEXT_SHADOWS.secondaryDepth,
   },
 
   // Caption styles
   captionSecondary: {
     ...TYPE_SCALE.caption,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     ...TEXT_SHADOWS.secondaryDepth,
   },
   captionMuted: {
     ...TYPE_SCALE.caption,
-    color: COLORS.silverDark,
+    color: COLORS.textMuted,
     ...TEXT_SHADOWS.secondaryDepth,
   },
 
   // Overline styles
   overlinePrimary: {
     ...TYPE_SCALE.overline,
-    color: COLORS.silverLight,
+    color: COLORS.textPrimary,
     textTransform: 'uppercase',
     ...TEXT_SHADOWS.secondaryDepth,
   },
   overlineSecondary: {
     ...TYPE_SCALE.overline,
-    color: COLORS.silverMid,
+    color: COLORS.textSecondary,
     textTransform: 'uppercase',
     ...TEXT_SHADOWS.secondaryDepth,
   },
@@ -288,7 +288,7 @@ export const TEXT_STYLES: Record<string, TextStyle> = {
 // Helper function to create custom text style
 export const createTextStyle = (
   typeScale: keyof typeof TYPE_SCALE,
-  color: string = COLORS.silverLight,
+  color: string = COLORS.textPrimary,
   shadow: keyof typeof TEXT_SHADOWS = 'secondaryDepth'
 ): TextStyle => ({
   ...TYPE_SCALE[typeScale],

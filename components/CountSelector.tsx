@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated } from 're
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { neumorphicStyles, NEU_COLORS, NEU_RADIUS } from '@/constants/neumorphicStyles';
+import { glassStyles, COLORS, BLUR, RADIUS, GRADIENTS, SHADOW } from '@/constants/glassStyles';
 
 interface CountSelectorProps {
   value: number;
@@ -111,97 +111,64 @@ function CountChip({ count, isActive, disabled, onPress }: { count: number; isAc
         onPressOut={handlePressOut}
         disabled={disabled}
         style={[
-          styles.chip,
+          glassStyles.glassChip,
+          isActive && glassStyles.glassChipActive,
           disabled && styles.disabled,
         ]}
         activeOpacity={1}
         testID={`count-${count}`}
       >
-        {/* Platform-specific glass chip */}
+        {/* SIMPLIFIED TO 3 LAYERS */}
+        {/* Layer 1: Blur or fallback */}
         {Platform.OS !== 'web' ? (
           <BlurView
-            intensity={isActive ? 20 : 12}
-            tint="light"
-            style={[StyleSheet.absoluteFill, { borderRadius: 28, overflow: 'hidden' }]}
+            intensity={BLUR.light}
+            tint="dark"
+            style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.full, overflow: 'hidden' }]}
           >
-            {/* Base gradient */}
+            {/* Layer 2: Single gradient */}
             <LinearGradient
-              colors={isActive ?
-                [
-                  'rgba(88, 169, 230, 0.5)',
-                  'rgba(59, 130, 201, 0.6)',
-                  'rgba(37, 99, 171, 0.7)'
-                ] :
-                [
-                  NEU_COLORS.gradient1,
-                  NEU_COLORS.gradient2,
-                  NEU_COLORS.gradient3,
-                ]
-              }
+              colors={isActive ? GRADIENTS.accent : GRADIENTS.glassDepth}
               start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              end={{ x: 0, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
 
-            {/* Light refraction (top 30%) */}
+            {/* Layer 3: Top highlight */}
             <LinearGradient
-              colors={[
-                isActive ? 'rgba(200, 220, 255, 0.18)' : NEU_COLORS.refractionLight,
-                'transparent',
-              ]}
+              colors={GRADIENTS.topShine}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={styles.chipRefraction}
+              style={styles.chipHighlight}
+              pointerEvents="none"
             />
-
-            {/* Top shine */}
-            <View style={styles.chipShine} />
-
-            {/* Border highlights */}
-            <View style={[styles.chipBorder, isActive && styles.chipBorderActive]} />
           </BlurView>
         ) : (
           <>
             {/* Web fallback */}
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.glassLight, borderRadius: RADIUS.full }]} />
+
+            {/* Layer 2: Single gradient */}
             <LinearGradient
-              colors={isActive ?
-                [
-                  'rgba(88, 169, 230, 0.5)',
-                  'rgba(59, 130, 201, 0.6)',
-                  'rgba(37, 99, 171, 0.7)'
-                ] :
-                [
-                  NEU_COLORS.gradient1,
-                  NEU_COLORS.gradient2,
-                  NEU_COLORS.gradient3,
-                ]
-              }
+              colors={isActive ? GRADIENTS.accent : GRADIENTS.glassDepth}
               start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              end={{ x: 0, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
 
-            {/* Light refraction */}
+            {/* Layer 3: Top highlight */}
             <LinearGradient
-              colors={[
-                isActive ? 'rgba(200, 220, 255, 0.18)' : NEU_COLORS.refractionLight,
-                'transparent',
-              ]}
+              colors={GRADIENTS.topShine}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={styles.chipRefraction}
+              style={styles.chipHighlight}
+              pointerEvents="none"
             />
-
-            {/* Top shine */}
-            <View style={styles.chipShine} />
-
-            {/* Border highlights */}
-            <View style={[styles.chipBorder, isActive && styles.chipBorderActive]} />
           </>
         )}
 
         {/* Chip text */}
-        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+        <Text style={[glassStyles.textPrimary, styles.chipText, isActive && styles.chipTextActive]}>
           {count}
         </Text>
       </TouchableOpacity>
@@ -223,78 +190,33 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: -6,
     borderRadius: 34,
-    shadowColor: NEU_COLORS.accentGlow,
+    shadowColor: COLORS.accentShadow,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.9,
     shadowRadius: 20,
     elevation: 10,
   },
-  chip: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderTopColor: NEU_COLORS.borderTop,
-    borderLeftColor: NEU_COLORS.borderLeft,
-    borderRightColor: NEU_COLORS.borderRight,
-    borderBottomColor: NEU_COLORS.borderBottom,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: NEU_COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  chipRefraction: {
+  chipHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '30%',
+    height: '35%',
+    borderTopLeftRadius: RADIUS.full,
+    borderTopRightRadius: RADIUS.full,
     pointerEvents: 'none',
-  },
-  chipShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1.5,
-    backgroundColor: NEU_COLORS.glassShine,
-    pointerEvents: 'none',
-  },
-  chipBorder: {
-    position: 'absolute',
-    top: 1,
-    left: 1,
-    right: 1,
-    bottom: 1,
-    borderRadius: 27,
-    borderWidth: 0.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.10)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.08)',
-    borderRightColor: 'transparent',
-    borderBottomColor: 'transparent',
-    pointerEvents: 'none',
-  },
-  chipBorderActive: {
-    borderTopColor: 'rgba(255, 255, 255, 0.18)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
   },
   chipText: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: NEU_COLORS.textSecondary,
     position: 'relative',
-    zIndex: 2,
+    zIndex: 10,
   },
   chipTextActive: {
     fontSize: 20,
     fontWeight: '800' as const,
-    color: NEU_COLORS.textPrimary,
-    textShadowColor: NEU_COLORS.textGlow,
+    color: COLORS.textPrimary,
+    textShadowColor: COLORS.accentGlow,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
   },

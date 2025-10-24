@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import NeumorphicPanel from '@/components/NeumorphicPanel';
-import { neumorphicStyles, NEU_COLORS, NEU_RADIUS } from '@/constants/neumorphicStyles';
+import GlassContainer from '@/components/GlassContainer';
+import { COLORS, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
 
 interface ImageUploaderProps {
   uploadedImage: string | null;
@@ -13,7 +13,7 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <NeumorphicPanel style={styles.container} inset>
+    <GlassContainer variant="card" style={styles.container}>
       <TouchableOpacity
         style={styles.imageContainer}
         onPress={onImageSelect}
@@ -49,7 +49,7 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
               {Platform.OS !== 'web' ? (
                 <BlurView intensity={12} tint="light" style={styles.iconRingBlur}>
                   <LinearGradient
-                    colors={[NEU_COLORS.depthLayer1, NEU_COLORS.depthLayer2]}
+                    colors={[GRADIENTS.glassDepth[0], GRADIENTS.glassDepth[1]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.iconRingInner}
@@ -60,7 +60,7 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
                 </BlurView>
               ) : (
                 <LinearGradient
-                  colors={[NEU_COLORS.glassBase, NEU_COLORS.glassSurface]}
+                  colors={[COLORS.glassLight, COLORS.glassMedium]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.iconRingInner}
@@ -84,20 +84,20 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
             {Platform.OS !== 'web' ? (
               <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill}>
                 <View style={styles.loadingContent}>
-                  <ActivityIndicator size="large" color={NEU_COLORS.accentStart} />
+                  <ActivityIndicator size="large" color={COLORS.accent} />
                 </View>
               </BlurView>
             ) : (
               <View style={[StyleSheet.absoluteFill, styles.loadingFallback]}>
                 <View style={styles.loadingContent}>
-                  <ActivityIndicator size="large" color={NEU_COLORS.accentStart} />
+                  <ActivityIndicator size="large" color={COLORS.accent} />
                 </View>
               </View>
             )}
           </View>
         )}
       </TouchableOpacity>
-    </NeumorphicPanel>
+    </GlassContainer>
   );
 }
 
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: NEU_RADIUS.lg,
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
   },
   imageGlassBorder: {
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: NEU_RADIUS.lg,
+    borderRadius: RADIUS.lg,
   },
   imageShine: {
     position: 'absolute',
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: NEU_RADIUS.lg,
+    borderRadius: RADIUS.lg,
   },
   placeholderContent: {
     alignItems: 'center',
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginBottom: 16,
     position: 'relative',
-    shadowColor: NEU_COLORS.shadowDark,
+    shadowColor: COLORS.shadowDark,
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.6,
     shadowRadius: 8,
@@ -160,8 +160,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderTopColor: NEU_COLORS.glassHighlight,
-    borderLeftColor: NEU_COLORS.glassHighlight,
+    borderTopColor: COLORS.glassHighlight,
+    borderLeftColor: COLORS.glassHighlight,
     borderRightColor: 'rgba(0, 0, 0, 0.1)',
     borderBottomColor: 'rgba(0, 0, 0, 0.15)',
   },
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: NEU_COLORS.glassShine,
+    backgroundColor: COLORS.glassShine,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     pointerEvents: 'none',
@@ -182,13 +182,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   placeholderText: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
     fontSize: 15,
     marginBottom: 4,
     fontWeight: '600',
   },
   placeholderSubtext: {
-    ...neumorphicStyles.neuTextMuted,
+    ...glassStyles.textMuted,
     fontSize: 12,
   },
   loadingOverlay: {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: NEU_RADIUS.lg,
+    borderRadius: RADIUS.lg,
   },
   loadingFallback: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',

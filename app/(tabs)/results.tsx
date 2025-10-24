@@ -7,11 +7,12 @@ import { Download, Trash2, Share2, X, Image as ImageIcon } from 'lucide-react-na
 import EmptyState from '@/components/EmptyState';
 import FavoriteButton from '@/components/FavoriteButton';
 import NeumorphicPanel from '@/components/NeumorphicPanel';
-import { NEU_COLORS, NEU_SPACING, NEU_RADIUS, neumorphicStyles } from '@/constants/neumorphicStyles';
+import { COLORS, SPACING, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import ShimmerLoader from '@/components/ShimmerLoader';
+import GlassContainer from '@/components/GlassContainer';
 import * as haptics from '@/utils/haptics';
 import { downloadImage, shareImage } from '@/utils/download';
 
@@ -292,6 +293,12 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={GRADIENTS.background as any}
+        style={StyleSheet.absoluteFill}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
@@ -299,12 +306,12 @@ export default function ResultsScreen() {
           {
             paddingTop: insets.top + 24,
             paddingBottom: insets.bottom + 120,
-            paddingHorizontal: NEU_SPACING.lg
+            paddingHorizontal: SPACING.lg
           }
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Results</Text>
+        <Text style={[glassStyles.titleText, styles.title]}>Results</Text>
 
         {/* Latest Generation Section */}
         {(isGenerating || generatedImages.length > 0) && (
@@ -361,7 +368,7 @@ export default function ResultsScreen() {
                 </NeumorphicPanel>
               ))}
             </View>
-            <Text style={[styles.emptyText, { marginTop: NEU_SPACING.xl }]}>
+            <Text style={[styles.emptyText, { marginTop: SPACING.xl }]}>
               Generate your first photoshoot to see results here
             </Text>
           </View>
@@ -506,27 +513,27 @@ export default function ResultsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: COLORS.bgDeep,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: NEU_SPACING.xxxl,
+    paddingBottom: SPACING.xxxl,
   },
   title: {
-    ...neumorphicStyles.neuTitle,
+    ...glassStyles.titleText,
     fontSize: 36,
-    marginBottom: NEU_SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   section: {
-    marginBottom: NEU_SPACING.xxl,
+    marginBottom: SPACING.xxl,
   },
   sectionLabel: {
-    ...neumorphicStyles.neuTextMuted,
+    ...glassStyles.textMuted,
     textTransform: 'uppercase',
-    marginBottom: NEU_SPACING.md,
-    paddingLeft: NEU_SPACING.xxs,
+    marginBottom: SPACING.md,
+    paddingLeft: SPACING.xxs,
     fontSize: 10,
     letterSpacing: 1.5,
     fontWeight: '700',
@@ -535,17 +542,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: NEU_SPACING.md,
+    rowGap: SPACING.md,
   },
   imageCard: {
     width: '48%',
     aspectRatio: 3 / 4,
-    marginBottom: NEU_SPACING.md,
+    marginBottom: SPACING.md,
   },
   cardImage: {
     width: '100%',
     height: '100%',
-    borderRadius: NEU_RADIUS.xl,
+    borderRadius: RADIUS.xl,
   },
   imageWrapper: {
     width: '100%',
@@ -553,14 +560,14 @@ const styles = StyleSheet.create({
   },
   favoriteOverlay: {
     position: 'absolute',
-    top: NEU_SPACING.xs,
-    right: NEU_SPACING.xs,
+    top: SPACING.xs,
+    right: SPACING.xs,
     zIndex: 10,
   },
   modalFavoriteButton: {
     position: 'absolute',
-    top: NEU_SPACING.md,
-    right: NEU_SPACING.md,
+    top: SPACING.md,
+    right: SPACING.md,
     zIndex: 10,
   },
   loadingPlaceholder: {
@@ -603,16 +610,16 @@ const styles = StyleSheet.create({
     borderRightColor: 'rgba(150, 190, 240, 0.7)',
   },
   loadingText: {
-    ...neumorphicStyles.neuTextPrimary,
+    ...glassStyles.textPrimary,
     fontSize: 15,
     fontWeight: '700' as const,
     letterSpacing: 0.3,
   },
   emptyText: {
-    ...neumorphicStyles.neuTextSecondary,
+    ...glassStyles.textSecondary,
     fontSize: 14,
     textAlign: 'center',
-    paddingHorizontal: NEU_SPACING.xl,
+    paddingHorizontal: SPACING.xl,
   },
   modalOverlay: {
     flex: 1,
@@ -622,7 +629,7 @@ const styles = StyleSheet.create({
   },
   modalBlur: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: NEU_COLORS.overlay,
+    backgroundColor: COLORS.overlay,
   },
   modalContent: {
     width: '100%',
@@ -733,7 +740,7 @@ const styles = StyleSheet.create({
   },
   emptyPlaceholder: {
     flex: 1,
-    borderRadius: NEU_RADIUS.xl,
+    borderRadius: RADIUS.xl,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -766,7 +773,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: 2,
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderTopLeftRadius: NEU_RADIUS.xl,
-    borderTopRightRadius: NEU_RADIUS.xl,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
   },
 });

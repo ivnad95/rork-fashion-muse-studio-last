@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { NEU_COLORS, NEU_SPACING, NEU_RADIUS, neumorphicStyles } from '@/constants/neumorphicStyles';
 import { FASHION_STYLES, FashionStyle } from '@/constants/styles';
 import * as haptics from '@/utils/haptics';
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: NEU_SPACING.md,
     position: 'relative',
-    backgroundColor: NEU_COLORS.base,
+    backgroundColor: COLORS.bgDeep,
     // Neumorphic shadows
     shadowColor: NEU_COLORS.shadowLight,
     shadowOffset: { width: -4, height: -4 },
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: NEU_COLORS.baseLighter,
+    backgroundColor: COLORS.bgLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: NEU_SPACING.sm,
