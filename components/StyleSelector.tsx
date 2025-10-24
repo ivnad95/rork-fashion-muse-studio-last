@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
-import { TEXT_STYLES } from '@/constants/typography';
+import { NEU_COLORS, NEU_SPACING, NEU_RADIUS, neumorphicStyles } from '@/constants/neumorphicStyles';
 import { FASHION_STYLES, FashionStyle } from '@/constants/styles';
 import * as haptics from '@/utils/haptics';
 
@@ -154,21 +153,20 @@ export default function StyleSelector({ selectedStyleId, onSelectStyle }: StyleS
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: SPACING.xl,
+    marginBottom: NEU_SPACING.xl,
   },
   label: {
-    ...TEXT_STYLES.overlineSecondary,
+    ...neumorphicStyles.neuTextMuted,
     textTransform: 'uppercase',
-    color: COLORS.silverDark,
-    marginBottom: SPACING.sm,
-    paddingLeft: SPACING.xxs,
+    marginBottom: NEU_SPACING.sm,
+    paddingLeft: NEU_SPACING.xxs,
     fontSize: 10,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
     fontWeight: '700',
   },
   scrollContent: {
-    paddingRight: SPACING.lg,
-    gap: SPACING.sm,
+    paddingRight: NEU_SPACING.lg,
+    gap: NEU_SPACING.sm,
   },
   cardWrapper: {
     width: 130,
@@ -178,69 +176,65 @@ const styles = StyleSheet.create({
   },
   card: {
     height: 160,
-    borderRadius: RADIUS.lg,
+    borderRadius: NEU_RADIUS.lg,
     overflow: 'hidden',
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: NEU_SPACING.md,
     position: 'relative',
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    backgroundColor: NEU_COLORS.base,
+    // Neumorphic shadows
+    shadowColor: NEU_COLORS.shadowLight,
+    shadowOffset: { width: -4, height: -4 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
     elevation: 6,
   },
   cardSelected: {
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
+    shadowColor: NEU_COLORS.accentGlow,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
     elevation: 12,
   },
   cardGlow: {
-    borderRadius: RADIUS.lg,
+    borderRadius: NEU_RADIUS.lg,
     opacity: 0.3,
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: NEU_COLORS.baseLighter,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginBottom: NEU_SPACING.sm,
   },
   icon: {
     fontSize: 28,
   },
   styleName: {
-    ...TEXT_STYLES.labelPrimary,
-    color: COLORS.silverLight,
-    marginBottom: SPACING.xxs,
+    ...neumorphicStyles.neuTextPrimary,
+    marginBottom: NEU_SPACING.xxs,
     fontWeight: '700',
+    fontSize: 14,
   },
   styleDescription: {
-    ...TEXT_STYLES.caption,
-    color: COLORS.silverMid,
+    ...neumorphicStyles.neuTextSecondary,
     lineHeight: 16,
     flex: 1,
+    fontSize: 11,
   },
   selectedBadge: {
     position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
+    top: NEU_SPACING.xs,
+    right: NEU_SPACING.xs,
     width: 24,
     height: 24,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowColor: NEU_COLORS.shadowDark,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 4,
   },

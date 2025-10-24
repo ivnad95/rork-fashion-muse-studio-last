@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import GlassPanel from '@/components/GlassPanel';
-import { glassStyles, COLORS } from '@/constants/glassStyles';
+import NeumorphicPanel from '@/components/NeumorphicPanel';
+import { neumorphicStyles, NEU_COLORS } from '@/constants/neumorphicStyles';
 
 interface ImageUploaderProps {
   uploadedImage: string | null;
@@ -11,9 +11,9 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassPanel style={glassStyles.imagePlaceholder} radius={28}>
+    <NeumorphicPanel style={styles.container} inset>
       <TouchableOpacity
-        style={glassStyles.imageContainer}
+        style={styles.imageContainer}
         onPress={onImageSelect}
         activeOpacity={0.9}
         testID="image-uploader"
@@ -23,78 +23,81 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
         ) : (
           <View style={styles.placeholderContent}>
             <View style={styles.iconRing}>
-              <View style={styles.iconRingInner}>
-                {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-                <Image source={require('@/assets/images/icon.png')} style={styles.logo} resizeMode="contain" />
-              </View>
+              {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
+              <Image source={require('@/assets/images/icon.png')} style={styles.logo} resizeMode="contain" />
             </View>
             <Text style={styles.placeholderText}>Tap to upload</Text>
             <Text style={styles.placeholderSubtext}>Your photo here</Text>
           </View>
         )}
         {uploading && (
-          <View style={glassStyles.loadingPulse}>
-            <ActivityIndicator size="large" color={COLORS.silverMid} />
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color={NEU_COLORS.accentStart} />
           </View>
         )}
       </TouchableOpacity>
-    </GlassPanel>
+    </NeumorphicPanel>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    aspectRatio: 4 / 5,
+  },
+  imageContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 28,
+    borderRadius: 20,
   },
   placeholderContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 24,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: NEU_COLORS.baseLighter,
+    marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: NEU_COLORS.shadowLight,
+    shadowOffset: { width: -4, height: -4 },
     shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  iconRingInner: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    shadowRadius: 8,
+    elevation: 4,
   },
   logo: {
-    width: '60%',
-    height: '60%',
-    opacity: 0.4,
+    width: '50%',
+    height: '50%',
+    opacity: 0.6,
   },
   placeholderText: {
-    color: COLORS.silverLight,
+    ...neumorphicStyles.neuTextPrimary,
     fontSize: 16,
-    fontWeight: '700' as const,
-    letterSpacing: -0.3,
     marginBottom: 4,
   },
   placeholderSubtext: {
-    color: COLORS.silverDark,
+    ...neumorphicStyles.neuTextMuted,
     fontSize: 13,
-    fontWeight: '500' as const,
-    letterSpacing: 0.2,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
   },
 });
