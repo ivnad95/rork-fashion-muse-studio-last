@@ -1,57 +1,57 @@
 import { StyleSheet } from 'react-native';
 
-// Premium Glass Color Constants - Refined for minimalist aesthetic
+// Deep Sea Glass Color Constants
 export const COLORS = {
-  // Background colors - premium dark palette
-  bgDeepest: '#020611',
-  bgDeep: '#030A1A',
-  bgMid: '#040D22',
-  bgBase: '#05102A',
+  // Background colors - darker, more premium
+  bgDeepest: '#020815',
+  bgDeep: '#030B1F',
+  bgMid: '#050E28',
+  bgBase: '#071235',
 
-  // Text colors (refined hierarchy)
-  silverLight: '#FFFFFF',              // Pure white for primary text
-  silverMid: '#E2E8F0',                // Light secondary text
-  silverDark: '#94A3B8',               // Muted tertiary text
-  silverGlow: 'rgba(255, 255, 255, 0.30)',
+  // Text colors (silver/white spectrum)
+  silverLight: '#F8FAFC',              // Primary text
+  silverMid: '#CBD5E1',                // Secondary text
+  silverDark: '#94A3B8',               // Tertiary text
+  silverGlow: 'rgba(248, 250, 252, 0.40)',
 
-  // Refined accent color
-  accent: '#0EA5E9',
+  // Accent color (single accent only)
+  accent: '#0A76AF',
   accentLight: '#38BDF8',
-  accentDark: '#0284C7',
-  accentGlow: 'rgba(14, 165, 233, 0.45)',
+  accentDark: '#075985',
+  accentGlow: 'rgba(10, 118, 175, 0.60)',
 
-  // Simplified glass surface colors
+  // Glass surface colors - more refined
   glassBase: 'rgba(255, 255, 255, 0.02)',
-  glassHighlight: 'rgba(255, 255, 255, 0.12)',
-  glassReflection: 'rgba(255, 255, 255, 0.06)',
-  glassStroke: 'rgba(255, 255, 255, 0.10)',
+  glassHighlight: 'rgba(255, 255, 255, 0.45)',
+  glassReflection: 'rgba(255, 255, 255, 0.08)',
+  glassStroke: 'rgba(255, 255, 255, 0.12)',
 
-  // Simplified border colors
-  borderTop: 'rgba(255, 255, 255, 0.15)',
-  borderLeft: 'rgba(255, 255, 255, 0.12)',
-  borderRight: 'rgba(255, 255, 255, 0.06)',
+  // Border colors (gradient from top to bottom)
+  borderTop: 'rgba(255, 255, 255, 0.25)',
+  borderLeft: 'rgba(255, 255, 255, 0.18)',
+  borderRight: 'rgba(255, 255, 255, 0.08)',
   borderBottom: 'rgba(255, 255, 255, 0.04)',
 
-  // Deeper shadows for premium depth
-  shadowBlack: 'rgba(0, 0, 0, 0.70)',
-  shadowAccent: 'rgba(14, 165, 233, 0.50)',
+  // Shadow colors
+  shadowBlack: 'rgba(0, 0, 0, 0.45)',
+  shadowAccent: 'rgba(10, 118, 175, 0.70)',
 
-  // Refined state colors
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
+  // State colors
+  success: '#4ADE80',
+  warning: '#FCD34D',
+  error: '#F87171',
 };
 
-// Refined spacing constants - more generous for minimalist aesthetic
+// Standardized spacing constants
 export const SPACING = {
   xxs: 4,
   xs: 8,
   sm: 12,
   md: 16,
-  lg: 24,                // Increased from 20 for more breathing room
-  xl: 32,                // Increased from 24
-  xxl: 40,               // Increased from 32
-  xxxl: 56,              // Increased from 48
+  lg: 20,
+  xl: 24,
+  xxl: 32,
+  xxxl: 48,
 };
 
 // Standardized border radius
@@ -66,39 +66,39 @@ export const RADIUS = {
 };
 
 export const glassStyles = StyleSheet.create({
-  // Main glass surface - simplified and refined
+  // Main glass surface (panels, cards) with 3-layer shadow system
   glass3DSurface: {
     backgroundColor: COLORS.glassBase,
-    borderWidth: 1,                                 // Reduced from 1.5
+    borderWidth: 1.5,
     borderTopColor: COLORS.borderTop,
     borderLeftColor: COLORS.borderLeft,
     borderRightColor: COLORS.borderRight,
     borderBottomColor: COLORS.borderBottom,
     borderRadius: RADIUS.xl,                        // 24px for main panels
-    // Simplified shadow - single layer for cleaner look
+    // Layer 1: Ambient shadow (large, diffused)
     shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 16 },         // Reduced from 24
-    shadowOpacity: 0.60,                            // Increased from 0.45
-    shadowRadius: 32,                               // Reduced from 48
-    elevation: 16,                                  // Reduced from 24
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 0.45,
+    shadowRadius: 48,
+    elevation: 24,
     overflow: 'hidden',
   },
 
-  // Interactive button surface - cleaner and simpler
+  // Interactive button surface with medium elevation
   glass3DButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',   // More subtle
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: RADIUS.xxl,                       // 28px for buttons
-    borderWidth: 1,                                 // Reduced from 2
-    borderTopColor: 'rgba(255, 255, 255, 0.20)',    // Simplified borders
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    // Cleaner shadow
+    borderWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.32)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.24)',
+    borderRightColor: 'rgba(255, 255, 255, 0.14)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    // Layer 2: Direct shadow (medium elevation)
     shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.50,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.60,
+    shadowRadius: 24,
+    elevation: 12,
     overflow: 'hidden',
   },
 
