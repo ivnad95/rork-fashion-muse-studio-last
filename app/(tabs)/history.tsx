@@ -1,29 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform, Alert } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import * as Haptics from 'expo-haptics';
-import { Calendar, Trash2, X, Sparkles } from 'lucide-react-native';
+import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import EmptyState from '@/components/EmptyState';
+import FavoriteButton from '@/components/FavoriteButton';
+import SearchBar from '@/components/SearchBar';
+import FilterChips, { FilterOption } from '@/components/FilterChips';
+import DateRangeFilter, { DateRange } from '@/components/DateRangeFilter';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
+import * as haptics from '@/utils/haptics';
+import { downloadImage, shareImage } from '@/utils/download';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const FILTER_OPTIONS: FilterOption[] = [
+  { id: 'all', label: 'All', color: '#60A5FA' },
+  { id: 'today', label: 'Today', color: '#10B981' },
+  { id: 'week', label: 'This Week', color: '#8B5CF6' },
+  { id: 'month', label: 'This Month', color: '#F59E0B' },
+  { id: 'custom', label: 'Custom', color: '#EC4899' },
+];
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { history, loadHistory, deleteHistoryItem } = useGeneration();
   const { handleScroll } = useScrollNavbar();
   const [items, setItems] = useState(history);
   const [selectedGeneration, setSelectedGeneration] = useState<typeof mockHistory[0] | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange>({ startDate: null, endDate: null });
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
@@ -82,74 +102,140 @@ export default function HistoryScreen() {
   const displayHistory = items.length > 0 ? items.map(h => ({
     id: h.id,
     imageUrls: h.results.length > 0 ? h.results : [h.thumbnail],
+    imageIds: h.imageIds || [],
     prompt: `${h.count} images generated`,
     style: '',
     aspectRatio: 'portrait' as const,
     createdAt: `${h.date} ${h.time}`,
   })) : (!user ? mockHistory : []);
 
-  const handleGenerationPress = (generation: typeof displayHistory[0]) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  // Filter history based on search and filter
+  const filteredHistory = useMemo(() => {
+    let filtered = displayHistory;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.createdAt.toLowerCase().includes(query) ||
+        item.prompt.toLowerCase().includes(query)
+      );
     }
+
+    // Apply date filter
+    if (selectedFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.createdAt);
+
+        if (selectedFilter === 'today') {
+          return itemDate.toDateString() === now.toDateString();
+        } else if (selectedFilter === 'week') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return itemDate >= weekAgo;
+        } else if (selectedFilter === 'month') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          return itemDate >= monthAgo;
+        } else if (selectedFilter === 'custom') {
+          // Apply custom date range filter
+          if (customDateRange.startDate || customDateRange.endDate) {
+            if (customDateRange.startDate && itemDate < customDateRange.startDate) {
+              return false;
+            }
+            if (customDateRange.endDate && itemDate > customDateRange.endDate) {
+              return false;
+            }
+            return true;
+          }
+        }
+        return true;
+      });
+    }
+
+    return filtered;
+  }, [displayHistory, searchQuery, selectedFilter, customDateRange]);
+
+  const handleGenerationPress = (generation: typeof displayHistory[0]) => {
+    haptics.light();
     setSelectedGeneration(generation);
+    setSelectedImageIndex(0);
   };
 
   const handleCloseModal = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setSelectedGeneration(null);
+    setSelectedImageIndex(0);
   };
 
   const handleDeleteGeneration = async () => {
     if (!selectedGeneration || !user) return;
 
-    const confirmDelete = async () => {
-      try {
-        if (Platform.OS !== 'web') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        }
+    try {
+      showToast('Deleting generation...', 'warning', 1500);
+      setTimeout(async () => {
+        haptics.heavy();
         await deleteHistoryItem(selectedGeneration.id);
         handleCloseModal();
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      } catch (err) {
-        console.error('Failed to delete history item:', err);
-        if (Platform.OS === 'web') {
-          alert('Failed to delete history item');
-        } else {
-          Alert.alert('Error', 'Failed to delete history item');
-        }
-      }
-    };
+        haptics.success();
+        showToast('Generation deleted', 'success');
+      }, 300);
+    } catch (err) {
+      console.error('Failed to delete history item:', err);
+      haptics.error();
+      showToast('Failed to delete history item', 'error');
+    }
+  };
 
-    if (Platform.OS === 'web') {
-      if (confirm('Are you sure you want to delete this generation?')) {
-        await confirmDelete();
+  const handleDownloadImage = async () => {
+    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+
+    try {
+      haptics.medium();
+      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
+      const success = await downloadImage(imageUri, {
+        filename: `fashion-muse-${selectedGeneration.id}-${selectedImageIndex}.jpg`,
+      });
+
+      if (success) {
+        haptics.success();
+        showToast('Image downloaded successfully!', 'success');
+      } else {
+        haptics.error();
+        showToast('Failed to download image', 'error');
       }
-    } else {
-      Alert.alert(
-        'Delete Generation',
-        'Are you sure you want to delete this generation?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: confirmDelete },
-        ]
-      );
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      haptics.error();
+      showToast('Failed to download image', 'error');
+    }
+  };
+
+  const handleShareImage = async () => {
+    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+
+    try {
+      haptics.medium();
+      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
+      const success = await shareImage(imageUri);
+
+      if (success) {
+        showToast('Image shared successfully!', 'success');
+      }
+    } catch (error) {
+      console.error('Error sharing image:', error);
+      showToast('Failed to share image', 'error');
     }
   };
 
   // Group history by date
-  const groupedHistory = displayHistory.reduce((acc, item) => {
+  const groupedHistory = filteredHistory.reduce((acc, item) => {
     const date = item.createdAt.split(' ')[0]; // Extract date part
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(item);
     return acc;
-  }, {} as Record<string, typeof displayHistory>);
+  }, {} as Record<string, typeof filteredHistory>);
 
   const dateGroups = Object.keys(groupedHistory).map(date => ({
     date,
@@ -183,6 +269,42 @@ export default function HistoryScreen() {
         scrollEventThrottle={16}
       >
         <GlassyTitle><Text>History</Text></GlassyTitle>
+
+        {/* Search Bar */}
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search history..."
+        />
+
+        {/* Filter Chips */}
+        <FilterChips
+          options={FILTER_OPTIONS}
+          selectedId={selectedFilter}
+          onSelect={(id) => {
+            setSelectedFilter(id);
+            if (id !== 'custom') {
+              setCustomDateRange({ startDate: null, endDate: null });
+            }
+          }}
+        />
+
+        {/* Custom Date Range Filter */}
+        {selectedFilter === 'custom' && (
+          <DateRangeFilter
+            currentRange={customDateRange}
+            onApply={(range) => {
+              setCustomDateRange(range);
+              showToast('Custom date range applied', 'success');
+            }}
+            onClear={() => {
+              setCustomDateRange({ startDate: null, endDate: null });
+              setSelectedFilter('all');
+              showToast('Date range cleared', 'info');
+            }}
+          />
+        )}
+
         {isLoading ? (
           <View style={styles.messagePanel}>
             <LinearGradient
@@ -210,14 +332,12 @@ export default function HistoryScreen() {
               </View>
             </LinearGradient>
           </View>
-        ) : displayHistory.length === 0 ? (
-          <GlassPanel style={styles.emptyState}>
-            <Sparkles size={32} color={COLORS.silverMid} />
-            <Text style={styles.emptyText}>No history yet</Text>
-            <Text style={styles.emptySubtext}>
-              {!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
-            </Text>
-          </GlassPanel>
+        ) : filteredHistory.length === 0 ? (
+          <EmptyState
+            icon={Sparkles}
+            title="No history yet"
+            description={!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
+          />
         ) : (
           <View style={styles.historyList}>
             {dateGroups.map((group, groupIndex) => (
@@ -359,6 +479,16 @@ export default function HistoryScreen() {
                         alignItems: 'center',
                         paddingHorizontal: 0,
                       }}
+                      onScroll={(e) => {
+                        const index = Math.round(
+                          e.nativeEvent.contentOffset.x /
+                            (SCREEN_WIDTH > MODAL_IMAGE_WIDTH
+                              ? MODAL_IMAGE_WIDTH
+                              : SCREEN_WIDTH - MODAL_IMAGE_HORIZONTAL_MARGIN)
+                        );
+                        setSelectedImageIndex(index);
+                      }}
+                      scrollEventThrottle={16}
                     >
                       {selectedGeneration.imageUrls.map((url, index) => (
                         <View key={index} style={styles.modalImageContainer}>
@@ -368,6 +498,15 @@ export default function HistoryScreen() {
                               style={styles.modalImage}
                               resizeMode="contain"
                             />
+                            {/* Favorite Button */}
+                            {user && selectedGeneration.imageIds && selectedGeneration.imageIds[index] && (
+                              <View style={styles.modalFavoriteButton}>
+                                <FavoriteButton
+                                  imageId={selectedGeneration.imageIds[index]}
+                                  size={24}
+                                />
+                              </View>
+                            )}
                           </View>
                         </View>
                       ))}
@@ -375,6 +514,43 @@ export default function HistoryScreen() {
 
                     <View style={styles.modalFooter}>
                       <Text style={styles.modalPromptText}><Text>{selectedGeneration.prompt}</Text></Text>
+
+                      {/* Action Buttons */}
+                      <View style={styles.actionButtons}>
+                        <TouchableOpacity
+                          onPress={handleDownloadImage}
+                          style={styles.actionButton}
+                          activeOpacity={0.85}
+                        >
+                          <LinearGradient
+                            colors={['rgba(74, 222, 128, 0.3)', 'rgba(34, 197, 94, 0.2)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.actionButtonGradient}
+                          >
+                            <View style={styles.actionButtonInner}>
+                              <Download size={22} color="rgba(74, 222, 128, 0.95)" strokeWidth={2.8} />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={handleShareImage}
+                          style={styles.actionButton}
+                          activeOpacity={0.85}
+                        >
+                          <LinearGradient
+                            colors={['rgba(200, 220, 255, 0.3)', 'rgba(150, 180, 230, 0.2)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.actionButtonGradient}
+                          >
+                            <View style={styles.actionButtonInner}>
+                              <Share2 size={22} color="rgba(200, 220, 255, 0.95)" strokeWidth={2.8} />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </LinearGradient>
@@ -673,6 +849,7 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    gap: 18,
   },
   modalPromptText: {
     color: 'rgba(255, 255, 255, 0.92)',
@@ -684,6 +861,49 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 5,
+  },
+  modalFavoriteButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    zIndex: 10,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 18,
+    justifyContent: 'center',
+  },
+  actionButton: {
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  actionButtonGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 32,
+    elevation: 16,
+  },
+  actionButtonInner: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
+    borderRightColor: 'rgba(255, 255, 255, 0.18)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
   },
   closeButton: {
     borderRadius: 30,

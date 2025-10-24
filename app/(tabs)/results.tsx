@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Animated, Platform, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions, Animated, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
-import * as Sharing from 'expo-sharing';
-import * as Haptics from 'expo-haptics';
-import { Download, Trash2, Share2, X } from 'lucide-react-native';
+import { Download, Trash2, Share2, X, Image as ImageIcon } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import EmptyState from '@/components/EmptyState';
+import FavoriteButton from '@/components/FavoriteButton';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import ShimmerLoader from '@/components/ShimmerLoader';
+import * as haptics from '@/utils/haptics';
+import { downloadImage, shareImage } from '@/utils/download';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -132,9 +134,12 @@ function LoadingPlaceholder() {
 
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
-  const { generatedImages, isGenerating, generationCount, deleteImage } = useGeneration();
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const { generatedImages, generatedImageIds, isGenerating, generationCount, deleteImage } = useGeneration();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -169,66 +174,40 @@ export default function ResultsScreen() {
   }, [selectedImage, fadeAnim, scaleAnim]);
 
   const handleImagePress = (img: string, index: number) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setSelectedImage(img);
     setSelectedImageIndex(index);
+    // Use the real database ID from generatedImageIds
+    setSelectedImageId(generatedImageIds[index] || null);
   };
 
   const handleCloseModal = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setSelectedImage(null);
     setSelectedImageIndex(-1);
+    setSelectedImageId(null);
   };
 
   const handleDownload = async () => {
     if (!selectedImage) return;
 
     try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+      haptics.medium();
+      const success = await downloadImage(selectedImage, {
+        filename: `fashion-muse-${Date.now()}.jpg`,
+      });
 
-      if (Platform.OS === 'web') {
-        const link = document.createElement('a');
-        link.href = selectedImage;
-        link.download = `photoshoot-${Date.now()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-        alert('Image downloaded successfully!');
+      if (success) {
+        haptics.success();
+        showToast('Image downloaded successfully!', 'success');
       } else {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Required', 'Please grant permission to save images to your gallery.');
-          return;
-        }
-
-        const fileUri = FileSystem.documentDirectory + `photoshoot-${Date.now()}.png`;
-        await FileSystem.writeAsStringAsync(fileUri, selectedImage.split(',')[1], {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        const asset = await MediaLibrary.createAssetAsync(fileUri);
-        await MediaLibrary.createAlbumAsync('Photoshoot', asset, false);
-        
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('Success', 'Image saved to gallery!');
+        haptics.error();
+        showToast('Failed to download image', 'error');
       }
     } catch (error) {
       console.error('Error downloading image:', error);
-      if (Platform.OS === 'web') {
-        alert('Failed to download image');
-      } else {
-        Alert.alert('Error', 'Failed to download image');
-      }
+      haptics.error();
+      showToast('Failed to download image', 'error');
     }
   };
 
@@ -236,62 +215,31 @@ export default function ResultsScreen() {
     if (!selectedImage) return;
 
     try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+      haptics.medium();
+      const success = await shareImage(selectedImage);
 
-      if (Platform.OS === 'web') {
-        if (navigator.share) {
-          const response = await fetch(selectedImage);
-          const blob = await response.blob();
-          const file = new File([blob], `photoshoot-${Date.now()}.png`, { type: 'image/png' });
-          await navigator.share({
-            files: [file],
-            title: 'Photoshoot Result',
-          });
-        } else {
-          alert('Sharing is not supported in this browser');
-        }
-      } else {
-        const fileUri = FileSystem.documentDirectory + `photoshoot-${Date.now()}.png`;
-        await FileSystem.writeAsStringAsync(fileUri, selectedImage.split(',')[1], {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        await Sharing.shareAsync(fileUri);
+      if (success) {
+        showToast('Image shared successfully!', 'success');
       }
     } catch (error) {
       console.error('Error sharing image:', error);
+      showToast('Failed to share image', 'error');
     }
   };
 
   const handleDelete = async () => {
     if (selectedImageIndex < 0 || selectedImageIndex >= generatedImages.length) return;
 
-    const confirmDelete = () => {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      }
+    // Show confirmation toast with a delay before deletion
+    showToast('Deleting image...', 'warning', 1500);
+
+    setTimeout(() => {
+      haptics.heavy();
       deleteImage(selectedImageIndex);
       handleCloseModal();
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (confirm('Are you sure you want to delete this image?')) {
-        confirmDelete();
-      }
-    } else {
-      Alert.alert(
-        'Delete Image',
-        'Are you sure you want to delete this image?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: confirmDelete },
-        ]
-      );
-    }
+      haptics.success();
+      showToast('Image deleted', 'success');
+    }, 300);
   };
 
   return (
@@ -348,6 +296,15 @@ export default function ResultsScreen() {
                       style={styles.cardImage}
                       resizeMode="cover"
                     />
+                    {/* Favorite Button Overlay */}
+                    {user && generatedImageIds[i] && (
+                      <View style={styles.favoriteOverlay}>
+                        <FavoriteButton
+                          imageId={generatedImageIds[i]}
+                          size={20}
+                        />
+                      </View>
+                    )}
                   </TouchableOpacity>
                 </GlassPanel>
               ))}
@@ -357,12 +314,11 @@ export default function ResultsScreen() {
 
         {/* Empty State */}
         {!isGenerating && generatedImages.length === 0 && (
-          <GlassPanel style={styles.emptyState}>
-            <Text style={styles.emptyText}>No results yet</Text>
-            <Text style={styles.emptySubtext}>
-              Generate your first photoshoot to see results here
-            </Text>
-          </GlassPanel>
+          <EmptyState
+            icon={ImageIcon}
+            title="No results yet"
+            description="Generate your first photoshoot to see results here"
+          />
         )}
       </ScrollView>
 
@@ -409,6 +365,15 @@ export default function ResultsScreen() {
                 >
                   <View style={styles.imageContainerInner}>
                     <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                    {/* Favorite Button in Modal */}
+                    {user && selectedImageId && (
+                      <View style={styles.modalFavoriteButton}>
+                        <FavoriteButton
+                          imageId={selectedImageId}
+                          size={24}
+                        />
+                      </View>
+                    )}
                   </View>
                 </LinearGradient>
 
@@ -540,21 +505,17 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  emptyState: {
-    marginTop: SPACING.xxxl,                // 48px
-    paddingVertical: SPACING.xxxl * 1.25,   // 60px
-    paddingHorizontal: SPACING.xxl,         // 32px
-    alignItems: 'center',
+  favoriteOverlay: {
+    position: 'absolute',
+    top: SPACING.xs,
+    right: SPACING.xs,
+    zIndex: 10,
   },
-  emptyText: {
-    ...TEXT_STYLES.h4Primary,
-    color: COLORS.silverLight,
-    marginBottom: SPACING.xs,               // 8px
-  },
-  emptySubtext: {
-    ...TEXT_STYLES.bodyRegularSecondary,
-    color: COLORS.silverMid,
-    textAlign: 'center',
+  modalFavoriteButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    zIndex: 10,
   },
   loadingPlaceholder: {
     flex: 1,

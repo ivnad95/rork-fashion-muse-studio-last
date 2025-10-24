@@ -71,19 +71,19 @@ export default function ShimmerLoader({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.glassBase,          // 'rgba(255, 255, 255, 0.03)'
+    backgroundColor: COLORS.glassBase,          // Updated to match new palette
     overflow: 'hidden',
-    // Subtle border to match glass panels
-    borderWidth: 1.5,
+    // Refined border to match new design system
+    borderWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.15)',
     borderLeftColor: 'rgba(255, 255, 255, 0.12)',
     borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.03)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
   },
   shimmer: {
     width: 300,
     height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',  // Shimmer sweep color
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',  // More subtle shimmer
     transform: [{ skewX: '-20deg' }],
   },
 });

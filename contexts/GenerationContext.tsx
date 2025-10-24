@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
-import { 
-  saveImage, 
-  saveHistory, 
-  getUserHistory, 
-  deleteHistory as dbDeleteHistory 
+import {
+  saveImage,
+  saveHistory,
+  getUserHistory,
+  deleteHistory as dbDeleteHistory
 } from '@/lib/database';
+import { getStylePrompt } from '@/constants/styles';
 
 type AspectRatio = 'portrait' | 'square' | 'landscape';
 
@@ -15,13 +16,16 @@ export interface HistoryItem {
   count: number;
   thumbnail: string;
   results: string[];
+  imageIds: string[];
 }
 
 interface GenerationState {
   selectedImage: string | null;
   generationCount: number;
   aspectRatio: AspectRatio;
+  selectedStyleId: string;
   generatedImages: string[];
+  generatedImageIds: string[];
   isGenerating: boolean;
   error: string | null;
   history: HistoryItem[];
@@ -31,6 +35,7 @@ interface GenerationContextType extends GenerationState {
   setSelectedImage: (uri: string | null) => void;
   setGenerationCount: (count: number) => void;
   setAspectRatio: (ratio: AspectRatio) => void;
+  setSelectedStyleId: (styleId: string) => void;
   generateImages: (userId: string) => Promise<void>;
   clearResults: () => void;
   deleteImage: (index: number) => void;
@@ -56,7 +61,9 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
     selectedImage: null,
     generationCount: 4,
     aspectRatio: 'portrait',
+    selectedStyleId: 'casual',
     generatedImages: [],
+    generatedImageIds: [],
     isGenerating: false,
     error: null,
     history: [],
@@ -74,14 +81,19 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, aspectRatio: ratio }));
   }, []);
 
+  const setSelectedStyleId = useCallback((styleId: string) => {
+    setState((prev) => ({ ...prev, selectedStyleId: styleId }));
+  }, []);
+
   const clearResults = useCallback(() => {
-    setState((prev) => ({ ...prev, generatedImages: [], error: null }));
+    setState((prev) => ({ ...prev, generatedImages: [], generatedImageIds: [], error: null }));
   }, []);
 
   const deleteImage = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
       generatedImages: prev.generatedImages.filter((_, i) => i !== index),
+      generatedImageIds: prev.generatedImageIds.filter((_, i) => i !== index),
     }));
   }, []);
 
@@ -139,7 +151,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setState((prev) => ({ ...prev, isGenerating: true, error: null, generatedImages: [] }));
+    setState((prev) => ({ ...prev, isGenerating: true, error: null, generatedImages: [], generatedImageIds: [] }));
 
     try {
       const results: string[] = [];
@@ -149,8 +161,11 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       
       for (let i = 0; i < state.generationCount; i++) {
         console.log(`Generating image ${i + 1}/${state.generationCount}...`);
-        
-        const prompt = FASHION_PROMPTS[i % FASHION_PROMPTS.length];
+
+        // Get style-specific prompt and combine with pose variation
+        const stylePrompt = getStylePrompt(state.selectedStyleId);
+        const posePrompt = FASHION_PROMPTS[i % FASHION_PROMPTS.length];
+        const prompt = `${stylePrompt}. ${posePrompt}`;
         
         let base64Image = state.selectedImage;
         if (base64Image.startsWith('file://')) {
@@ -320,6 +335,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
         ...prev,
         isGenerating: false,
         generatedImages: results,
+        generatedImageIds: imageIds,
         history: historyItems,
       }));
       
@@ -340,6 +356,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       setSelectedImage,
       setGenerationCount,
       setAspectRatio,
+      setSelectedStyleId,
       generateImages,
       clearResults,
       deleteImage,
@@ -347,7 +364,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       loadHistory,
       deleteHistoryItem,
     }),
-    [state, setSelectedImage, setGenerationCount, setAspectRatio, generateImages, clearResults, deleteImage, saveToHistory, loadHistory, deleteHistoryItem]
+    [state, setSelectedImage, setGenerationCount, setAspectRatio, setSelectedStyleId, generateImages, clearResults, deleteImage, saveToHistory, loadHistory, deleteHistoryItem]
   );
 
   return (
