@@ -480,7 +480,12 @@ export default function HistoryScreen() {
                         paddingHorizontal: 0,
                       }}
                       onScroll={(e) => {
-                        const index = Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH > 540 ? 540 : SCREEN_WIDTH - 48));
+                        const index = Math.round(
+                          e.nativeEvent.contentOffset.x /
+                            (SCREEN_WIDTH > MODAL_IMAGE_WIDTH
+                              ? MODAL_IMAGE_WIDTH
+                              : SCREEN_WIDTH - MODAL_IMAGE_HORIZONTAL_MARGIN)
+                        );
                         setSelectedImageIndex(index);
                       }}
                       scrollEventThrottle={16}
