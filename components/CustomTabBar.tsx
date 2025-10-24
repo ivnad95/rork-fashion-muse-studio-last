@@ -2,10 +2,9 @@ import React, { useEffect, useRef, createContext, useContext } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { COLORS, RADIUS, SPACING } from '@/constants/glassStyles';
+import { NEU_COLORS, NEU_RADIUS, NEU_SPACING } from '@/constants/neumorphicStyles';
 
 // Context for navbar visibility
 interface NavbarContextType {
@@ -128,8 +127,8 @@ function TabButton({
   });
 
   const getIcon = (routeName: string) => {
-    // Active state: accent (#0A76AF), inactive: silverMid
-    const color = isFocused ? COLORS.accent : COLORS.silverMid;
+    // Active state: accent, inactive: textSecondary
+    const color = isFocused ? NEU_COLORS.accentStart : NEU_COLORS.textSecondary;
     switch (routeName) {
       case 'generate':
         return <HomeIcon color={color} />;
@@ -168,13 +167,13 @@ function TabButton({
 }
 
 /**
- * CustomTabBar - "Floating Island" navigation component
- * Deep Sea Glass specification:
- * - Frosted white glass panel (rgba(255, 255, 255, 0.03))
- * - Blur intensity: 25-30
- * - Subtle border: rgba(255, 255, 255, 0.1)
- * - Active icons: lightColor3 (#0A76AF)
- * - Detached from bottom for "floating" effect
+ * CustomTabBar - Neumorphic navigation component
+ * Design specification:
+ * - Soft extruded appearance from base surface
+ * - Dual shadows (light and dark) for tactile depth
+ * - Same material as background (NEU_COLORS.base)
+ * - Soft pressed effect on interaction
+ * - Detached from bottom for floating effect
  */
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const translateY = useRef(new Animated.Value(0)).current;
@@ -214,48 +213,13 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           },
         ]}
       >
-        {/* Gradient fade to create visual separation from content above */}
-        <LinearGradient
-          colors={[
-            'rgba(10, 19, 59, 0)',
-            'rgba(10, 19, 59, 0.3)',
-            'rgba(10, 19, 59, 0.7)',
-            'rgba(10, 19, 59, 0.95)',
-          ]}
-          locations={[0, 0.3, 0.7, 1]}
-          style={styles.topFadeGradient}
-          pointerEvents="none"
-        />
-
-        {/* Multi-layer glass container with depth */}
+        {/* Neumorphic container with dual shadows */}
         <View style={styles.tabBarOuter}>
-          {/* Outer glow layer for floating effect */}
-          <View style={styles.outerGlow} />
+          {/* Dark shadow layer (bottom-right) */}
+          <View style={styles.darkShadowLayer} />
 
-          {/* Main glass panel with multi-stage borders */}
+          {/* Main neumorphic panel */}
           <View style={styles.tabBarContainer}>
-            {/* Blur layer (standardized intensity 28) */}
-            {Platform.OS === 'web' ? (
-              <View style={styles.tabBarBlurWeb} />
-            ) : (
-              <BlurView intensity={28} tint="dark" style={StyleSheet.absoluteFill} />
-            )}
-
-            {/* Gradient overlay for depth */}
-            <LinearGradient
-              colors={[
-                'rgba(255, 255, 255, 0.08)',
-                'rgba(255, 255, 255, 0.04)',
-                'rgba(255, 255, 255, 0.02)',
-              ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-
-            {/* Top glossy highlight for 3D glass effect */}
-            <View style={styles.topHighlight} />
-
             {/* Tab buttons */}
             <View style={styles.tabBarInner}>
               {state.routes.map((route, index) => {
@@ -297,113 +261,80 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: SPACING.lg,                          // 20px bottom margin (floating effect)
-    paddingHorizontal: SPACING.lg,                      // 20px horizontal margin
-  },
-  topFadeGradient: {
-    position: 'absolute',
-    top: -60,
-    left: 0,
-    right: 0,
-    height: 60,
-    zIndex: 0,
+    paddingBottom: NEU_SPACING.xl,
+    paddingHorizontal: NEU_SPACING.lg,
   },
   tabBarOuter: {
     position: 'relative',
-    height: 72,
-    borderRadius: 36,
-    zIndex: 1,
+    height: 70,
+    borderRadius: 35,
   },
-  outerGlow: {
-    position: 'absolute',
-    inset: -4,
-    borderRadius: 40,
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',        // Accent background tint
-    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.90,
-    shadowRadius: 28,
-    elevation: 12,
-  },
-  tabBarContainer: {
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: COLORS.glassBase,
-    borderWidth: 2.5,
-    borderTopColor: COLORS.borderTop,
-    borderLeftColor: COLORS.borderLeft,
-    borderRightColor: COLORS.borderRight,
-    borderBottomColor: COLORS.borderBottom,
-    overflow: 'hidden',
-    // 3-layer shadow system
-    shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.65,
-    shadowRadius: 40,
-    elevation: 20,
-    position: 'relative',
-  },
-  tabBarBlurWeb: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 20, 35, 0.65)',
-  },
-  topHighlight: {
+  // Dark shadow layer (bottom-right)
+  darkShadowLayer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '40%',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    opacity: 0.6,
+    bottom: 0,
+    borderRadius: 35,
+    shadowColor: NEU_COLORS.shadowDark,
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  tabBarContainer: {
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: NEU_COLORS.base,
+    // Light shadow (top-left)
+    shadowColor: NEU_COLORS.shadowLight,
+    shadowOffset: { width: -6, height: -6 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 10,
+    position: 'relative',
   },
   tabBarInner: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    zIndex: 10,
+    paddingHorizontal: 20,
   },
   navButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     overflow: 'visible',
     position: 'relative',
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -10,
-    borderRadius: 36,
-    backgroundColor: 'rgba(10, 118, 175, 0.25)',        // Accent background tint
-    shadowColor: COLORS.shadowAccent,                   // Accent glow shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.90,
-    shadowRadius: 16,
+    inset: -8,
+    borderRadius: 33,
+    shadowColor: NEU_COLORS.accentGlow,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
     elevation: 8,
   },
   glowInner: {
     flex: 1,
-    borderRadius: 36,
+    borderRadius: 33,
   },
   buttonContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.20)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    shadowColor: COLORS.shadowBlack,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 8,
+    backgroundColor: NEU_COLORS.base,
+    // Neumorphic effect with dual shadows
+    shadowColor: NEU_COLORS.shadowLight,
+    shadowOffset: { width: -3, height: -3 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
     elevation: 4,
   },
 });

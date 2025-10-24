@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Platform } from 'react-native';
+import { StyleSheet, Text, View, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
-import { TEXT_STYLES } from '@/constants/typography';
+import { NEU_COLORS, NEU_SPACING, neumorphicStyles } from '@/constants/neumorphicStyles';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import GlassyTitle from '@/components/GlassyTitle';
-import GlassPanel from '@/components/GlassPanel';
+import NeumorphicPanel from '@/components/NeumorphicPanel';
+import NeumorphicButton from '@/components/NeumorphicButton';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
-import GlowingButton from '@/components/GlowingButton';
 import StyleSelector from '@/components/StyleSelector';
 import * as haptics from '@/utils/haptics';
 
@@ -79,24 +76,20 @@ export default function GenerateScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Premium dark gradient background */}
-      <LinearGradient
-        colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
-        locations={[0, 0.3, 0.65, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-      {/* Subtle noise texture overlay */}
-      <View style={[StyleSheet.absoluteFill, { opacity: 0.03, backgroundColor: 'transparent' }]}
-        pointerEvents="none"
-      />
-      <View style={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 100 }]}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 100 }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Title with Credit Badge */}
         <View style={styles.titleSection}>
-          <GlassyTitle><Text>Generate</Text></GlassyTitle>
-          {/* Credit Badge - top-right corner */}
-          <GlassPanel style={styles.creditBadge}>
-            <Text style={styles.creditText}>{user?.credits || 0} credits</Text>
-          </GlassPanel>
+          <Text style={styles.title}>Generate</Text>
+          {/* Credit Badge */}
+          <NeumorphicPanel style={styles.creditBadge} noPadding>
+            <View style={styles.creditBadgeInner}>
+              <Text style={styles.creditText}>{user?.credits || 0} credits</Text>
+            </View>
+          </NeumorphicPanel>
         </View>
 
         {/* Style Selector Section */}
@@ -111,7 +104,7 @@ export default function GenerateScreen() {
           <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
         </View>
 
-        {/* Image Uploader Section - flex to fill remaining space */}
+        {/* Image Uploader Section */}
         <View style={styles.uploaderSection}>
           <Text style={styles.sectionLabel}>UPLOAD PHOTO</Text>
           <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
@@ -119,15 +112,16 @@ export default function GenerateScreen() {
 
         {/* Generate Button Section */}
         <View style={styles.buttonSection}>
-          <Text style={styles.sectionLabel}>GENERATE</Text>
-          <GlowingButton
+          <NeumorphicButton
+            title={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
             onPress={handleGenerate}
             disabled={isGenerating}
-            text={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
-            variant="primary"
+            size="large"
+            fullWidth
+            active={!isGenerating && !!selectedImage}
           />
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -135,50 +129,52 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: NEU_COLORS.base,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
-    flex: 1,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: NEU_SPACING.lg,
   },
   titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: SPACING.xl,                   // 24px
+    marginBottom: NEU_SPACING.xl,
+  },
+  title: {
+    ...neumorphicStyles.neuTitle,
+    fontSize: 36,
   },
   creditBadge: {
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md + 4,
     minWidth: 110,
+  },
+  creditBadgeInner: {
+    paddingVertical: NEU_SPACING.sm,
+    paddingHorizontal: NEU_SPACING.md,
     alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 6,
   },
   creditText: {
-    ...TEXT_STYLES.labelPrimary,
-    color: COLORS.silverLight,
+    ...neumorphicStyles.neuTextPrimary,
+    fontSize: 14,
   },
   sectionLabel: {
-    ...TEXT_STYLES.overlineSecondary,
+    ...neumorphicStyles.neuTextMuted,
     textTransform: 'uppercase',
-    color: COLORS.silverDark,
-    marginBottom: SPACING.sm,
-    paddingLeft: SPACING.xxs,
+    marginBottom: NEU_SPACING.sm,
+    paddingLeft: NEU_SPACING.xxs,
     fontSize: 10,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
     fontWeight: '700',
   },
   selectorSection: {
-    marginBottom: SPACING.xl,                   // 24px
+    marginBottom: NEU_SPACING.xl,
   },
   uploaderSection: {
-    flex: 1,
-    marginBottom: SPACING.xl,                   // 24px
+    marginBottom: NEU_SPACING.xl,
   },
   buttonSection: {
-    marginBottom: 0,
+    marginBottom: NEU_SPACING.md,
   },
 });
