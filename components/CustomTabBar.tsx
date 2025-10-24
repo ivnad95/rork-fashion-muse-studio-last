@@ -29,14 +29,14 @@ export const useNavbar = () => {
 };
 
 const HomeIcon = ({ color }: { color: string }) => (
-  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8">
     <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     <Polyline points="9 22 9 12 15 12 15 22" />
   </Svg>
 );
 
 const ResultsIcon = ({ color }: { color: string }) => (
-  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8">
     <Rect x="3" y="3" width="7" height="7" rx="1" />
     <Rect x="14" y="3" width="7" height="7" rx="1" />
     <Rect x="3" y="14" width="7" height="7" rx="1" />
@@ -45,14 +45,14 @@ const ResultsIcon = ({ color }: { color: string }) => (
 );
 
 const HistoryIcon = ({ color }: { color: string }) => (
-  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+  <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8">
     <Circle cx="12" cy="12" r="10" />
     <Polyline points="12 6 12 12 16 14" />
   </Svg>
 );
 
 const SettingsIcon = ({ color }: { color: string }) => (
-  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="3" />
     <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </Svg>
@@ -74,30 +74,14 @@ function TabButton({
 
   useEffect(() => {
     Animated.spring(scaleAnim, {
-      toValue: isFocused ? 1.05 : 1,
+      toValue: isFocused ? 1.02 : 1,
       friction: 6,
-      tension: 50,
+      tension: 60,
       useNativeDriver: true,
     }).start();
 
-    if (isFocused) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(glowAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(glowAnim, {
-            toValue: 0,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      glowAnim.setValue(0);
-    }
+    // Removed heavy glow for minimal aesthetic
+    glowAnim.setValue(0);
   }, [isFocused, scaleAnim, glowAnim]);
 
   const handlePress = () => {
@@ -112,9 +96,9 @@ function TabButton({
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
-        toValue: isFocused ? 1.05 : 1,
+        toValue: isFocused ? 1.02 : 1,
         friction: 6,
-        tension: 50,
+        tension: 60,
         useNativeDriver: true,
       }),
     ]).start();
@@ -332,40 +316,45 @@ const styles = StyleSheet.create({
   },
   tabBarOuter: {
     position: 'relative',
-    height: 70,
-    borderRadius: 35,
-    // Floating depth shadow
-    ...SHADOW.high,
+    height: 64,
+    borderRadius: 32,
+    // Minimal soft shadow
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   blurContainer: {
-    height: 70,
-    borderRadius: 35,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderTopColor: COLORS.borderTop,
-    borderLeftColor: COLORS.borderLeft,
-    borderRightColor: COLORS.borderRight,
-    borderBottomColor: COLORS.borderBottom,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    backgroundColor: COLORS.glassMinimal,
   },
   webGlassContainer: {
-    height: 70,
-    borderRadius: 35,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
-    backgroundColor: COLORS.glassMedium,
-    borderWidth: 1.5,
-    borderTopColor: COLORS.borderTop,
-    borderLeftColor: COLORS.borderLeft,
-    borderRightColor: COLORS.borderRight,
-    borderBottomColor: COLORS.borderBottom,
+    backgroundColor: COLORS.glassMinimalLight,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
   },
   topShine: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    height: '40%',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     pointerEvents: 'none',
   },
   tabBarInner: {
@@ -378,30 +367,30 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   navButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     overflow: 'visible',
     position: 'relative',
   },
   buttonGlow: {
     position: 'absolute',
-    inset: -8,
-    borderRadius: 33,
+    inset: -6,
+    borderRadius: 28,
     shadowColor: COLORS.accentShadow,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 4,
   },
   glowInner: {
     flex: 1,
-    borderRadius: 33,
+    borderRadius: 28,
   },
   buttonContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',

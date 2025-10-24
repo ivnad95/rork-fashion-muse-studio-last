@@ -897,16 +897,18 @@ const styles = StyleSheet.create({
     // Padding added via paddingTop, paddingBottom, paddingHorizontal in the component
   },
   title: {
-    ...glassStyles.titleText,
-    fontSize: 36,
-    marginBottom: SPACING.xl,
+    fontSize: 28,
+    fontWeight: '300' as const,
+    letterSpacing: -0.5,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.lg,
   },
   mainTitle: {
-    fontSize: 36,
-    fontWeight: '700' as const,
+    fontSize: 28,
+    fontWeight: '300' as const,
     color: Colors.dark.text,
-    letterSpacing: -1.2,
-    marginBottom: 26,
+    letterSpacing: -0.5,
+    marginBottom: 20,
   },
   creditsCard: {
     marginBottom: 26,

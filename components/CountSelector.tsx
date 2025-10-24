@@ -43,30 +43,14 @@ function CountChip({ count, isActive, disabled, onPress }: { count: number; isAc
 
   useEffect(() => {
     Animated.spring(scaleAnim, {
-      toValue: isActive ? 1.08 : 1,
-      friction: 5,
-      tension: 40,
+      toValue: isActive ? 1.02 : 1,
+      friction: 6,
+      tension: 60,
       useNativeDriver: true,
     }).start();
 
-    if (isActive) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(glowAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(glowAnim, {
-            toValue: 0.5,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      glowAnim.setValue(0);
-    }
+    // Removed heavy glow animation for minimal aesthetic
+    glowAnim.setValue(0);
   }, [isActive, scaleAnim, glowAnim]);
 
   const handlePressIn = () => {
@@ -79,9 +63,9 @@ function CountChip({ count, isActive, disabled, onPress }: { count: number; isAc
 
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
-      toValue: isActive ? 1.08 : 1,
-      friction: 5,
-      tension: 40,
+      toValue: isActive ? 1.02 : 1,
+      friction: 6,
+      tension: 60,
       useNativeDriver: true,
     }).start();
   };
@@ -100,75 +84,34 @@ function CountChip({ count, isActive, disabled, onPress }: { count: number; isAc
         },
       ]}
     >
-      {/* Active glow effect */}
-      {isActive && (
-        <Animated.View style={[styles.activeGlow, { opacity: glowOpacity }]} />
-      )}
-
       <TouchableOpacity
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled}
         style={[
-          glassStyles.glassChip,
-          isActive && glassStyles.glassChipActive,
+          styles.minimalChip,
+          isActive && styles.minimalChipActive,
           disabled && styles.disabled,
         ]}
-        activeOpacity={1}
+        activeOpacity={0.9}
         testID={`count-${count}`}
       >
-        {/* SIMPLIFIED TO 3 LAYERS */}
-        {/* Layer 1: Blur or fallback */}
-        {Platform.OS !== 'web' ? (
-          <BlurView
-            intensity={BLUR.light}
-            tint="dark"
-            style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.full, overflow: 'hidden' }]}
-          >
-            {/* Layer 2: Single gradient */}
-            <LinearGradient
-              colors={isActive ? GRADIENTS.accent : GRADIENTS.glassDepth}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-
-            {/* Layer 3: Top highlight */}
-            <LinearGradient
-              colors={GRADIENTS.topShine}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.chipHighlight}
-              pointerEvents="none"
-            />
-          </BlurView>
-        ) : (
-          <>
-            {/* Web fallback */}
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.glassLight, borderRadius: RADIUS.full }]} />
-
-            {/* Layer 2: Single gradient */}
-            <LinearGradient
-              colors={isActive ? GRADIENTS.accent : GRADIENTS.glassDepth}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-
-            {/* Layer 3: Top highlight */}
-            <LinearGradient
-              colors={GRADIENTS.topShine}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.chipHighlight}
-              pointerEvents="none"
-            />
-          </>
-        )}
+        {/* Top highlight only */}
+        <LinearGradient
+          colors={[
+            isActive ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.06)',
+            'rgba(255, 255, 255, 0.02)',
+            'transparent',
+          ]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.chipHighlight}
+          pointerEvents="none"
+        />
 
         {/* Chip text */}
-        <Text style={[glassStyles.textPrimary, styles.chipText, isActive && styles.chipTextActive]}>
+        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
           {count}
         </Text>
       </TouchableOpacity>
@@ -179,46 +122,64 @@ function CountChip({ count, isActive, disabled, onPress }: { count: number; isAc
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipWrapper: {
     position: 'relative',
   },
-  activeGlow: {
-    position: 'absolute',
-    inset: -6,
-    borderRadius: 34,
+  minimalChip: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.06)',
+    borderRightColor: 'rgba(255, 255, 255, 0.03)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.02)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  minimalChipActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: `${COLORS.accent}35`,
+    borderLeftColor: `${COLORS.accent}28`,
+    borderRightColor: `${COLORS.accent}18`,
+    borderBottomColor: `${COLORS.accent}10`,
     shadowColor: COLORS.accentShadow,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 4,
   },
   chipHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
+    height: '50%',
     borderTopLeftRadius: RADIUS.full,
     borderTopRightRadius: RADIUS.full,
     pointerEvents: 'none',
   },
   chipText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    position: 'relative',
+    fontSize: 16,
+    fontWeight: '500' as const,
+    color: COLORS.textSecondary,
     zIndex: 10,
   },
   chipTextActive: {
-    fontSize: 20,
-    fontWeight: '800' as const,
+    fontSize: 17,
+    fontWeight: '600' as const,
     color: COLORS.textPrimary,
-    textShadowColor: COLORS.accentGlow,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
   },
   disabled: {
     opacity: 0.4,

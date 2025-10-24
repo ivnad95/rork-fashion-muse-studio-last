@@ -22,17 +22,34 @@ export const COLORS = {
   glassMedium: 'rgba(26, 57, 98, 0.35)',          // Medium glass depth
   glassDark: 'rgba(13, 25, 42, 0.50)',            // Dark glass shadow
 
+  // Minimal Glass Variants (Premium Subtle Aesthetic)
+  glassMinimal: 'rgba(255, 255, 255, 0.03)',      // Barely-there glass
+  glassMinimalLight: 'rgba(255, 255, 255, 0.05)', // Subtle glass surface
+  glassMinimalMedium: 'rgba(255, 255, 255, 0.08)', // Soft glass depth
+  glassMinimalDark: 'rgba(0, 0, 0, 0.20)',        // Minimal dark overlay
+
   // Glass Highlights & Reflections
   glassHighlight: 'rgba(255, 255, 255, 0.25)',    // Strong top highlight
   glassShine: 'rgba(255, 255, 255, 0.18)',        // Glossy shine effect
   glassReflection: 'rgba(200, 220, 255, 0.10)',   // Blue-tinted reflection
   glassStroke: 'rgba(255, 255, 255, 0.12)',       // Subtle edge stroke
 
+  // Minimal Highlights (Softer, More Premium)
+  glassHighlightMinimal: 'rgba(255, 255, 255, 0.10)', // Soft top highlight
+  glassShineMinimal: 'rgba(255, 255, 255, 0.06)',     // Barely-visible shine
+  glassStrokeMinimal: 'rgba(255, 255, 255, 0.06)',    // Ultra-subtle edge
+
   // Border Colors (Light-to-Shadow Gradient)
   borderTop: 'rgba(255, 255, 255, 0.25)',         // Brightest - top edge
   borderLeft: 'rgba(255, 255, 255, 0.18)',        // Bright - left edge
   borderRight: 'rgba(255, 255, 255, 0.08)',       // Subtle - right edge
   borderBottom: 'rgba(255, 255, 255, 0.04)',      // Darkest - bottom edge
+
+  // Minimal Border Colors (Softer Gradient)
+  borderMinimalTop: 'rgba(255, 255, 255, 0.10)',     // Soft top edge
+  borderMinimalLeft: 'rgba(255, 255, 255, 0.08)',    // Soft left edge
+  borderMinimalRight: 'rgba(255, 255, 255, 0.04)',   // Barely-visible right
+  borderMinimalBottom: 'rgba(255, 255, 255, 0.02)',  // Almost invisible bottom
 
   // Text Colors (Silver/White Spectrum)
   textPrimary: '#F8FAFC',          // Primary text - almost white
@@ -115,6 +132,10 @@ export const BLUR = {
   light: 18,       // Subtle blur for overlays
   medium: 28,      // Standard glass blur
   heavy: 40,       // Strong blur for modals
+
+  // Minimal blur intensities
+  minimal: 10,     // Ultra-subtle blur
+  soft: 15,        // Soft minimal blur
 };
 
 // ============================================================================
@@ -153,6 +174,36 @@ export const SHADOW = {
     shadowOpacity: 0.80,
     shadowRadius: 24,
     elevation: 12,
+  },
+
+  // Minimal shadow variants (softer, more premium)
+  minimal: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  minimalMedium: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.20,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  minimalHigh: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  accentGlowMinimal: {
+    shadowColor: COLORS.accentShadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.40,
+    shadowRadius: 16,
+    elevation: 6,
   },
 };
 
@@ -544,6 +595,155 @@ export const glassStyles = StyleSheet.create({
     backgroundColor: COLORS.overlay,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // --------------------------------------------------------------------------
+  // MINIMAL GLASS VARIANTS (Premium Subtle Aesthetic)
+  // --------------------------------------------------------------------------
+
+  /**
+   * Minimal glass panel - ultra-subtle, premium look
+   * Use for: Main content areas requiring minimal visual weight
+   */
+  glassPanelMinimal: {
+    backgroundColor: COLORS.glassMinimal,
+    borderRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    ...SHADOW.minimal,
+    overflow: 'hidden',
+  },
+
+  /**
+   * Minimal glass card - compact with soft shadows
+   * Use for: List items, small containers
+   */
+  glassCardMinimal: {
+    backgroundColor: COLORS.glassMinimalLight,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    ...SHADOW.minimalMedium,
+    overflow: 'hidden',
+    padding: SPACING.md,
+  },
+
+  /**
+   * Minimal glass button - soft, premium feel
+   * Use for: Primary actions with minimal aesthetic
+   */
+  glassButtonMinimal: {
+    backgroundColor: COLORS.glassMinimalLight,
+    borderRadius: RADIUS.xxl,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    ...SHADOW.minimalMedium,
+    overflow: 'hidden',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /**
+   * Minimal glass button active state
+   */
+  glassButtonMinimalActive: {
+    backgroundColor: COLORS.glassMinimalMedium,
+    borderTopColor: `${COLORS.accent}30`,
+    borderLeftColor: `${COLORS.accent}25`,
+    borderRightColor: `${COLORS.accent}15`,
+    borderBottomColor: `${COLORS.accent}10`,
+    ...SHADOW.accentGlowMinimal,
+  },
+
+  /**
+   * Glass pill - compact minimal button/chip
+   * Use for: Filter tags, small selectors
+   */
+  glassPill: {
+    backgroundColor: COLORS.glassMinimalLight,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    ...SHADOW.minimal,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /**
+   * Glass pill active state
+   */
+  glassPillActive: {
+    backgroundColor: COLORS.glassMinimalMedium,
+    borderTopColor: `${COLORS.accent}40`,
+    borderLeftColor: `${COLORS.accent}30`,
+    borderRightColor: `${COLORS.accent}20`,
+    borderBottomColor: `${COLORS.accent}10`,
+    ...SHADOW.accentGlowMinimal,
+  },
+
+  /**
+   * Floating minimal glass container
+   * Use for: Upload areas, large interactive zones
+   */
+  glassFloatingMinimal: {
+    backgroundColor: COLORS.glassMinimal,
+    borderRadius: RADIUS.xxl,
+    borderWidth: 1,
+    borderTopColor: COLORS.borderMinimalTop,
+    borderLeftColor: COLORS.borderMinimalLeft,
+    borderRightColor: COLORS.borderMinimalRight,
+    borderBottomColor: COLORS.borderMinimalBottom,
+    ...SHADOW.minimalHigh,
+    overflow: 'hidden',
+  },
+
+  // --------------------------------------------------------------------------
+  // MINIMAL TEXT STYLES
+  // --------------------------------------------------------------------------
+
+  /**
+   * Minimal section label - ultra-light weight
+   */
+  textSectionMinimal: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '500' as const,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
+  },
+
+  /**
+   * Minimal button text - lighter weight
+   */
+  buttonTextMinimal: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    fontWeight: '500' as const,
+    letterSpacing: 0.3,
+  },
+
+  /**
+   * Minimal button text active
+   */
+  buttonTextMinimalActive: {
+    color: COLORS.textPrimary,
+    fontWeight: '600' as const,
   },
 
   // --------------------------------------------------------------------------

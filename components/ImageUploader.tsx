@@ -13,7 +13,7 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassContainer variant="card" style={styles.container}>
+    <View style={[styles.glassBorder]}>
       <TouchableOpacity
         style={styles.imageContainer}
         onPress={onImageSelect}
@@ -97,20 +97,33 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
           </View>
         )}
       </TouchableOpacity>
-    </GlassContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  glassBorder: {
     width: '100%',
     aspectRatio: 3 / 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: RADIUS.xxl,
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.06)',
+    borderRightColor: 'rgba(255, 255, 255, 0.03)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.02)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 2,
+    overflow: 'hidden',
   },
   imageContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xxl,
     overflow: 'hidden',
   },
   imageGlassBorder: {
@@ -121,7 +134,7 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xxl,
   },
   imageShine: {
     position: 'absolute',
@@ -129,51 +142,51 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xxl,
   },
   placeholderContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconRingOuter: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginBottom: 12,
     position: 'relative',
-    shadowColor: COLORS.shadowDark,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
   },
   iconRingBlur: {
     width: '100%',
     height: '100%',
-    borderRadius: 40,
+    borderRadius: 32,
     overflow: 'hidden',
   },
   iconRingInner: {
     width: '100%',
     height: '100%',
-    borderRadius: 40,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderTopColor: COLORS.glassHighlight,
-    borderLeftColor: COLORS.glassHighlight,
-    borderRightColor: 'rgba(0, 0, 0, 0.1)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.15)',
+    borderWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.06)',
+    borderRightColor: 'rgba(255, 255, 255, 0.02)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.01)',
   },
   ringShine: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 2,
-    backgroundColor: COLORS.glassShine,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     pointerEvents: 'none',
   },
   logo: {
@@ -182,14 +195,17 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   placeholderText: {
-    ...glassStyles.textPrimary,
-    fontSize: 15,
-    marginBottom: 4,
-    fontWeight: '600',
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    marginBottom: 2,
+    fontWeight: '400' as const,
+    letterSpacing: 0.3,
   },
   placeholderSubtext: {
-    ...glassStyles.textMuted,
-    fontSize: 12,
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '400' as const,
+    letterSpacing: 0.5,
   },
   loadingOverlay: {
     position: 'absolute',
@@ -197,7 +213,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xxl,
   },
   loadingFallback: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',

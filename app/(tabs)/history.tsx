@@ -588,9 +588,11 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxxl,
   },
   title: {
-    ...glassStyles.titleText,
-    fontSize: 36,
-    marginBottom: SPACING.xl,
+    fontSize: 28,
+    fontWeight: '300' as const,
+    letterSpacing: -0.5,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.lg,
   },
   emptyStateContainer: {
     flex: 1,
@@ -634,13 +636,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xxl,
   },
   dateLabel: {
-    ...glassStyles.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: SPACING.md,
-    paddingLeft: SPACING.xxs,
-    fontSize: 10,
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '500' as const,
     letterSpacing: 1.5,
-    fontWeight: '700',
+    textTransform: 'uppercase' as const,
+    marginBottom: SPACING.sm,
+    paddingLeft: SPACING.xxs,
   },
   historyCard: {
     marginBottom: SPACING.md,               // 16px between cards

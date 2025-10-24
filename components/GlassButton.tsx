@@ -120,8 +120,8 @@ export default function GlassButton({
         onPress={handlePress}
         disabled={disabled}
         style={[
-          glassStyles.glassButton,
-          active && glassStyles.glassButtonActive,
+          glassStyles.glassButtonMinimal,
+          active && glassStyles.glassButtonMinimalActive,
           {
             paddingVertical: currentSize.paddingVertical,
             paddingHorizontal: currentSize.paddingHorizontal,
@@ -131,57 +131,25 @@ export default function GlassButton({
           style,
         ]}
       >
-        {/* Layer 1: Blur or fallback */}
-        {Platform.OS !== 'web' ? (
-          <BlurView
-            intensity={BLUR.light}
-            tint="dark"
-            style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.xxl }]}
-          >
-            {/* Layer 2: Gradient */}
-            <LinearGradient
-              colors={active ? GRADIENTS.accent : GRADIENTS.glassDepth}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.xxl }]}
-            />
-
-            {/* Layer 3: Top highlight (2px) */}
-            <LinearGradient
-              colors={GRADIENTS.topShine}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={[styles.topHighlight, { borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl }]}
-              pointerEvents="none"
-            />
-          </BlurView>
-        ) : (
-          <View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS.xxl, overflow: 'hidden' }]}>
-            {/* Layer 2: Gradient */}
-            <LinearGradient
-              colors={active ? GRADIENTS.accent : GRADIENTS.glassDepth}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.glassLight }]}
-            />
-
-            {/* Layer 3: Top highlight (2px) */}
-            <LinearGradient
-              colors={GRADIENTS.topShine}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={[styles.topHighlight, { borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl }]}
-              pointerEvents="none"
-            />
-          </View>
-        )}
+        {/* Minimal top highlight only */}
+        <LinearGradient
+          colors={[
+            active ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.06)',
+            'rgba(255, 255, 255, 0.02)',
+            'transparent',
+          ]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={[styles.topHighlight, { borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl }]}
+          pointerEvents="none"
+        />
 
         {/* Button text */}
         <Text
           style={[
-            glassStyles.buttonText,
+            glassStyles.buttonTextMinimal,
             { fontSize: currentSize.fontSize },
-            active && glassStyles.buttonTextActive,
+            active && glassStyles.buttonTextMinimalActive,
             disabled && styles.disabledText,
             textStyle,
             { zIndex: 10 },
