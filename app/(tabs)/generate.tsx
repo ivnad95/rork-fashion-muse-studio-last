@@ -109,11 +109,15 @@ export default function GenerateScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Deep Sea Glass 4-stop gradient background */}
+      {/* Premium dark gradient background */}
       <LinearGradient
         colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
-        locations={[0, 0.35, 0.70, 1]}
+        locations={[0, 0.3, 0.65, 1]}
         style={StyleSheet.absoluteFill}
+      />
+      {/* Subtle noise texture overlay */}
+      <View style={[StyleSheet.absoluteFill, { opacity: 0.03, backgroundColor: 'transparent' }]}
+        pointerEvents="none"
       />
       <View style={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 100 }]}>
         {/* Title with Credit Badge */}
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: SPACING.lg,              // 20px floating margins
+    paddingHorizontal: SPACING.lg,
   },
   titleSection: {
     flexDirection: 'row',
@@ -167,10 +171,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,                   // 24px
   },
   creditBadge: {
-    paddingVertical: SPACING.xs,                // 8px
-    paddingHorizontal: SPACING.md,              // 16px
-    minWidth: 100,
+    paddingVertical: SPACING.xs + 2,
+    paddingHorizontal: SPACING.md + 4,
+    minWidth: 110,
     alignItems: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   creditText: {
     ...TEXT_STYLES.labelPrimary,
@@ -179,9 +188,12 @@ const styles = StyleSheet.create({
   sectionLabel: {
     ...TEXT_STYLES.overlineSecondary,
     textTransform: 'uppercase',
-    color: COLORS.silverMid,
-    marginBottom: SPACING.sm,                   // 12px
-    paddingLeft: SPACING.xxs,                   // 4px
+    color: COLORS.silverDark,
+    marginBottom: SPACING.sm,
+    paddingLeft: SPACING.xxs,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    fontWeight: '700',
   },
   selectorSection: {
     marginBottom: SPACING.xl,                   // 24px

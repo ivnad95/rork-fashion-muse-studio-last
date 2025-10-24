@@ -296,11 +296,14 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Deep Sea Glass 4-stop gradient background */}
+      {/* Premium dark gradient background */}
       <LinearGradient
         colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
-        locations={[0, 0.35, 0.70, 1]}
+        locations={[0, 0.3, 0.65, 1]}
         style={StyleSheet.absoluteFill}
+      />
+      <View style={[StyleSheet.absoluteFill, { opacity: 0.03, backgroundColor: 'transparent' }]}
+        pointerEvents="none"
       />
 
       <ScrollView
@@ -505,9 +508,12 @@ const styles = StyleSheet.create({
   sectionLabel: {
     ...TEXT_STYLES.overlineSecondary,
     textTransform: 'uppercase',
-    color: COLORS.silverMid,
-    marginBottom: SPACING.md,               // 16px
-    paddingLeft: SPACING.xxs,               // 4px
+    color: COLORS.silverDark,
+    marginBottom: SPACING.md,
+    paddingLeft: SPACING.xxs,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    fontWeight: '700',
   },
   grid: {
     flexDirection: 'row',
@@ -515,10 +521,15 @@ const styles = StyleSheet.create({
     gap: SPACING.md,                        // 16px gap between cards
   },
   imageCard: {
-    width: (SCREEN_WIDTH - 40 - 16) / 2,   // (screen - margins - gap) / 2 columns
+    width: (SCREEN_WIDTH - 40 - 16) / 2,
     aspectRatio: 3 / 4,
-    padding: 0,                             // No internal padding (image fills panel)
+    padding: 0,
     overflow: 'hidden',
+    shadowColor: 'rgba(0, 0, 0, 0.4)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 10,
   },
   cardImage: {
     width: '100%',

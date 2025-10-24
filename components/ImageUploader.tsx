@@ -11,23 +11,25 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassPanel style={glassStyles.imagePlaceholder} radius={24}>
+    <GlassPanel style={glassStyles.imagePlaceholder} radius={28}>
       <TouchableOpacity
         style={glassStyles.imageContainer}
         onPress={onImageSelect}
-        activeOpacity={0.85}
+        activeOpacity={0.9}
         testID="image-uploader"
       >
         {uploadedImage ? (
           <Image source={{ uri: uploadedImage }} style={styles.uploadedImage} resizeMode="cover" />
         ) : (
           <View style={styles.placeholderContent}>
-            <View style={styles.logoContainer}>
-              {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-              <Image source={require('@/assets/images/icon.png')} style={styles.logo} resizeMode="contain" />
+            <View style={styles.iconRing}>
+              <View style={styles.iconRingInner}>
+                {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
+                <Image source={require('@/assets/images/icon.png')} style={styles.logo} resizeMode="contain" />
+              </View>
             </View>
-            <Text style={styles.placeholderText}>Tap to upload your photo</Text>
-            <Text style={styles.placeholderSubtext}>Start your fashion transformation</Text>
+            <Text style={styles.placeholderText}>Tap to upload</Text>
+            <Text style={styles.placeholderSubtext}>Your photo here</Text>
           </View>
         )}
         {uploading && (
@@ -44,37 +46,55 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 24,                                   // Spec: 24px border radius for main panels
+    borderRadius: 28,
   },
   placeholderContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoContainer: {
-    width: 96,
-    height: 96,
-    marginBottom: 16,
-    opacity: 0.25,
+  iconRing: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.3)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  iconRingInner: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   logo: {
-    width: '100%',
-    height: '100%',
+    width: '60%',
+    height: '60%',
+    opacity: 0.4,
   },
   placeholderText: {
-    color: COLORS.silverLight,                      // Spec: near-white primary text
-    fontSize: 15,
-    fontWeight: '600' as const,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',         // Spec: neon-like glow effect
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    color: COLORS.silverLight,
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
+    marginBottom: 4,
   },
   placeholderSubtext: {
-    color: COLORS.silverMid,                        // Spec: secondary silver text
+    color: COLORS.silverDark,
     fontSize: 13,
-    marginTop: 6,
     fontWeight: '500' as const,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    letterSpacing: 0.2,
   },
 });

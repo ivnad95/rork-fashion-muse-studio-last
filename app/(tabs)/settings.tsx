@@ -500,11 +500,14 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Deep Sea Glass 4-stop gradient background */}
+      {/* Premium dark gradient background */}
       <LinearGradient
         colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
-        locations={[0, 0.35, 0.70, 1]}
+        locations={[0, 0.3, 0.65, 1]}
         style={StyleSheet.absoluteFill}
+      />
+      <View style={[StyleSheet.absoluteFill, { opacity: 0.03, backgroundColor: 'transparent' }]}
+        pointerEvents="none"
       />
 
       <ScrollView

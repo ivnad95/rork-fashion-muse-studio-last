@@ -64,16 +64,16 @@ export default function GlassPanel({
         })
       )}
 
-      {/* Top highlight gradient (40% height, glossy shine effect) */}
+      {/* Top highlight gradient - refined glossy effect */}
       <LinearGradient
         colors={[
-          'rgba(255, 255, 255, 0.35)', // Top - brightest
-          'rgba(255, 255, 255, 0.10)', // Mid - fading
-          'rgba(255, 255, 255, 0.05)', // Bottom - subtle
-          'transparent',                // Fade to nothing
+          'rgba(255, 255, 255, 0.25)',
+          'rgba(255, 255, 255, 0.08)',
+          'rgba(255, 255, 255, 0.02)',
+          'transparent',
         ]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 0.5 }}
+        end={{ x: 0, y: 0.35 }}
         style={[
           styles.topHighlight,
           {
@@ -83,16 +83,30 @@ export default function GlassPanel({
         ]}
       />
 
-      {/* Inner gradient overlay (subtle depth) */}
+      {/* Inner gradient overlay - more depth */}
       <LinearGradient
         colors={[
-          'rgba(255, 255, 255, 0.05)', // Top
-          'transparent',                // Mid
-          'rgba(0, 0, 0, 0.10)',       // Bottom - subtle shadow
+          'rgba(255, 255, 255, 0.04)',
+          'transparent',
+          'rgba(0, 0, 0, 0.15)',
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[styles.innerGradient, { borderRadius: radius }]}
+      />
+
+      {/* Edge glow for premium feel */}
+      <View
+        style={[
+          styles.edgeGlow,
+          {
+            borderRadius: radius,
+            shadowColor: 'rgba(255, 255, 255, 0.1)',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 8,
+          },
+        ]}
       />
 
       {/* Content layer */}
@@ -111,7 +125,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '40%', // 40% height for glossy top shine
+    height: '35%',
     zIndex: 1,
   },
   innerGradient: {
@@ -121,5 +135,14 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 2,
+  },
+  edgeGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 3,
+    pointerEvents: 'none',
   },
 });

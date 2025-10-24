@@ -158,11 +158,14 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Deep Sea Glass 4-stop gradient background */}
+      {/* Premium dark gradient background */}
       <LinearGradient
         colors={[COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid, COLORS.bgBase]}
-        locations={[0, 0.35, 0.70, 1]}
+        locations={[0, 0.3, 0.65, 1]}
         style={StyleSheet.absoluteFill}
+      />
+      <View style={[StyleSheet.absoluteFill, { opacity: 0.03, backgroundColor: 'transparent' }]}
+        pointerEvents="none"
       />
 
       <ScrollView
@@ -436,9 +439,12 @@ const styles = StyleSheet.create({
   dateLabel: {
     ...TEXT_STYLES.overlineSecondary,
     textTransform: 'uppercase',
-    color: COLORS.silverDark,               // Muted for date headers
-    marginBottom: SPACING.md,               // 16px
-    paddingLeft: SPACING.xxs,               // 4px
+    color: COLORS.silverDark,
+    marginBottom: SPACING.md,
+    paddingLeft: SPACING.xxs,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    fontWeight: '700',
   },
   historyCard: {
     marginBottom: SPACING.md,               // 16px between cards

@@ -2,11 +2,11 @@ import { StyleSheet } from 'react-native';
 
 // Deep Sea Glass Color Constants
 export const COLORS = {
-  // Background colors
-  bgDeepest: '#060D28',
-  bgDeep: '#0A133B',
-  bgMid: '#0D1A48',
-  bgBase: '#0F2055',
+  // Background colors - darker, more premium
+  bgDeepest: '#020815',
+  bgDeep: '#030B1F',
+  bgMid: '#050E28',
+  bgBase: '#071235',
 
   // Text colors (silver/white spectrum)
   silverLight: '#F8FAFC',              // Primary text
@@ -20,10 +20,11 @@ export const COLORS = {
   accentDark: '#075985',
   accentGlow: 'rgba(10, 118, 175, 0.60)',
 
-  // Glass surface colors
-  glassBase: 'rgba(255, 255, 255, 0.03)',
-  glassHighlight: 'rgba(255, 255, 255, 0.35)',
-  glassReflection: 'rgba(255, 255, 255, 0.05)',
+  // Glass surface colors - more refined
+  glassBase: 'rgba(255, 255, 255, 0.02)',
+  glassHighlight: 'rgba(255, 255, 255, 0.45)',
+  glassReflection: 'rgba(255, 255, 255, 0.08)',
+  glassStroke: 'rgba(255, 255, 255, 0.12)',
 
   // Border colors (gradient from top to bottom)
   borderTop: 'rgba(255, 255, 255, 0.25)',
