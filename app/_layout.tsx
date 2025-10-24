@@ -9,6 +9,7 @@ import Colors from '@/constants/colors';
 import { GenerationProvider } from '@/contexts/GenerationContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AuthSplash from '@/components/AuthSplash';
 import Onboarding from '@/components/Onboarding';
@@ -100,19 +101,21 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <ToastProvider>
-        <AuthProvider>
-          <GenerationProvider>
-            <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.dark.backgroundDeep }}>
-              <RootLayoutNav />
-              <Onboarding
-                visible={showOnboarding}
-                onComplete={handleOnboardingComplete}
-              />
-            </GestureHandlerRootView>
-          </GenerationProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <GenerationProvider>
+              <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.dark.backgroundDeep }}>
+                <RootLayoutNav />
+                <Onboarding
+                  visible={showOnboarding}
+                  onComplete={handleOnboardingComplete}
+                />
+              </GestureHandlerRootView>
+            </GenerationProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

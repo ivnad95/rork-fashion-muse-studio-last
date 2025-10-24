@@ -10,6 +10,7 @@ import EmptyState from '@/components/EmptyState';
 import FavoriteButton from '@/components/FavoriteButton';
 import SearchBar from '@/components/SearchBar';
 import FilterChips, { FilterOption } from '@/components/FilterChips';
+import DateRangeFilter, { DateRange } from '@/components/DateRangeFilter';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
@@ -26,6 +27,7 @@ const FILTER_OPTIONS: FilterOption[] = [
   { id: 'today', label: 'Today', color: '#10B981' },
   { id: 'week', label: 'This Week', color: '#8B5CF6' },
   { id: 'month', label: 'This Month', color: '#F59E0B' },
+  { id: 'custom', label: 'Custom', color: '#EC4899' },
 ];
 
 export default function HistoryScreen() {
@@ -41,6 +43,7 @@ export default function HistoryScreen() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange>({ startDate: null, endDate: null });
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
@@ -132,13 +135,24 @@ export default function HistoryScreen() {
         } else if (selectedFilter === 'month') {
           const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           return itemDate >= monthAgo;
+        } else if (selectedFilter === 'custom') {
+          // Apply custom date range filter
+          if (customDateRange.startDate || customDateRange.endDate) {
+            if (customDateRange.startDate && itemDate < customDateRange.startDate) {
+              return false;
+            }
+            if (customDateRange.endDate && itemDate > customDateRange.endDate) {
+              return false;
+            }
+            return true;
+          }
         }
         return true;
       });
     }
 
     return filtered;
-  }, [displayHistory, searchQuery, selectedFilter]);
+  }, [displayHistory, searchQuery, selectedFilter, customDateRange]);
 
   const handleGenerationPress = (generation: typeof displayHistory[0]) => {
     haptics.light();
@@ -266,8 +280,29 @@ export default function HistoryScreen() {
         <FilterChips
           options={FILTER_OPTIONS}
           selectedId={selectedFilter}
-          onSelect={setSelectedFilter}
+          onSelect={(id) => {
+            setSelectedFilter(id);
+            if (id !== 'custom') {
+              setCustomDateRange({ startDate: null, endDate: null });
+            }
+          }}
         />
+
+        {/* Custom Date Range Filter */}
+        {selectedFilter === 'custom' && (
+          <DateRangeFilter
+            currentRange={customDateRange}
+            onApply={(range) => {
+              setCustomDateRange(range);
+              showToast('Custom date range applied', 'success');
+            }}
+            onClear={() => {
+              setCustomDateRange({ startDate: null, endDate: null });
+              setSelectedFilter('all');
+              showToast('Date range cleared', 'info');
+            }}
+          />
+        )}
 
         {isLoading ? (
           <View style={styles.messagePanel}>

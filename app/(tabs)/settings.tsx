@@ -23,6 +23,7 @@ import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlassPanel from '@/components/GlassPanel';
@@ -315,6 +316,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { showToast } = useToast();
+  const { theme, themeId, setTheme: setAppTheme } = useTheme();
   const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
   const { handleScroll } = useScrollNavbar();
@@ -326,7 +328,6 @@ export default function SettingsScreen() {
   const [authPassword, setAuthPassword] = useState('');
   const [authName, setAuthName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState('ocean');
 
   const toggleNotifications = () => {
     haptics.light();
@@ -710,11 +711,12 @@ export default function SettingsScreen() {
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Appearance</Text>
             <ThemePicker
-              selectedThemeId={selectedTheme}
-              onSelectTheme={(themeId) => {
+              selectedThemeId={themeId}
+              onSelectTheme={(newThemeId) => {
                 haptics.medium();
-                setSelectedTheme(themeId);
-                showToast(`Theme changed to ${themeId}`, 'success');
+                setAppTheme(newThemeId);
+                const themeName = newThemeId.charAt(0).toUpperCase() + newThemeId.slice(1);
+                showToast(`Theme changed to ${themeName}`, 'success');
               }}
             />
           </View>

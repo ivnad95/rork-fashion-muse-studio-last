@@ -22,9 +22,8 @@ export default function GenerateScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
+  const { selectedImage, setSelectedImage, generationCount, setGenerationCount, selectedStyleId, setSelectedStyleId, isGenerating, generateImages } = useGeneration();
   const [uploading, setUploading] = useState<boolean>(false);
-  const [selectedStyleId, setSelectedStyleId] = useState<string>('casual');
 
   const handleImageSelect = async () => {
     try {
