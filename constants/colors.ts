@@ -1,68 +1,68 @@
 export default {
   dark: {
-    // Deep Sea Glass background palette
-    background: '#060D28',               // bgDeepest - darkest blue
-    backgroundDeep: '#0A133B',           // bgDeep - primary dark blue
-    backgroundMid: '#0D1A48',            // bgMid - midpoint blue
-    backgroundBase: '#0F2055',           // bgBase - base blue
+    // Premium dark background palette - deeper and more refined
+    background: '#020611',               // bgDeepest - almost black
+    backgroundDeep: '#030A1A',           // bgDeep - very dark blue
+    backgroundMid: '#040D22',            // bgMid - dark blue
+    backgroundBase: '#05102A',           // bgBase - base dark blue
     backgroundGradient: [
-      '#060D28',                         // Top - deepest
-      '#091433',                         // Upper mid
-      '#0C1A47',                         // Lower mid
-      '#0F2055',                         // Bottom - base
+      '#020611',                         // Top - almost black
+      '#030814',                         // Upper mid
+      '#040C1E',                         // Lower mid
+      '#05102A',                         // Bottom - base
     ],
 
-    // Glass surface colors (white-based for authentic glass)
-    glass: 'rgba(255, 255, 255, 0.03)',          // Base glass tint
-    glassBorder: 'rgba(255, 255, 255, 0.1)',     // Default border
-    glassHighlight: 'rgba(255, 255, 255, 0.1)',  // Top highlight shine
-    glassWrapper: 'rgba(255, 255, 255, 0.03)',   // Wrapper tint
-    glassShadow: 'rgba(0, 0, 0, 0.45)',          // Default shadow
+    // Refined glass surface colors - more subtle
+    glass: 'rgba(255, 255, 255, 0.02)',          // Base glass tint - more subtle
+    glassBorder: 'rgba(255, 255, 255, 0.08)',    // Default border - softer
+    glassHighlight: 'rgba(255, 255, 255, 0.12)', // Top highlight - refined
+    glassWrapper: 'rgba(255, 255, 255, 0.02)',   // Wrapper tint
+    glassShadow: 'rgba(0, 0, 0, 0.60)',          // Deeper shadows
 
-    // Accent colors (single accent only - #0A76AF)
-    primary: '#0A76AF',                          // Primary accent
+    // Refined accent colors - more muted and premium
+    primary: '#0EA5E9',                          // Refined sky blue
     primaryLight: '#38BDF8',                     // Hover state
-    primaryDark: '#075985',                      // Pressed state
-    primaryGlow: 'rgba(10, 118, 175, 0.60)',     // Glow effect
+    primaryDark: '#0284C7',                      // Pressed state
+    primaryGlow: 'rgba(14, 165, 233, 0.45)',     // More subtle glow
 
-    accent: '#0A76AF',                           // Same as primary
+    accent: '#0EA5E9',                           // Same as primary
     accentLight: '#38BDF8',                      // Lighter variant
-    accentDark: '#075985',                       // Darker variant
-    accentGlow: 'rgba(10, 118, 175, 0.60)',      // Accent glow
+    accentDark: '#0284C7',                       // Darker variant
+    accentGlow: 'rgba(14, 165, 233, 0.45)',      // Accent glow
 
-    // Text colors (silver/white spectrum for maximum contrast)
-    text: '#F8FAFC',                             // Primary text (silverLight)
-    textSecondary: '#CBD5E1',                    // Secondary text (silverMid)
-    textMuted: '#94A3B8',                        // Tertiary text (silverDark)
+    // Refined text colors - better hierarchy
+    text: '#FFFFFF',                             // Pure white for primary text
+    textSecondary: '#E2E8F0',                    // Lighter secondary text
+    textMuted: '#94A3B8',                        // Muted text
     textDisabled: '#64748B',                     // Disabled text
 
-    // State colors (used sparingly)
-    success: '#4ADE80',
-    successGlow: 'rgba(74, 222, 128, 0.50)',
-    warning: '#FCD34D',
-    warningGlow: 'rgba(252, 211, 77, 0.50)',
-    error: '#F87171',
-    errorGlow: 'rgba(248, 113, 113, 0.50)',
+    // State colors - more refined
+    success: '#10B981',
+    successGlow: 'rgba(16, 185, 129, 0.40)',
+    warning: '#F59E0B',
+    warningGlow: 'rgba(245, 158, 11, 0.40)',
+    error: '#EF4444',
+    errorGlow: 'rgba(239, 68, 68, 0.40)',
 
-    // Shadow colors (primarily black, accent for active states)
-    shadowBlack: 'rgba(0, 0, 0, 0.45)',
-    shadowAccent: 'rgba(10, 118, 175, 0.70)',
+    // Shadow colors - deeper for premium feel
+    shadowBlack: 'rgba(0, 0, 0, 0.70)',
+    shadowAccent: 'rgba(14, 165, 233, 0.50)',
 
     // UI utilities
-    overlay: 'rgba(7, 10, 15, 0.96)',
-    divider: 'rgba(230, 238, 255, 0.16)',
+    overlay: 'rgba(2, 6, 17, 0.97)',
+    divider: 'rgba(255, 255, 255, 0.10)',
 
-    // Silver palette (legacy support - mapped to new values)
-    silver: '#CBD5E1',                           // Mapped to textSecondary
-    silverLight: '#F8FAFC',                      // Mapped to text
-    silverMid: '#CBD5E1',                        // Mapped to textSecondary
-    silverDark: '#94A3B8',                       // Mapped to textMuted
-    silverGlow: 'rgba(248, 250, 252, 0.40)',     // Text glow effect
+    // Silver palette (refined for minimalist aesthetic)
+    silver: '#E2E8F0',                           // Lighter silver
+    silverLight: '#FFFFFF',                      // Pure white
+    silverMid: '#E2E8F0',                        // Light gray
+    silverDark: '#94A3B8',                       // Muted gray
+    silverGlow: 'rgba(255, 255, 255, 0.30)',     // Subtle text glow
 
-    // Gradient utilities
-    liquidGradient: ['#F8FAFC', '#CBD5E1', '#94A3B8', '#CBD5E1'],
-    liquidGradientAlt: ['#F8FAFC', '#CBD5E1', '#94A3B8'],
-    edgeGradient: ['#F8FAFC', '#CBD5E1', '#94A3B8', '#CBD5E1', '#F8FAFC'],
-    glowGradient: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0)'],
+    // Gradient utilities - more refined
+    liquidGradient: ['#FFFFFF', '#E2E8F0', '#CBD5E1', '#E2E8F0'],
+    liquidGradientAlt: ['#FFFFFF', '#E2E8F0', '#CBD5E1'],
+    edgeGradient: ['#FFFFFF', '#E2E8F0', '#CBD5E1', '#E2E8F0', '#FFFFFF'],
+    glowGradient: ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0)'],
   },
 };
