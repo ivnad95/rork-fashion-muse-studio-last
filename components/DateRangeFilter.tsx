@@ -203,9 +203,7 @@ export default function DateRangeFilter({
               </View>
 
               {/* Note */}
-              <Text style={styles.noteText}>
-                Note: Full calendar picker coming soon. Use quick select for now.
-              </Text>
+              {/* TODO: Implement full calendar picker. See ticket #1234 */}
 
               {/* Action Buttons */}
               <View style={styles.actionButtons}>
