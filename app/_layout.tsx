@@ -19,7 +19,6 @@ if (process.env.NODE_ENV === 'development') {
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const { isLoading } = useAuth();
 
   // No need for splash screen - app loads directly to main content
   return (
