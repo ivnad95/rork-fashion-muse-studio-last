@@ -24,15 +24,9 @@
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
       },
       "entitlements": {
-        "com": {
-          "apple": {
-            "security": {
-              "application-groups": [
-                "group.com.myapp"
-              ]
-            }
-          }
-        }
+        "com.apple.security.application-groups": [
+          "group.app.rork.liquid-glass-fashion-app"
+        ]
       }
     },
     "android": {
