@@ -64,7 +64,7 @@ export const TYPE_SCALE = {
   bodyLarge: {
     fontSize: 17,                                   // Reduced from 18
     fontWeight: FONT_WEIGHTS.regular,
-    lineHeight: 28,                                 // Increased line height
+    lineHeight: 28,                                 // Increased for better readability (despite reduced font size)
     letterSpacing: -0.2,
   },
   bodyRegular: {
