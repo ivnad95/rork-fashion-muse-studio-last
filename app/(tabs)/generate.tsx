@@ -1,32 +1,32 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Platform, Alert } from 'react-native';
+import { StyleSheet, Text, View, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
 import GlowingButton from '@/components/GlowingButton';
+import * as haptics from '@/utils/haptics';
 
 export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
   const [uploading, setUploading] = useState<boolean>(false);
 
   const handleImageSelect = async () => {
     try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
+      haptics.light();
       setUploading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -38,8 +38,7 @@ export default function GenerateScreen() {
         setSelectedImage(result.assets[0].uri);
       }
     } catch {
-      const msg = 'Failed to upload image. Please try again.';
-      if (Platform.OS === 'web') alert(msg); else Alert.alert('Upload Error', msg);
+      showToast('Failed to upload image. Please try again.', 'error');
     } finally {
       setUploading(false);
     }
@@ -47,14 +46,12 @@ export default function GenerateScreen() {
 
   const handleGenerate = async () => {
     if (!selectedImage) {
-      const msg = 'Please upload an image first.';
-      if (Platform.OS === 'web') alert(msg); else Alert.alert('No Image', msg);
+      showToast('Please upload an image first.', 'warning');
       return;
     }
 
     if (!user) {
-      const msg = 'Please sign in to generate images.';
-      if (Platform.OS === 'web') alert(msg); else Alert.alert('Authentication Required', msg);
+      showToast('Please sign in to generate images.', 'warning');
       return;
     }
 
@@ -62,45 +59,17 @@ export default function GenerateScreen() {
     if (user.credits < generationCount) {
       if (user.isGuest) {
         // Guest user out of credits - prompt to sign in
-        const msg = `You need ${generationCount} credits but only have ${user.credits}. Sign in to get more credits and save your progress!`;
-        if (Platform.OS === 'web') {
-          if (confirm(msg + '\n\nGo to Sign In now?')) {
-            router.push('/auth/login');
-          }
-        } else {
-          Alert.alert(
-            'Credits Required',
-            msg,
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Sign In', onPress: () => router.push('/auth/login') },
-            ]
-          );
-        }
+        showToast(`You need ${generationCount} credits but only have ${user.credits}. Sign in to get more!`, 'warning', 4000);
+        setTimeout(() => router.push('/auth/login'), 2000);
       } else {
         // Authenticated user out of credits - go to plans
-        const msg = `You need ${generationCount} credits but only have ${user.credits}. Purchase more credits to continue.`;
-        if (Platform.OS === 'web') {
-          if (confirm(msg + '\n\nGo to Plans now?')) {
-            router.push('/plans');
-          }
-        } else {
-          Alert.alert(
-            'Insufficient Credits',
-            msg,
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Buy Credits', onPress: () => router.push('/plans') },
-            ]
-          );
-        }
+        showToast(`You need ${generationCount} credits but only have ${user.credits}. Buy more to continue.`, 'warning', 4000);
+        setTimeout(() => router.push('/plans'), 2000);
       }
       return;
     }
 
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }
+    haptics.heavy();
     // Redirect to results immediately so user can see loading placeholders
     router.push('/(tabs)/results');
     // Start generation in background

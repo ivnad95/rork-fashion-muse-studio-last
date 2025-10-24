@@ -8,14 +8,12 @@ import {
   Animated,
   Platform,
   TextInput,
-  Alert,
   Keyboard,
   TouchableWithoutFeedback,
   Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import * as WebBrowser from 'expo-web-browser';
 import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles, FileText, Shield } from 'lucide-react-native';
@@ -24,12 +22,14 @@ import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'expo-router';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';
 import GlassPanel from '@/components/GlassPanel';
 import GlowingButton from '@/components/GlowingButton';
 import GlassyTitle from '@/components/GlassyTitle';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
+import * as haptics from '@/utils/haptics';
 
 // Glowing section divider
 function GlowingDivider() {
@@ -313,6 +313,7 @@ function SettingsRow({
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { showToast } = useToast();
   const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
   const { handleScroll } = useScrollNavbar();
@@ -326,175 +327,107 @@ export default function SettingsScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleNotifications = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setNotifications(!notifications);
   };
 
   const toggleCloudStorage = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setCloudStorage(!cloudStorage);
   };
 
   const handleSaveProfile = async () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
 
     try {
       await updateProfile({ name, email });
-      if (Platform.OS === 'web') {
-        alert('Profile updated successfully!');
-      } else {
-        Alert.alert('Success', 'Profile updated successfully!');
-      }
+      haptics.success();
+      showToast('Profile updated successfully!', 'success');
     } catch {
-      if (Platform.OS === 'web') {
-        alert('Failed to update profile');
-      } else {
-        Alert.alert('Error', 'Failed to update profile');
-      }
+      haptics.error();
+      showToast('Failed to update profile', 'error');
     }
   };
 
   const handleSignOut = async () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
+    haptics.medium();
 
-    const confirmSignOut = async () => {
-      try {
+    try {
+      showToast('Signing out...', 'info', 1500);
+      setTimeout(async () => {
         await signOut();
-      } catch {
-        if (Platform.OS === 'web') {
-          alert('Failed to sign out');
-        } else {
-          Alert.alert('Error', 'Failed to sign out');
-        }
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (confirm('Are you sure you want to sign out?')) {
-        await confirmSignOut();
-      }
-    } else {
-      Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: confirmSignOut },
-      ]);
+        haptics.success();
+        showToast('Signed out successfully', 'success');
+      }, 300);
+    } catch {
+      haptics.error();
+      showToast('Failed to sign out', 'error');
     }
   };
 
   const handleDeleteData = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
+    haptics.medium();
 
-    const confirmDelete = () => {
+    showToast('Deleting all data...', 'warning', 1500);
+    setTimeout(() => {
       clearResults();
       setSelectedImage(null);
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    };
-
-    if (Platform.OS === 'web') {
-      if (confirm('Are you sure you want to delete all data?')) {
-        confirmDelete();
-      }
-    } else {
-      Alert.alert(
-        'Delete All Data',
-        'Are you sure you want to delete all data? This action cannot be undone.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: confirmDelete },
-        ]
-      );
-    }
+      haptics.success();
+      showToast('All data deleted', 'success');
+    }, 300);
   };
 
   const handleInlineSignIn = async () => {
     if (!authEmail || !authPassword) {
-      if (Platform.OS === 'web') {
-        alert('Please fill in email and password');
-      } else {
-        Alert.alert('Error', 'Please fill in email and password');
-      }
+      showToast('Please fill in email and password', 'warning');
       return;
     }
     try {
       await signIn(authEmail, authPassword);
+      haptics.success();
+      showToast('Signed in successfully!', 'success');
     } catch {
-      if (Platform.OS === 'web') {
-        alert('Sign in failed. Please try again.');
-      } else {
-        Alert.alert('Error', 'Sign in failed. Please try again.');
-      }
+      haptics.error();
+      showToast('Sign in failed. Please try again.', 'error');
     }
   };
 
   const handleInlineSignUp = async () => {
     if (!authName || !authEmail || !authPassword) {
-      if (Platform.OS === 'web') {
-        alert('Please fill in all fields');
-      } else {
-        Alert.alert('Error', 'Please fill in all fields');
-      }
+      showToast('Please fill in all fields', 'warning');
       return;
     }
     if (authPassword.length < 6) {
-      if (Platform.OS === 'web') {
-        alert('Password must be at least 6 characters');
-      } else {
-        Alert.alert('Error', 'Password must be at least 6 characters');
-      }
+      showToast('Password must be at least 6 characters', 'warning');
       return;
     }
     try {
       await signUp(authName, authEmail, authPassword);
+      haptics.success();
+      showToast('Account created successfully!', 'success');
     } catch {
-      if (Platform.OS === 'web') {
-        alert('Sign up failed. Please try again.');
-      } else {
-        Alert.alert('Error', 'Sign up failed. Please try again.');
-      }
+      haptics.error();
+      showToast('Sign up failed. Please try again.', 'error');
     }
   };
 
   const handleOpenPrivacyPolicy = async () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     const privacyUrl = 'https://fashion-muse-studio-6377.taskade.app/privacy-policy';
     try {
       await WebBrowser.openBrowserAsync(privacyUrl);
     } catch (error) {
-      if (Platform.OS === 'web') {
-        alert('Unable to open Privacy Policy. Please visit: ' + privacyUrl);
-      } else {
-        Alert.alert('Error', 'Unable to open Privacy Policy');
-      }
+      showToast('Unable to open Privacy Policy', 'error');
     }
   };
 
   const handleOpenTerms = async () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     const termsUrl = 'https://fashion-muse-studio-6377.taskade.app/terms-of-service';
     try {
       await WebBrowser.openBrowserAsync(termsUrl);
     } catch (error) {
-      if (Platform.OS === 'web') {
-        alert('Unable to open Terms of Service. Please visit: ' + termsUrl);
-      } else {
-        Alert.alert('Error', 'Unable to open Terms of Service');
-      }
+      showToast('Unable to open Terms of Service', 'error');
     }
   };
 
@@ -627,9 +560,7 @@ export default function SettingsScreen() {
                 {!user.isGuest && (
                   <TouchableOpacity
                     onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
+                      haptics.light();
                       router.push('/plans');
                     }}
                     style={styles.buyButton}
@@ -663,9 +594,7 @@ export default function SettingsScreen() {
             <TouchableOpacity
               onPress={async () => {
                 try {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
+                  haptics.light();
                   const result = await ImagePicker.launchImageLibraryAsync({
                     mediaTypes: ImagePicker.MediaTypeOptions.Images,
                     allowsEditing: true,
@@ -674,18 +603,12 @@ export default function SettingsScreen() {
                   });
                   if (!result.canceled && result.assets[0]) {
                     await updateProfile({ profileImage: result.assets[0].uri });
-                    if (Platform.OS === 'web') {
-                      alert('Profile photo updated!');
-                    } else {
-                      Alert.alert('Success', 'Profile photo updated!');
-                    }
+                    haptics.success();
+                    showToast('Profile photo updated!', 'success');
                   }
                 } catch {
-                  if (Platform.OS === 'web') {
-                    alert('Failed to update profile photo');
-                  } else {
-                    Alert.alert('Error', 'Failed to update profile photo');
-                  }
+                  haptics.error();
+                  showToast('Failed to update profile photo', 'error');
                 }
               }}
               activeOpacity={0.8}
@@ -793,9 +716,7 @@ export default function SettingsScreen() {
               <View style={styles.formatSelector}>
                 <TouchableOpacity
                   onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
+                    haptics.light();
                     setAspectRatio('portrait');
                   }}
                   style={[
@@ -825,9 +746,7 @@ export default function SettingsScreen() {
 
                 <TouchableOpacity
                   onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
+                    haptics.light();
                     setAspectRatio('square');
                   }}
                   style={[
@@ -857,9 +776,7 @@ export default function SettingsScreen() {
 
                 <TouchableOpacity
                   onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
+                    haptics.light();
                     setAspectRatio('landscape');
                   }}
                   style={[

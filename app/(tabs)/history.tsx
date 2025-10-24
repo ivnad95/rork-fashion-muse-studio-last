@@ -1,27 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import * as Haptics from 'expo-haptics';
-import { Calendar, Trash2, X, Sparkles } from 'lucide-react-native';
+import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import EmptyState from '@/components/EmptyState';
+import FavoriteButton from '@/components/FavoriteButton';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
+import * as haptics from '@/utils/haptics';
+import { downloadImage, shareImage } from '@/utils/download';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { history, loadHistory, deleteHistoryItem } = useGeneration();
   const { handleScroll } = useScrollNavbar();
   const [items, setItems] = useState(history);
   const [selectedGeneration, setSelectedGeneration] = useState<typeof mockHistory[0] | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -89,55 +95,74 @@ export default function HistoryScreen() {
   })) : (!user ? mockHistory : []);
 
   const handleGenerationPress = (generation: typeof displayHistory[0]) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setSelectedGeneration(generation);
+    setSelectedImageIndex(0);
   };
 
   const handleCloseModal = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptics.light();
     setSelectedGeneration(null);
+    setSelectedImageIndex(0);
   };
 
   const handleDeleteGeneration = async () => {
     if (!selectedGeneration || !user) return;
 
-    const confirmDelete = async () => {
-      try {
-        if (Platform.OS !== 'web') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        }
+    try {
+      showToast('Deleting generation...', 'warning', 1500);
+      setTimeout(async () => {
+        haptics.heavy();
         await deleteHistoryItem(selectedGeneration.id);
         handleCloseModal();
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      } catch (err) {
-        console.error('Failed to delete history item:', err);
-        if (Platform.OS === 'web') {
-          alert('Failed to delete history item');
-        } else {
-          Alert.alert('Error', 'Failed to delete history item');
-        }
-      }
-    };
+        haptics.success();
+        showToast('Generation deleted', 'success');
+      }, 300);
+    } catch (err) {
+      console.error('Failed to delete history item:', err);
+      haptics.error();
+      showToast('Failed to delete history item', 'error');
+    }
+  };
 
-    if (Platform.OS === 'web') {
-      if (confirm('Are you sure you want to delete this generation?')) {
-        await confirmDelete();
+  const handleDownloadImage = async () => {
+    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+
+    try {
+      haptics.medium();
+      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
+      const success = await downloadImage(imageUri, {
+        filename: `fashion-muse-${selectedGeneration.id}-${selectedImageIndex}.jpg`,
+      });
+
+      if (success) {
+        haptics.success();
+        showToast('Image downloaded successfully!', 'success');
+      } else {
+        haptics.error();
+        showToast('Failed to download image', 'error');
       }
-    } else {
-      Alert.alert(
-        'Delete Generation',
-        'Are you sure you want to delete this generation?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: confirmDelete },
-        ]
-      );
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      haptics.error();
+      showToast('Failed to download image', 'error');
+    }
+  };
+
+  const handleShareImage = async () => {
+    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+
+    try {
+      haptics.medium();
+      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
+      const success = await shareImage(imageUri);
+
+      if (success) {
+        showToast('Image shared successfully!', 'success');
+      }
+    } catch (error) {
+      console.error('Error sharing image:', error);
+      showToast('Failed to share image', 'error');
     }
   };
 
@@ -211,13 +236,11 @@ export default function HistoryScreen() {
             </LinearGradient>
           </View>
         ) : displayHistory.length === 0 ? (
-          <GlassPanel style={styles.emptyState}>
-            <Sparkles size={32} color={COLORS.silverMid} />
-            <Text style={styles.emptyText}>No history yet</Text>
-            <Text style={styles.emptySubtext}>
-              {!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
-            </Text>
-          </GlassPanel>
+          <EmptyState
+            icon={Sparkles}
+            title="No history yet"
+            description={!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
+          />
         ) : (
           <View style={styles.historyList}>
             {dateGroups.map((group, groupIndex) => (
@@ -359,6 +382,11 @@ export default function HistoryScreen() {
                         alignItems: 'center',
                         paddingHorizontal: 0,
                       }}
+                      onScroll={(e) => {
+                        const index = Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH > 540 ? 540 : SCREEN_WIDTH - 48));
+                        setSelectedImageIndex(index);
+                      }}
+                      scrollEventThrottle={16}
                     >
                       {selectedGeneration.imageUrls.map((url, index) => (
                         <View key={index} style={styles.modalImageContainer}>
@@ -368,6 +396,15 @@ export default function HistoryScreen() {
                               style={styles.modalImage}
                               resizeMode="contain"
                             />
+                            {/* Favorite Button */}
+                            {user && (
+                              <View style={styles.modalFavoriteButton}>
+                                <FavoriteButton
+                                  imageId={`history-${selectedGeneration.id}-${index}`}
+                                  size={24}
+                                />
+                              </View>
+                            )}
                           </View>
                         </View>
                       ))}
@@ -375,6 +412,43 @@ export default function HistoryScreen() {
 
                     <View style={styles.modalFooter}>
                       <Text style={styles.modalPromptText}><Text>{selectedGeneration.prompt}</Text></Text>
+
+                      {/* Action Buttons */}
+                      <View style={styles.actionButtons}>
+                        <TouchableOpacity
+                          onPress={handleDownloadImage}
+                          style={styles.actionButton}
+                          activeOpacity={0.85}
+                        >
+                          <LinearGradient
+                            colors={['rgba(74, 222, 128, 0.3)', 'rgba(34, 197, 94, 0.2)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.actionButtonGradient}
+                          >
+                            <View style={styles.actionButtonInner}>
+                              <Download size={22} color="rgba(74, 222, 128, 0.95)" strokeWidth={2.8} />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={handleShareImage}
+                          style={styles.actionButton}
+                          activeOpacity={0.85}
+                        >
+                          <LinearGradient
+                            colors={['rgba(200, 220, 255, 0.3)', 'rgba(150, 180, 230, 0.2)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.actionButtonGradient}
+                          >
+                            <View style={styles.actionButtonInner}>
+                              <Share2 size={22} color="rgba(200, 220, 255, 0.95)" strokeWidth={2.8} />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </LinearGradient>
@@ -673,6 +747,7 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    gap: 18,
   },
   modalPromptText: {
     color: 'rgba(255, 255, 255, 0.92)',
@@ -684,6 +759,49 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 5,
+  },
+  modalFavoriteButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    zIndex: 10,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 18,
+    justifyContent: 'center',
+  },
+  actionButton: {
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  actionButtonGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    padding: 3,
+    borderWidth: 2.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.45)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
+    borderRightColor: 'rgba(255, 255, 255, 0.25)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
+    shadowColor: 'rgba(200, 220, 255, 0.5)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.7,
+    shadowRadius: 32,
+    elevation: 16,
+  },
+  actionButtonInner: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
+    borderRightColor: 'rgba(255, 255, 255, 0.18)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
   },
   closeButton: {
     borderRadius: 30,
