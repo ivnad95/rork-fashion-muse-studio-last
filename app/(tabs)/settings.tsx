@@ -20,11 +20,12 @@ import Colors from '@/constants/colors';
 import { COLORS, SPACING, GRADIENTS, glassStyles } from '@/constants/glassStyles';
 import GlassyTitle from '@/components/GlassyTitle';
 import { useGeneration } from '@/contexts/GenerationContext';
+import StyleSelector from '@/components/StyleSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'expo-router';
-import NeumorphicPanel from '@/components/NeumorphicPanel';
-import NeumorphicButton from '@/components/NeumorphicButton';
+import GlassPanel from '@/components/GlassPanel';
+import GlowingButton from '@/components/GlowingButton';
 import { useScrollNavbar } from '@/hooks/useScrollNavbar';
 import * as haptics from '@/utils/haptics';
 
@@ -311,7 +312,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { showToast } = useToast();
-  const { clearResults, setSelectedImage, aspectRatio, setAspectRatio } = useGeneration();
+  const { clearResults, setSelectedImage, aspectRatio, setAspectRatio, selectedStyleId, setSelectedStyleId } = useGeneration();
   const { user, signOut, updateProfile, signIn, signUp, isLoading } = useAuth();
   const { handleScroll } = useScrollNavbar();
   const [notifications, setNotifications] = useState(true);
@@ -456,11 +457,11 @@ export default function SettingsScreen() {
         <GlassyTitle>Settings</GlassyTitle>
 
         {!user ? (
-          <NeumorphicPanel style={styles.settingsPanel}>
+          <GlassPanel style={styles.settingsPanel} radius={20}>
             <View style={styles.panelContent}>
               <Text style={styles.sectionTitle}>Account</Text>
 
-              <NeumorphicPanel style={styles.inputContainer}>
+              <GlassPanel style={styles.inputContainer} radius={16} noPadding>
                 <View style={styles.inputWrapper}>
                   <Mail size={18} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                   <TextInput
@@ -474,9 +475,9 @@ export default function SettingsScreen() {
                     autoFocus={false}
                   />
                 </View>
-              </NeumorphicPanel>
+              </GlassPanel>
 
-              <NeumorphicPanel style={styles.inputContainer}>
+              <GlassPanel style={styles.inputContainer} radius={16} noPadding>
                 <View style={styles.inputWrapper}>
                   <Lock size={18} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                   <TextInput
@@ -496,17 +497,17 @@ export default function SettingsScreen() {
                     )}
                   </TouchableOpacity>
                 </View>
-              </NeumorphicPanel>
+              </GlassPanel>
 
-              <NeumorphicButton
+              <GlowingButton
                 onPress={handleInlineSignIn}
                 disabled={isLoading}
-                title={isLoading ? 'Signing In...' : 'Sign In'}
-                active={true}
+                text={isLoading ? 'Signing In...' : 'Sign In'}
+                variant="primary"
                 style={{ marginBottom: 12 }}
               />
 
-              <NeumorphicPanel style={styles.inputContainer}>
+              <GlassPanel style={styles.inputContainer} radius={16} noPadding>
                 <View style={styles.inputWrapper}>
                   <User size={18} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                   <TextInput
@@ -518,18 +519,19 @@ export default function SettingsScreen() {
                     autoCapitalize="words"
                   />
                 </View>
-              </NeumorphicPanel>
+              </GlassPanel>
 
-              <NeumorphicButton
+              <GlowingButton
                 onPress={handleInlineSignUp}
                 disabled={isLoading}
-                title={isLoading ? 'Creating Account...' : 'Create Account'}
+                text={isLoading ? 'Creating Account...' : 'Create Account'}
+                variant="primary"
               />
             </View>
-          </NeumorphicPanel>
+          </GlassPanel>
         ) : (
           <>
-            <NeumorphicPanel style={styles.creditsCard}>
+            <GlassPanel style={styles.creditsCard} radius={20}>
               <View style={styles.creditsContent}>
                 <View style={styles.creditsInfo}>
                   <Text style={styles.creditsLabel}>
@@ -563,16 +565,16 @@ export default function SettingsScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-            </NeumorphicPanel>
+            </GlassPanel>
 
             {user.isGuest && (
               <>
                 <TrialProgressBar used={5 - user.credits} total={5} />
                 <BenefitsList />
-                <NeumorphicButton
+                <GlowingButton
                   onPress={() => router.push('/auth/login')}
-                  title="Sign In to Get 50 Free Credits"
-                  active={true}
+                  text="Sign In to Get 50 Free Credits"
+                  variant="primary"
                   style={{ marginBottom: 26 }}
                 />
               </>
@@ -628,7 +630,7 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.profileInfo}>
-            <NeumorphicPanel style={styles.inputContainer}>
+            <GlassPanel style={styles.inputContainer} radius={16} noPadding>
               <View style={styles.inputWrapper}>
                 <User size={18} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                 <TextInput
@@ -641,9 +643,9 @@ export default function SettingsScreen() {
                   blurOnSubmit
                 />
               </View>
-            </NeumorphicPanel>
+            </GlassPanel>
 
-            <NeumorphicPanel style={styles.inputContainer}>
+            <GlassPanel style={styles.inputContainer} radius={16} noPadding>
               <View style={styles.inputWrapper}>
                 <Mail size={18} color={Colors.dark.textSecondary} style={styles.inputIcon} />
                 <TextInput
@@ -658,21 +660,21 @@ export default function SettingsScreen() {
                   blurOnSubmit
                 />
               </View>
-            </NeumorphicPanel>
+            </GlassPanel>
           </View>
         </View>
         )}
 
         {user && (
-        <NeumorphicButton
+        <GlowingButton
           onPress={handleSaveProfile}
-          title="Save Profile"
-          active={true}
+          text="Save Profile"
+          variant="primary"
           style={styles.saveButton}
         />
         )}
 
-        <NeumorphicPanel style={styles.settingsPanel}>
+        <GlassPanel style={styles.settingsPanel} radius={20}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Preferences</Text>
 
@@ -694,9 +696,9 @@ export default function SettingsScreen() {
               />
             </SettingsRow>
           </View>
-        </NeumorphicPanel>
+        </GlassPanel>
 
-        <NeumorphicPanel style={styles.settingsPanel}>
+        <GlassPanel style={styles.settingsPanel} radius={20}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Image Generation</Text>
 
@@ -798,9 +800,17 @@ export default function SettingsScreen() {
               </View>
             </View>
           </View>
-        </NeumorphicPanel>
+        </GlassPanel>
 
-        <NeumorphicPanel style={styles.settingsPanel}>
+        {/* Pick Your Style moved from Generate */}
+        <GlassPanel style={styles.settingsPanel} radius={20}>
+          <View style={styles.panelContent}>
+            <Text style={styles.sectionTitle}>Pick Your Style</Text>
+            <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
+          </View>
+        </GlassPanel>
+
+        <GlassPanel style={styles.settingsPanel} radius={20}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Account</Text>
 
@@ -828,9 +838,9 @@ export default function SettingsScreen() {
               </View>
             </TouchableOpacity>
           </View>
-        </NeumorphicPanel>
+        </GlassPanel>
 
-        <NeumorphicPanel style={styles.settingsPanel}>
+        <GlassPanel style={styles.settingsPanel} radius={20}>
           <View style={styles.panelContent}>
             <Text style={styles.sectionTitle}>Legal & Privacy</Text>
 
@@ -870,7 +880,7 @@ export default function SettingsScreen() {
               <ChevronRight size={20} color={Colors.dark.textMuted} />
             </TouchableOpacity>
           </View>
-        </NeumorphicPanel>
+        </GlassPanel>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Version 1.0.0</Text>

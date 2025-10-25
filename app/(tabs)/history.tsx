@@ -1,393 +1,312 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Animated, Modal, Dimensions, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
-import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
-import SearchBar from '@/components/SearchBar';
-import FilterChips, { FilterOption } from '@/components/FilterChips';
-import DateRangeFilter, { DateRange } from '@/components/DateRangeFilter';
-import NeumorphicPanel from '@/components/NeumorphicPanel';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Share2,
+  Trash2,
+  X,
+} from 'lucide-react-native';
+import GlassPanel from '@/components/GlassPanel';
 import GlassyTitle from '@/components/GlassyTitle';
-import { COLORS, SPACING, GRADIENTS, glassStyles } from '@/constants/glassStyles';
-import { useGeneration } from '@/contexts/GenerationContext';
+import { useGeneration, type HistoryItem } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { useScrollNavbar } from '@/hooks/useScrollNavbar';
-import * as haptics from '@/utils/haptics';
+import { COLORS, GRADIENTS, SPACING, glassStyles } from '@/constants/glassStyles';
 import { downloadImage, shareImage } from '@/utils/download';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MODAL_IMAGE_WIDTH = 400;
-const MODAL_IMAGE_HORIZONTAL_MARGIN = 48;
+type HistoryGroup = {
+  date: string;
+  items: HistoryItem[];
+};
 
-const FILTER_OPTIONS: FilterOption[] = [
-  { id: 'all', label: 'All', color: '#60A5FA' },
-  { id: 'today', label: 'Today', color: '#10B981' },
-  { id: 'week', label: 'This Week', color: '#8B5CF6' },
-  { id: 'month', label: 'This Month', color: '#F59E0B' },
-  { id: 'custom', label: 'Custom', color: '#EC4899' },
-];
+type PreviewState = {
+  item: HistoryItem;
+  index: number;
+};
 
 export default function HistoryScreen() {
-  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showToast } = useToast();
   const { history, loadHistory, deleteHistoryItem } = useGeneration();
-  const { handleScroll } = useScrollNavbar();
-  const [items, setItems] = useState(history);
-  const [selectedGeneration, setSelectedGeneration] = useState<typeof mockHistory[0] | null>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [customDateRange, setCustomDateRange] = useState<DateRange>({ startDate: null, endDate: null });
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const [preview, setPreview] = useState<PreviewState | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      if (user) {
-        try {
-          setIsLoading(true);
+    let mounted = true;
+
+    const fetchHistory = async () => {
+      if (!user) {
+        if (mounted) {
+          setLoading(false);
           setError(null);
-          await loadHistory(user.id);
-        } catch (err) {
-          console.error('Failed to load history:', err);
-          setError('Failed to load history');
-        } finally {
-          setIsLoading(false);
+        }
+        return;
+      }
+
+      if (mounted) {
+        setLoading(true);
+        setError(null);
+      }
+
+      try {
+        await loadHistory(user.id);
+      } catch (err) {
+        console.error('Failed to load history:', err);
+        if (mounted) {
+          setError('Unable to load your history right now.');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
         }
       }
     };
-    loadData();
+
+    fetchHistory();
+
+    return () => {
+      mounted = false;
+    };
   }, [user, loadHistory]);
 
-  useEffect(() => {
-    setItems(history);
+  const groupedHistory = useMemo<HistoryGroup[]>(() => {
+    const groups = new Map<string, HistoryItem[]>();
+
+    history.forEach((item) => {
+      const existing = groups.get(item.date) ?? [];
+      existing.push(item);
+      groups.set(item.date, existing);
+    });
+
+    return Array.from(groups.entries()).map(([date, items]) => ({
+      date,
+      items,
+    }));
   }, [history]);
 
-  useEffect(() => {
-    if (selectedGeneration) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 9,
-          tension: 50,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      fadeAnim.setValue(0);
-      scaleAnim.setValue(0.9);
+  const getImages = (item: HistoryItem) => {
+    if (item.results.length > 0) {
+      return item.results;
     }
-  }, [selectedGeneration, fadeAnim, scaleAnim]);
-
-  const mockHistory: {
-    id: string;
-    imageUrls: string[];
-    prompt: string;
-    style: string;
-    aspectRatio: 'portrait' | 'square' | 'landscape';
-    createdAt: string;
-  }[] = [];
-
-  const displayHistory = items.length > 0 ? items.map(h => ({
-    id: h.id,
-    imageUrls: h.results.length > 0 ? h.results : [h.thumbnail],
-    prompt: `${h.count} images generated`,
-    style: '',
-    aspectRatio: 'portrait' as const,
-    createdAt: `${h.date} ${h.time}`,
-  })) : (!user ? mockHistory : []);
-
-  // Filter history based on search and filter
-  const filteredHistory = useMemo(() => {
-    let filtered = displayHistory;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.createdAt.toLowerCase().includes(query) ||
-        item.prompt.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply date filter
-    if (selectedFilter !== 'all') {
-      const now = new Date();
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.createdAt);
-
-        if (selectedFilter === 'today') {
-          return itemDate.toDateString() === now.toDateString();
-        } else if (selectedFilter === 'week') {
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          return itemDate >= weekAgo;
-        } else if (selectedFilter === 'month') {
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          return itemDate >= monthAgo;
-        } else if (selectedFilter === 'custom') {
-          // Apply custom date range filter
-          if (customDateRange.startDate || customDateRange.endDate) {
-            if (customDateRange.startDate && itemDate < customDateRange.startDate) {
-              return false;
-            }
-            if (customDateRange.endDate && itemDate > customDateRange.endDate) {
-              return false;
-            }
-            return true;
-          }
-        }
-        return true;
-      });
-    }
-
-    return filtered;
-  }, [displayHistory, searchQuery, selectedFilter, customDateRange]);
-
-  const handleGenerationPress = (generation: typeof displayHistory[0]) => {
-    haptics.light();
-    setSelectedGeneration(generation);
-    setSelectedImageIndex(0);
+    return item.thumbnail ? [item.thumbnail] : [];
   };
 
-  const handleCloseModal = () => {
-    haptics.light();
-    setSelectedGeneration(null);
-    setSelectedImageIndex(0);
+  const formatGroupLabel = (isoDate: string) => {
+    const parsed = new Date(`${isoDate}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) {
+      return isoDate;
+    }
+    return parsed.toLocaleDateString(undefined, {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
-  const handleDeleteGeneration = async () => {
-    if (!selectedGeneration || !user) return;
+  const formatTimestamp = (item: HistoryItem) => {
+    const parsed = new Date(`${item.date} ${item.time}`);
+    if (Number.isNaN(parsed.getTime())) {
+      return `${item.date} · ${item.time}`;
+    }
+    return parsed.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
+  const handleDelete = async (historyId: string) => {
+    if (!user) {
+      showToast('Please sign in to manage your history', 'warning');
+      return;
+    }
 
     try {
-      showToast('Deleting generation...', 'warning', 1500);
-      setTimeout(async () => {
-        haptics.heavy();
-        await deleteHistoryItem(selectedGeneration.id);
-        handleCloseModal();
-        haptics.success();
-        showToast('Generation deleted', 'success');
-      }, 300);
+      await deleteHistoryItem(historyId);
+      if (preview?.item.id === historyId) {
+        setPreview(null);
+      }
+      showToast('Removed from history', 'success');
     } catch (err) {
       console.error('Failed to delete history item:', err);
-      haptics.error();
-      showToast('Failed to delete history item', 'error');
+      showToast('Failed to delete item', 'error');
     }
   };
 
-  const handleDownloadImage = async () => {
-    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+  const handleDownload = async (uri?: string) => {
+    if (!uri) {
+      return;
+    }
 
-    try {
-      haptics.medium();
-      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
-      const success = await downloadImage(imageUri, {
-        filename: `fashion-muse-${selectedGeneration.id}-${selectedImageIndex}.jpg`,
-      });
+    const success = await downloadImage(uri);
+    showToast(
+      success ? 'Image saved to your library' : 'Download failed, please try again',
+      success ? 'success' : 'error'
+    );
+  };
 
-      if (success) {
-        haptics.success();
-        showToast('Image downloaded successfully!', 'success');
-      } else {
-        haptics.error();
-        showToast('Failed to download image', 'error');
-      }
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      haptics.error();
-      showToast('Failed to download image', 'error');
+  const handleShare = async (uri?: string) => {
+    if (!uri) {
+      return;
+    }
+
+    const success = await shareImage(uri);
+    if (success) {
+      showToast('Share sheet opened', 'success');
+    } else {
+      showToast('Unable to share image', 'error');
     }
   };
 
-  const handleShareImage = async () => {
-    if (!selectedGeneration || selectedImageIndex < 0 || selectedImageIndex >= selectedGeneration.imageUrls.length) return;
+  const previewImage = preview ? getImages(preview.item)[preview.index] : undefined;
+  const previewCount = preview ? getImages(preview.item).length : 0;
 
-    try {
-      haptics.medium();
-      const imageUri = selectedGeneration.imageUrls[selectedImageIndex];
-      const success = await shareImage(imageUri);
-
-      if (success) {
-        showToast('Image shared successfully!', 'success');
-      }
-    } catch (error) {
-      console.error('Error sharing image:', error);
-      showToast('Failed to share image', 'error');
-    }
+  const showNextPreview = () => {
+    if (!preview) return;
+    const images = getImages(preview.item);
+    if (images.length <= 1) return;
+    const nextIndex = (preview.index + 1) % images.length;
+    setPreview({ item: preview.item, index: nextIndex });
   };
 
-  // Group history by date
-  const groupedHistory = filteredHistory.reduce((acc, item) => {
-    const date = item.createdAt.split(' ')[0]; // Extract date part
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(item);
-    return acc;
-  }, {} as Record<string, typeof filteredHistory>);
-
-  const dateGroups = Object.keys(groupedHistory).map(date => ({
-    date,
-    items: groupedHistory[date]
-  }));
+  const showPreviousPreview = () => {
+    if (!preview) return;
+    const images = getImages(preview.item);
+    if (images.length <= 1) return;
+    const nextIndex = (preview.index - 1 + images.length) % images.length;
+    setPreview({ item: preview.item, index: nextIndex });
+  };
 
   return (
-    <View style={styles.container}>
-      {/* Full-screen gradient background */}
-      <LinearGradient
-        colors={GRADIENTS.background as any}
-        style={StyleSheet.absoluteFill}
-      />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <LinearGradient colors={GRADIENTS.background} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingTop: insets.top + 24,
-            paddingBottom: insets.bottom + 120,
-            paddingHorizontal: SPACING.lg
-          }
-        ]}
+        contentContainerStyle={glassStyles.screenContent}
         showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
       >
         <GlassyTitle>History</GlassyTitle>
 
-        {/* Search Bar */}
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search history..."
-        />
-
-        {/* Filter Chips */}
-        <FilterChips
-          options={FILTER_OPTIONS}
-          selectedId={selectedFilter}
-          onSelect={(id) => {
-            setSelectedFilter(id);
-            if (id !== 'custom') {
-              setCustomDateRange({ startDate: null, endDate: null });
-            }
-          }}
-        />
-
-        {/* Custom Date Range Filter */}
-        {selectedFilter === 'custom' && (
-          <DateRangeFilter
-            currentRange={customDateRange}
-            onApply={(range) => {
-              setCustomDateRange(range);
-              showToast('Custom date range applied', 'success');
-            }}
-            onClear={() => {
-              setCustomDateRange({ startDate: null, endDate: null });
-              setSelectedFilter('all');
-              showToast('Date range cleared', 'info');
-            }}
-          />
-        )}
-
-        {isLoading ? (
-          <View style={styles.messagePanel}>
-            <NeumorphicPanel style={styles.messageCard}>
-              <View style={styles.messageContent}>
-                <Sparkles size={32} color={COLORS.accent} />
-                <Text style={styles.messageText}><Text>Loading history...</Text></Text>
-              </View>
-            </NeumorphicPanel>
-          </View>
-        ) : error ? (
-          <View style={styles.messagePanel}>
-            <NeumorphicPanel style={styles.messageCard}>
-              <View style={styles.messageContent}>
-                <Text style={styles.errorText}><Text>{error}</Text></Text>
-              </View>
-            </NeumorphicPanel>
-          </View>
-        ) : filteredHistory.length === 0 ? (
-          <View style={styles.emptyStateContainer}>
-            <NeumorphicPanel style={styles.emptyLogoCard} inset>
-              <View style={styles.emptyLogoWrapper}>
-                <Image
-                  source={require('@/assets/images/icon.png')}
-                  style={styles.emptyLogo}
-                  resizeMode="contain"
-                />
-              </View>
-            </NeumorphicPanel>
-            <Text style={styles.emptyTitle}>No history yet</Text>
-            <Text style={styles.emptyDescription}>
-              {!user ? 'Sign in to view your generation history' : 'Your past generations will appear here'}
+        {!user ? (
+          <GlassPanel style={styles.messagePanel} radius={28}>
+            <Text style={styles.messageTitle}>No session active</Text>
+            <Text style={styles.messageBody}>
+              Sign in to sync your fashion shoots across devices.
             </Text>
-          </View>
+          </GlassPanel>
+        ) : loading ? (
+          <GlassPanel style={styles.loaderPanel} radius={28}>
+            <ActivityIndicator size="large" color={COLORS.silverLight} />
+            <Text style={styles.loaderText}>Fetching your shoots…</Text>
+          </GlassPanel>
+        ) : error ? (
+          <GlassPanel style={styles.messagePanel} radius={28}>
+            <Text style={styles.messageTitle}>Something went wrong</Text>
+            <Text style={styles.messageBody}>{error}</Text>
+          </GlassPanel>
+        ) : history.length === 0 ? (
+          <GlassPanel style={styles.messagePanel} radius={28}>
+            <Text style={styles.messageTitle}>No shoots yet</Text>
+            <Text style={styles.messageBody}>
+              Generate a photoshoot to start building your gallery.
+            </Text>
+          </GlassPanel>
         ) : (
-          <View style={styles.historyList}>
-            {dateGroups.map((group, groupIndex) => (
-              <View key={groupIndex} style={styles.dateGroup}>
-                {/* Date Header */}
-                <Text style={styles.dateLabel}>{group.date}</Text>
+          <View style={styles.groups}>
+            {groupedHistory.map((group) => (
+              <View key={group.date} style={styles.groupContainer}>
+                <Text style={styles.groupLabel}>{formatGroupLabel(group.date)}</Text>
 
-                {/* History Items for this date */}
-                {group.items.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => handleGenerationPress(item)}
-                    activeOpacity={0.92}
-                  >
-                    <NeumorphicPanel style={styles.historyCard}>
-                      {/* Header Row */}
+                {group.items.map((item) => {
+                  const images = getImages(item);
+                  if (images.length === 0) {
+                    return null;
+                  }
+                  const primaryImage = images[0];
+
+                  return (
+                    <GlassPanel key={item.id} style={styles.historyCard} radius={28}>
                       <View style={styles.cardHeader}>
-                        <Text style={styles.timeText}>{item.createdAt.split(' ').slice(1).join(' ')}</Text>
-                        {user && (
+                        <View>
+                          <Text style={styles.cardDate}>{formatTimestamp(item)}</Text>
+                          <Text style={styles.cardCount}>{item.count} variations</Text>
+                        </View>
+
+                        <TouchableOpacity
+                          onPress={() => handleDelete(item.id)}
+                          style={styles.iconButtonDanger}
+                          activeOpacity={0.85}
+                        >
+                          <Trash2 size={18} color={COLORS.error} />
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={styles.imageGrid}>
+                        {images.map((uri, index) => (
                           <TouchableOpacity
-                            onPress={(e) => {
-                              e.stopPropagation();
-                              setSelectedGeneration(item);
-                              setTimeout(() => handleDeleteGeneration(), 100);
-                            }}
-                            style={styles.deleteButtonSmall}
+                            key={`${item.id}-${index}`}
+                            style={styles.imageWrapper}
+                            onPress={() => setPreview({ item, index })}
+                            activeOpacity={0.9}
                           >
-                            <Text style={styles.deleteText}>Delete</Text>
+                            <Image source={{ uri }} style={styles.image} resizeMode="cover" />
                           </TouchableOpacity>
-                        )}
-                      </View>
-
-                      {/* Image Grid (horizontal scroll) */}
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.imageRow}
-                      >
-                        {item.imageUrls.map((url, imgIndex) => (
-                          <View key={imgIndex} style={styles.historyImage}>
-                            <Image
-                              source={{ uri: url }}
-                              style={styles.thumbnailImage}
-                              resizeMode="cover"
-                            />
-                          </View>
                         ))}
-                      </ScrollView>
-
-                      {/* Footer */}
-                      <View style={styles.cardFooter}>
-                        <Text style={styles.countText}>{item.prompt}</Text>
                       </View>
-                    </NeumorphicPanel>
-                  </TouchableOpacity>
-                ))}
+
+                      <View style={styles.cardFooter}>
+                        <View style={styles.footerMeta}>
+                          <Calendar size={16} color={COLORS.silverMid} />
+                          <Text style={styles.footerText}>{formatTimestamp(item)}</Text>
+                        </View>
+
+                        <View style={styles.footerActions}>
+                          <TouchableOpacity
+                            onPress={() => handleDownload(primaryImage)}
+                            style={styles.iconButton}
+                            activeOpacity={0.85}
+                            disabled={!primaryImage}
+                          >
+                            <Download
+                              size={18}
+                              color={primaryImage ? COLORS.silverLight : COLORS.silverDark}
+                            />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            onPress={() => handleShare(primaryImage)}
+                            style={styles.iconButton}
+                            activeOpacity={0.85}
+                            disabled={!primaryImage}
+                          >
+                            <Share2
+                              size={18}
+                              color={primaryImage ? COLORS.silverLight : COLORS.silverDark}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </GlassPanel>
+                  );
+                })}
               </View>
             ))}
           </View>
@@ -395,547 +314,262 @@ export default function HistoryScreen() {
       </ScrollView>
 
       <Modal
-        visible={selectedGeneration !== null}
+        visible={Boolean(preview)}
         transparent
-        animationType="none"
-        onRequestClose={handleCloseModal}
+        animationType="fade"
+        onRequestClose={() => setPreview(null)}
       >
-        <Animated.View
-          style={[
-            styles.modalOverlay,
-            { opacity: fadeAnim },
-          ]}
-        >
-          {Platform.OS === 'web' ? (
-            <View style={styles.modalBlur} />
-          ) : (
-            <BlurView intensity={100} style={StyleSheet.absoluteFill} tint="dark" />
-          )}
+        <View style={styles.modalBackdrop}>
+          <GlassPanel style={styles.modalPanel} radius={32} noPadding>
+            <View style={styles.modalImageContainer}>
+              {previewImage ? (
+                <Image source={{ uri: previewImage }} style={styles.modalImage} resizeMode="contain" />
+              ) : null}
+            </View>
 
-          <TouchableOpacity
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={handleCloseModal}
-          />
+            {preview && (
+              <View style={styles.modalFooter}>
+                <View>
+                  <Text style={styles.modalTitle}>{formatTimestamp(preview.item)}</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {previewCount > 1
+                      ? `Image ${preview.index + 1} of ${previewCount}`
+                      : 'Single variation'}
+                  </Text>
+                </View>
 
-          <Animated.View
-            style={[
-              styles.modalContent,
-              {
-                transform: [{ scale: scaleAnim }],
-                opacity: fadeAnim,
-              },
-            ]}
-          >
-            {selectedGeneration && (
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    onPress={() => handleDownload(previewImage)}
+                    style={styles.modalIconButton}
+                    activeOpacity={0.85}
+                  >
+                    <Download size={20} color={COLORS.silverLight} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleShare(previewImage)}
+                    style={styles.modalIconButton}
+                    activeOpacity={0.85}
+                  >
+                    <Share2 size={20} color={COLORS.silverLight} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={() => setPreview(null)}
+              style={styles.modalClose}
+              activeOpacity={0.85}
+            >
+              <X size={20} color={COLORS.silverLight} />
+            </TouchableOpacity>
+
+            {previewCount > 1 && (
               <>
-                <LinearGradient
-                  colors={['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.modalCard}
-                >
-                  <View style={styles.modalCardInner}>
-                    <View style={styles.modalHeader}>
-                      <LinearGradient
-                        colors={['rgba(200, 220, 255, 0.28)', 'rgba(200, 220, 255, 0.15)']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.modalDateContainer}
-                      >
-                        <Calendar size={16} color="rgba(255, 255, 255, 0.95)" />
-                        <Text style={styles.modalDateText}><Text>{selectedGeneration.createdAt}</Text></Text>
-                      </LinearGradient>
-                      {user && (
-                        <TouchableOpacity
-                          onPress={handleDeleteGeneration}
-                          style={styles.deleteButton}
-                          activeOpacity={0.85}
-                        >
-                          <LinearGradient
-                            colors={['rgba(239, 68, 68, 0.25)', 'rgba(239, 68, 68, 0.15)']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.deleteButtonGradient}
-                          >
-                            <Trash2 size={18} color="rgba(255, 100, 100, 0.95)" />
-                          </LinearGradient>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-
-                    <ScrollView
-                      horizontal
-                      pagingEnabled
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.imageScroll}
-                      contentContainerStyle={{
-                        alignItems: 'center',
-                        paddingHorizontal: 0,
-                      }}
-                      onScroll={(e) => {
-                        const index = Math.round(
-                          e.nativeEvent.contentOffset.x /
-                            (SCREEN_WIDTH > MODAL_IMAGE_WIDTH
-                              ? MODAL_IMAGE_WIDTH
-                              : SCREEN_WIDTH - MODAL_IMAGE_HORIZONTAL_MARGIN)
-                        );
-                        setSelectedImageIndex(index);
-                      }}
-                      scrollEventThrottle={16}
-                    >
-                      {selectedGeneration.imageUrls.map((url, index) => (
-                        <View key={index} style={styles.modalImageContainer}>
-                          <View style={styles.modalImageFrame}>
-                            <Image
-                              source={{ uri: url }}
-                              style={styles.modalImage}
-                              resizeMode="contain"
-                            />
-                            {/* Favorite Button - Commented out temporarily */}
-                            {/* {user && selectedGeneration.imageIds && selectedGeneration.imageIds[index] && (
-                              <View style={styles.modalFavoriteButton}>
-                                <FavoriteButton
-                                  imageId={selectedGeneration.imageIds[index]}
-                                  size={24}
-                                />
-                              </View>
-                            )} */}
-                          </View>
-                        </View>
-                      ))}
-                    </ScrollView>
-
-                    <View style={styles.modalFooter}>
-                      <Text style={styles.modalPromptText}><Text>{selectedGeneration.prompt}</Text></Text>
-
-                      {/* Action Buttons */}
-                      <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                          onPress={handleDownloadImage}
-                          style={styles.actionButton}
-                          activeOpacity={0.85}
-                        >
-                          <LinearGradient
-                            colors={['rgba(74, 222, 128, 0.3)', 'rgba(34, 197, 94, 0.2)']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.actionButtonGradient}
-                          >
-                            <View style={styles.actionButtonInner}>
-                              <Download size={22} color="rgba(74, 222, 128, 0.95)" strokeWidth={2.8} />
-                            </View>
-                          </LinearGradient>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onPress={handleShareImage}
-                          style={styles.actionButton}
-                          activeOpacity={0.85}
-                        >
-                          <LinearGradient
-                            colors={['rgba(200, 220, 255, 0.3)', 'rgba(150, 180, 230, 0.2)']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.actionButtonGradient}
-                          >
-                            <View style={styles.actionButtonInner}>
-                              <Share2 size={22} color="rgba(200, 220, 255, 0.95)" strokeWidth={2.8} />
-                            </View>
-                          </LinearGradient>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </LinearGradient>
-
                 <TouchableOpacity
-                  onPress={handleCloseModal}
-                  style={styles.closeButton}
+                  onPress={showPreviousPreview}
+                  style={[styles.carouselButton, styles.carouselLeft]}
                   activeOpacity={0.85}
                 >
-                  <LinearGradient
-                    colors={['rgba(255, 255, 255, 0.28)', 'rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.12)']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.closeButtonGradient}
-                  >
-                    <View style={styles.closeButtonInner}>
-                      <X size={22} color="#ffffff" strokeWidth={2.8} />
-                    </View>
-                  </LinearGradient>
+                  <ChevronLeft size={24} color={COLORS.silverLight} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={showNextPreview}
+                  style={[styles.carouselButton, styles.carouselRight]}
+                  activeOpacity={0.85}
+                >
+                  <ChevronRight size={24} color={COLORS.silverLight} />
                 </TouchableOpacity>
               </>
             )}
-          </Animated.View>
-        </Animated.View>
+          </GlassPanel>
+        </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDeep,
   },
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: SPACING.xxxl,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '300' as const,
-    letterSpacing: -0.5,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.lg,
-  },
-  emptyStateContainer: {
-    flex: 1,
+  messagePanel: {
+    marginTop: SPACING.xl,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: SPACING.xxxl * 2,
-    paddingHorizontal: SPACING.xl,
+    gap: SPACING.sm,
   },
-  emptyLogoCard: {
-    width: 180,
-    height: 180,
-    marginBottom: SPACING.xl,
+  messageTitle: {
+    color: COLORS.silverLight,
+    fontSize: 18,
+    fontWeight: '700',
   },
-  emptyLogoWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyLogo: {
-    width: '50%',
-    height: '50%',
-    opacity: 0.3,
-  },
-  emptyTitle: {
-    ...glassStyles.textPrimary,
-    fontSize: 24,
-    fontWeight: '600' as const,
-    marginBottom: SPACING.sm,
-  },
-  emptyDescription: {
-    ...glassStyles.textSecondary,
+  messageBody: {
+    color: COLORS.silverMid,
     fontSize: 14,
     textAlign: 'center',
-    maxWidth: 300,
     lineHeight: 20,
   },
-  historyList: {
-    gap: SPACING.xxl,
+  loaderPanel: {
+    marginTop: SPACING.xl,
+    alignItems: 'center',
+    gap: SPACING.md,
   },
-  dateGroup: {
-    marginBottom: SPACING.xxl,
+  loaderText: {
+    color: COLORS.silverMid,
+    fontSize: 14,
   },
-  dateLabel: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '500' as const,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase' as const,
-    marginBottom: SPACING.sm,
-    paddingLeft: SPACING.xxs,
+  groups: {
+    marginTop: SPACING.xl,
+    gap: SPACING.lg,
+  },
+  groupContainer: {
+    gap: SPACING.md,
+  },
+  groupLabel: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   historyCard: {
-    marginBottom: SPACING.md,               // 16px between cards
-    padding: SPACING.md,                    // 16px internal padding
+    gap: SPACING.md,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.sm,               // 12px
   },
-  timeText: {
-    ...glassStyles.textSecondary,
-    color: COLORS.textSecondary,
-  },
-  deleteButtonSmall: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.sm,          // 12px
-    borderRadius: SPACING.sm,               // 12px
-    backgroundColor: 'rgba(248, 113, 113, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.30)',
-  },
-  deleteText: {
-    ...glassStyles.textMuted,
-    color: COLORS.error,
+  cardDate: {
+    color: COLORS.silverLight,
+    fontSize: 16,
     fontWeight: '600',
   },
-  imageRow: {
-    gap: SPACING.sm,                        // 12px between images
-    paddingBottom: SPACING.xxs,             // 4px
+  cardCount: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    marginTop: 4,
   },
-  historyImage: {
-    width: 100,
-    height: 133,                            // 3:4 aspect ratio
-    borderRadius: SPACING.md,               // 16px
+  iconButtonDanger: {
+    padding: SPACING.xs,
+    borderRadius: SPACING.sm,
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.25)',
+  },
+  imageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  imageWrapper: {
+    flexBasis: '47%',
+    aspectRatio: 3 / 4,
+    borderRadius: SPACING.md,
     overflow: 'hidden',
-    backgroundColor: COLORS.bgDeep,
+    backgroundColor: COLORS.glassDark,
   },
-  thumbnailImage: {
+  image: {
     width: '100%',
     height: '100%',
   },
   cardFooter: {
-    marginTop: SPACING.sm,                  // 12px
-    paddingTop: SPACING.sm,                 // 12px
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  countText: {
-    ...glassStyles.textMuted,
-    color: COLORS.textMuted,
-  },
-  messagePanel: {
-    marginTop: SPACING.xxl,                 // 32px
-    marginBottom: SPACING.xxl,              // 32px
-  },
-  messageCard: {
-    padding: 48,
-  },
-  messageContent: {
-    alignItems: 'center',
-    gap: 18,
-  },
-  messageText: {
-    color: 'rgba(255, 255, 255, 0.92)',
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '700' as const,
-    letterSpacing: 0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
-  },
-  errorText: {
-    color: 'rgba(255, 100, 100, 0.95)',
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '700' as const,
-    letterSpacing: 0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalBlur: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: COLORS.overlay,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: 540,
-    alignItems: 'center',
-    gap: 28,
-  },
-  modalCard: {
-    width: '100%',
-    borderRadius: 36,
-    padding: 3.5,
-    overflow: 'hidden',
-    shadowColor: 'rgba(200, 220, 255, 0.6)',
-    shadowOffset: { width: 0, height: 24 },
-    shadowOpacity: 0.8,
-    shadowRadius: 48,
-    elevation: 25,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.5)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.42)',
-    borderRightColor: 'rgba(255, 255, 255, 0.25)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  modalCardInner: {
-    backgroundColor: 'rgba(12, 18, 28, 0.75)',
-    borderRadius: 33,
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.16)',
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 24,
-    paddingBottom: 16,
   },
-  modalDateContainer: {
+  footerMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.35)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.28)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    gap: SPACING.xs,
   },
-  modalDateText: {
-    color: 'rgba(255, 255, 255, 0.98)',
-    fontSize: 15,
-    fontWeight: '800' as const,
-    letterSpacing: 0.4,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 5,
+  footerText: {
+    color: COLORS.silverMid,
+    fontSize: 13,
   },
-  deleteButton: {
-    borderRadius: 22,
-    overflow: 'hidden',
+  footerActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
   },
-  deleteButtonGradient: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
+  iconButton: {
+    padding: SPACING.xs,
+    borderRadius: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: COLORS.overlay,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(239, 68, 68, 0.45)',
-    borderLeftColor: 'rgba(239, 68, 68, 0.38)',
-    borderRightColor: 'rgba(239, 68, 68, 0.25)',
-    borderBottomColor: 'rgba(239, 68, 68, 0.18)',
-    shadowColor: 'rgba(239, 68, 68, 0.6)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.7,
-    shadowRadius: 20,
-    elevation: 10,
+    justifyContent: 'center',
+    padding: SPACING.lg,
   },
-  imageScroll: {
+  modalPanel: {
     width: '100%',
-    maxHeight: 600,
+    maxWidth: 520,
+    overflow: 'hidden',
   },
   modalImageContainer: {
-    width: SCREEN_WIDTH > 540 ? 540 : SCREEN_WIDTH - 48,
-    aspectRatio: 3 / 4,
-    padding: 24,
-  },
-  modalImageFrame: {
     width: '100%',
-    height: '100%',
-    borderRadius: 24,
-    overflow: 'hidden',
-    borderWidth: 3,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
-    borderRightColor: 'rgba(255, 255, 255, 0.18)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
-    shadowColor: 'rgba(0, 0, 0, 0.7)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.6,
-    shadowRadius: 32,
-    elevation: 15,
+    aspectRatio: 3 / 4,
+    backgroundColor: COLORS.bgDeep,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalImage: {
     width: '100%',
     height: '100%',
   },
   modalFooter: {
-    padding: 24,
-    paddingTop: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    gap: 18,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: SPACING.lg,
   },
-  modalPromptText: {
-    color: 'rgba(255, 255, 255, 0.92)',
+  modalTitle: {
+    color: COLORS.silverLight,
     fontSize: 16,
-    fontWeight: '700' as const,
-    textAlign: 'center',
-    letterSpacing: 0.3,
-    lineHeight: 24,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 5,
+    fontWeight: '600',
   },
-  modalFavoriteButton: {
+  modalSubtitle: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  modalIconButton: {
+    padding: SPACING.sm,
+    borderRadius: SPACING.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  modalClose: {
     position: 'absolute',
     top: SPACING.md,
     right: SPACING.md,
-    zIndex: 10,
+    padding: SPACING.sm,
+    borderRadius: SPACING.lg,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 18,
-    justifyContent: 'center',
+  carouselButton: {
+    position: 'absolute',
+    top: '45%',
+    padding: SPACING.md,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
-  actionButton: {
-    borderRadius: 30,
-    overflow: 'hidden',
+  carouselLeft: {
+    left: SPACING.md,
   },
-  actionButtonGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    padding: 3,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.45)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
-    borderRightColor: 'rgba(255, 255, 255, 0.25)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.18)',
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.7,
-    shadowRadius: 32,
-    elevation: 16,
-  },
-  actionButtonInner: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 27,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.32)',
-    borderRightColor: 'rgba(255, 255, 255, 0.18)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
-  },
-  closeButton: {
-    borderRadius: 30,
-    overflow: 'hidden',
-  },
-  closeButtonGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    padding: 3,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.55)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.45)',
-    borderRightColor: 'rgba(255, 255, 255, 0.28)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: 'rgba(200, 220, 255, 0.7)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.8,
-    shadowRadius: 36,
-    elevation: 20,
-  },
-  closeButtonInner: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    borderRadius: 27,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.45)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.35)',
-    borderRightColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.12)',
+  carouselRight: {
+    right: SPACING.md,
   },
 });

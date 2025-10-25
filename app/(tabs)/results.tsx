@@ -1,48 +1,30 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Eye, Download, Share2, Trash2, X } from 'lucide-react-native';
-import { useGeneration } from '@/contexts/GenerationContext';
-import { useToast } from '@/contexts/ToastContext';
-import { downloadImage, shareImage } from '@/utils/download';
-import FavoriteButton from '@/components/FavoriteButton';
+import { Eye, Download, X } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import { useGeneration } from '@/contexts/GenerationContext';
+import { useToast } from '@/contexts/ToastContext';
+import { downloadImage } from '@/utils/download';
 import { COLORS, glassStyles } from '@/constants/glassStyles';
 
 export default function ResultsScreen() {
-  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
-  const { generatedImages, generatedImageIds, isGenerating, generationCount, deleteImage } = useGeneration();
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { generatedImages, isGenerating, generationCount } = useGeneration();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const selectedImage = selectedIndex !== null ? generatedImages[selectedIndex] : null;
   const progress = useMemo(() => {
-    if (!generationCount) return 0;
+    if (!generationCount) {
+      return 0;
+    }
     return Math.min(100, Math.round((generatedImages.length / generationCount) * 100));
   }, [generatedImages.length, generationCount]);
 
-  const handleDownload = async (imageUri?: string) => {
-    const target = imageUri ?? selectedImage;
-    if (!target) return;
-    const success = await downloadImage(target, { filename: `fashion-${Date.now()}.jpg` });
+  const handleDownload = async (imageUri: string) => {
+    const success = await downloadImage(imageUri, { filename: `fashion-${Date.now()}.jpg` });
     showToast(success ? 'Image downloaded!' : 'Failed to download', success ? 'success' : 'error');
-  };
-
-  const handleShare = async () => {
-    if (!selectedImage) return;
-    const success = await shareImage(selectedImage);
-    if (success) {
-      showToast('Image shared!', 'success');
-    }
-  };
-
-  const handleDelete = () => {
-    if (selectedIndex === null) return;
-    deleteImage(selectedIndex);
-    setSelectedIndex(null);
-    showToast('Image deleted', 'success');
   };
 
   const remainingCount = Math.max(0, generationCount - generatedImages.length);
@@ -54,7 +36,7 @@ export default function ResultsScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[glassStyles.screenContent, { paddingBottom: insets.bottom + 120 }]}
+        contentContainerStyle={glassStyles.screenContent}
         showsVerticalScrollIndicator={false}
       >
         <GlassyTitle>Results</GlassyTitle>
@@ -76,29 +58,24 @@ export default function ResultsScreen() {
           </GlassPanel>
         ) : (
           <View style={styles.grid}>
-            {generatedImages.map((img, i) => (
-              <GlassPanel key={`img-${i}`} style={styles.gridItem} radius={20}>
-                <TouchableOpacity style={styles.imageWrapper} activeOpacity={0.85} onPress={() => setSelectedIndex(i)}>
+            {generatedImages.map((img, index) => (
+              <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={20}>
+                <View style={styles.imageWrapper}>
                   <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
                   <View style={styles.overlay}>
-                    <TouchableOpacity style={styles.overlayButton} onPress={() => setSelectedIndex(i)}>
-                      <Eye size={28} color="#fff" />
+                    <TouchableOpacity style={styles.overlayButton} onPress={() => setPreviewImage(img)}>
+                      <Eye size={26} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.overlayButton} onPress={() => handleDownload(img)}>
-                      <Download size={28} color="#fff" />
+                      <Download size={26} color="#fff" />
                     </TouchableOpacity>
                   </View>
-                  {generatedImageIds[i] && (
-                    <View style={styles.favoriteBadge}>
-                      <FavoriteButton imageId={generatedImageIds[i]} size={18} />
-                    </View>
-                  )}
-                </TouchableOpacity>
+                </View>
               </GlassPanel>
             ))}
 
-            {loadingPlaceholders.map((_, i) => (
-              <GlassPanel key={`loading-${i}`} style={styles.gridItem} radius={20}>
+            {loadingPlaceholders.map((_, index) => (
+              <GlassPanel key={`loading-${index}`} style={styles.gridItem} radius={20}>
                 <View style={styles.loadingCard}>
                   <Text style={styles.loadingText}>Generating...</Text>
                 </View>
@@ -115,33 +92,22 @@ export default function ResultsScreen() {
       </ScrollView>
 
       <Modal
-        visible={selectedImage !== null}
+        visible={previewImage !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setSelectedIndex(null)}
+        onRequestClose={() => setPreviewImage(null)}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setSelectedIndex(null)} />
-
+          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setPreviewImage(null)} />
           <View style={styles.modalContent}>
-            {selectedImage && (
+            {previewImage && (
               <>
-                <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
-
+                <Image source={{ uri: previewImage }} style={styles.modalImage} resizeMode="contain" />
                 <View style={styles.modalActions}>
-                  <TouchableOpacity onPress={() => handleDownload()} style={styles.actionButton}>
+                  <TouchableOpacity onPress={() => handleDownload(previewImage)} style={styles.actionButton}>
                     <Download size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
-
-                  <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
-                    <Share2 size={22} color={COLORS.silverLight} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
-                    <Trash2 size={22} color={COLORS.silverLight} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => setSelectedIndex(null)} style={styles.actionButton}>
+                  <TouchableOpacity onPress={() => setPreviewImage(null)} style={styles.actionButton}>
                     <X size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
                 </View>
@@ -206,20 +172,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-    opacity: 1,
   },
   overlayButton: {
     padding: 8,
-  },
-  favoriteBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
   },
   loadingCard: {
     flex: 1,

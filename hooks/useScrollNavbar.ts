@@ -1,9 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import { useNavbar } from '@/components/CustomTabBar';
 
 export function useScrollNavbar() {
-  const { hideNavbar, showNavbar } = useNavbar();
   const lastScrollY = useRef(0);
   const scrollThreshold = 5; // Minimum scroll distance to trigger hide/show
 
@@ -12,20 +10,14 @@ export function useScrollNavbar() {
       const currentScrollY = event.nativeEvent.contentOffset.y;
       const scrollDelta = currentScrollY - lastScrollY.current;
 
-      // Only trigger if scrolled more than threshold
+      // Placeholder: no-op for custom tab bar visibility (can be wired later)
       if (Math.abs(scrollDelta) > scrollThreshold) {
-        if (scrollDelta > 0 && currentScrollY > 100) {
-          // Scrolling down and past top
-          hideNavbar();
-        } else if (scrollDelta < 0) {
-          // Scrolling up
-          showNavbar();
-        }
+        // optionally handle UI as needed
       }
 
       lastScrollY.current = currentScrollY;
     },
-    [hideNavbar, showNavbar]
+    []
   );
 
   return { handleScroll };

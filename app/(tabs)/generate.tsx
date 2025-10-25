@@ -1,22 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useGeneration } from '@/contexts/GenerationContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/contexts/ToastContext';
-import { COLORS, glassStyles } from '@/constants/glassStyles';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
-import StyleSelector from '@/components/StyleSelector';
+import GlowingButton from '@/components/GlowingButton';
+import { useGeneration } from '@/contexts/GenerationContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
+import { COLORS, glassStyles } from '@/constants/glassStyles';
 
 export default function GenerateScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showToast } = useToast();
   const {
@@ -84,46 +83,33 @@ export default function GenerateScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[glassStyles.screenContent, { paddingBottom: insets.bottom + 120 }]}
+        contentContainerStyle={glassStyles.screenContent}
         showsVerticalScrollIndicator={false}
       >
         <GlassyTitle>
           {greeting}, {user?.name || 'Muse'}
         </GlassyTitle>
 
-        <View style={styles.inlineRow}>
-          <GlassPanel style={styles.creditPanel} radius={24}>
-            <Text style={styles.creditLabel}>Credits</Text>
-            <Text style={styles.creditValue}>{user?.credits ?? 0}</Text>
-          </GlassPanel>
-          <GlassPanel style={styles.countPanel} radius={24}>
-            <Text style={styles.sectionTitle}>Variations</Text>
-            <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
-          </GlassPanel>
-        </View>
+        <GlassPanel style={styles.creditPanel} radius={24}>
+          <Text style={styles.creditLabel}>Credits available</Text>
+          <Text style={styles.creditValue}>{user?.credits ?? 0}</Text>
+          <Text style={styles.creditHint}>Each variation consumes one credit.</Text>
+        </GlassPanel>
 
-        <GlassPanel style={styles.sectionPanel} radius={24}>
-          <Text style={styles.sectionTitle}>Pick Your Style</Text>
-          <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
+        <GlassPanel style={styles.countPanel} radius={24}>
+          <Text style={styles.sectionTitle}>Variations</Text>
+          <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
         </GlassPanel>
 
         <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
 
-        <TouchableOpacity
-          style={[
-            glassStyles.glass3DButton,
-            glassStyles.primaryButton,
-            styles.generateButton,
-            (isGenerating || !selectedImage) && styles.disabledButton,
-          ]}
+        <GlowingButton
           onPress={handleGenerate}
+          text={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
+          variant="primary"
+          style={[styles.generateButton, (isGenerating || !selectedImage) && styles.disabledButton]}
           disabled={isGenerating || !selectedImage}
-          activeOpacity={0.8}
-        >
-          <Text style={[glassStyles.buttonText, glassStyles.primaryButtonText]}>
-            {isGenerating ? 'Generating...' : 'Generate Photoshoot'}
-          </Text>
-        </TouchableOpacity>
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -136,16 +122,10 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  inlineRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 16,
-  },
   creditPanel: {
-    flex: 0.35,
+    marginBottom: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
+    gap: 8,
   },
   creditLabel: {
     color: COLORS.silverMid,
@@ -162,17 +142,19 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
   },
+  creditHint: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    textAlign: 'center',
+  },
   countPanel: {
-    flex: 0.65,
+    marginBottom: 16,
   },
   sectionTitle: {
     color: COLORS.silverLight,
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 12,
-  },
-  sectionPanel: {
-    marginBottom: 16,
   },
   generateButton: {
     width: '100%',

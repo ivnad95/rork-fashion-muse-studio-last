@@ -96,12 +96,6 @@ export const COLORS = {
   overlayLight: 'rgba(13, 25, 41, 0.85)',   // Lighter overlay
 
   // Legacy aliases (for backward compatibility - will be removed in future version)
-  /** @deprecated Use textPrimary instead */
-  silverLight: '#F8FAFC',
-  /** @deprecated Use textSecondary instead */
-  silverMid: '#CBD5E1',
-  /** @deprecated Use textMuted instead */
-  silverDark: '#94A3B8',
   /** @deprecated Use glassLight instead */
   glassBase: 'rgba(42, 73, 114, 0.25)',
   /** @deprecated Use accentShadow instead */

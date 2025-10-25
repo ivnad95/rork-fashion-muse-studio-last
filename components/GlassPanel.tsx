@@ -1,12 +1,12 @@
 import React from 'react';
-import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { glassStyles, COLORS, RADIUS, BLUR, GRADIENTS } from '@/constants/glassStyles';
 
 interface GlassPanelProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   radius?: number;
   noPadding?: boolean;
   testID?: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import GlassPanel from '@/components/GlassPanel';
-import { COLORS } from '@/constants/glassStyles';
+import GlassPanel from './GlassPanel';
+import { glassStyles, COLORS } from '../styles/glassStyles';
 
 interface ImageUploaderProps {
   uploadedImage: string | null;
@@ -10,30 +10,37 @@ interface ImageUploaderProps {
 }
 
 /**
- * ImageUploader – matches the ManusAI Deep Sea glass aesthetic
+ * ImageUploader - Display uploaded image or upload prompt
  */
 export default function ImageUploader({ uploadedImage, uploading, onImageSelect }: ImageUploaderProps) {
   return (
-    <GlassPanel style={styles.panel} radius={20}>
-      <TouchableOpacity
-        style={styles.touch}
+    <GlassPanel style={glassStyles.imagePlaceholder} radius={20}>
+      <TouchableOpacity 
+        style={glassStyles.imageContainer}
         onPress={onImageSelect}
         activeOpacity={0.8}
       >
         {uploadedImage ? (
-          <Image source={{ uri: uploadedImage }} style={styles.uploadedImage} resizeMode="cover" />
+          <Image 
+            source={{ uri: uploadedImage }}
+            style={styles.uploadedImage}
+            resizeMode="cover"
+          />
         ) : (
           <View style={styles.placeholderContent}>
             <View style={styles.logoContainer}>
-              <Image source={require('@/assets/images/icon.png')} style={styles.logo} resizeMode="contain" />
+              <Image
+                source={require('../../assets/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.placeholderText}>Tap to upload your photo</Text>
             <Text style={styles.placeholderSubtext}>Start your fashion transformation</Text>
           </View>
         )}
-
         {uploading && (
-          <View style={styles.loadingOverlay}>
+          <View style={glassStyles.loadingPulse}>
             <ActivityIndicator size="large" color={COLORS.silverMid} />
           </View>
         )}
@@ -43,15 +50,6 @@ export default function ImageUploader({ uploadedImage, uploading, onImageSelect 
 }
 
 const styles = StyleSheet.create({
-  panel: {
-    marginBottom: 16,
-  },
-  touch: {
-    width: '100%',
-    aspectRatio: 3 / 4,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
   uploadedImage: {
     width: '100%',
     height: '100%',
@@ -60,7 +58,6 @@ const styles = StyleSheet.create({
   placeholderContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
   logoContainer: {
     width: 80,
@@ -80,15 +77,7 @@ const styles = StyleSheet.create({
   placeholderSubtext: {
     color: '#6B7280',
     fontSize: 12,
+    marginTop: 4,
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.15)'
-  }
 });
+

@@ -1,223 +1,36 @@
-# Fashion Muse Studio - AI Coding Guide
+# Fashion Muse Studio – Copilot Guide
 
-## Architecture Overview
+## Core Context
+- AI fashion photoshoot app built with Expo Router + React Native 0.79.6, orchestrated by the Rork platform (see app/(tabs)/generate.tsx).
+- Hono+tRPC backend co-exists in backend/ and is consumed through the typed client in lib/trpc.ts.
+- React Context (Auth, Generation, Theme, Toast) owns runtime state; Zustand is not currently used despite being installed.
+- Bun is the only package manager; the start scripts wrap `bun x rork start` so avoid calling `expo start` directly.
+- TypeScript runs in strict mode with the `@/*` path alias; prefer absolute imports to maintain consistency across platforms.
 
-This is a **cross-platform React Native app** built with Expo Router and managed by Rork platform. The app generates AI-powered fashion photoshoots from user images.
+## Architecture & State
+- app/_layout.tsx composes ErrorBoundary → ThemeProvider → ToastProvider → AuthProvider → GenerationProvider before rendering the router; preserve this order when introducing new providers.
+- AuthContext.tsx initializes SQLite, recreates guest sessions via AsyncStorage keys (`@fashion_ai_user_session`, `@fashion_ai_guest_credits`), and enforces credit accounting through updateUserCredits.
+- GenerationContext.tsx layers prompts from constants/styles.ts with fixed pose prompts, enforces a 4 MB upload limit, a 180 s timeout, and two retries per image, then persists results + history via lib/database.ts.
+- ToastContext.tsx and ThemeContext.tsx supply glass-themed notifications and theme switching (AsyncStorage-backed); consume them with useToast/useTheme rather than duplicating state.
+- scripts/add-credits.ts injects dev helpers when NODE_ENV===development—keep helper imports guarded to avoid leaking into production builds.
 
-**Key Stack:**
-- **Frontend:** React Native 0.79 + Expo 53 + Expo Router (file-based routing)
-- **Backend:** Hono server with tRPC for type-safe APIs
-- **State:** React Context (AuthContext, GenerationContext) + Zustand potential
-- **Styling:** Custom glass morphism design system, no UI library
-- **Type Safety:** TypeScript strict mode throughout
+## Data & Backend
+- lib/database.ts boots Expo SQLite on native and returns safe fallbacks on web; wrap new DB code with Platform checks or reuse the exported helpers.
+- Tables cover users, images, history, history_images, transactions, and favorites; secure IDs come from expo-crypto’s randomUUID helper.
+- Password flows must use hashPassword/verifyPassword to keep the SHA-256+salt contract that AuthContext expects.
+- backend/trpc/routes/* houses one procedure per file with Zod schemas; register them in backend/trpc/app-router.ts so AppRouter types cascade to lib/trpc.ts.
+- services/ exposes authService, creditService, generationService, and storageService—update service logic alongside contexts to keep business rules centralized.
 
-**Critical Flows:**
-1. User uploads image via `ImageUploader` component
-2. `GenerationContext` manages state and calls external AI API (`https://toolkit.rork.com/images/edit/`)
-3. Generated images stored in history with AsyncStorage
-4. Custom glass-styled UI components provide premium aesthetic
+## UI & Styling
+- constants/glassStyles.ts defines the Deep Sea Glass tokens; always use glassStyles.glassPanel/glassButton (or primitives like GlassPanel.tsx, GlowingButton.tsx) instead of legacy neumorphicStyles.ts.
+- PremiumLiquidGlass and GlassContainer establish background gradients; wrap new screens with these before placing glass surfaces.
+- constants/styles.ts drives the style selector chips; GenerationContext expects ids like `casual`, so reuse getStyleById/getStylePrompt when adding variants.
+- app/(tabs)/history.tsx and settings.tsx still contain old panels—follow the migration notes in AGENTS.md to replace them with glass primitives.
+- Lucide icons (`lucide-react-native`) and Platform-specific fallbacks (BlurView vs rgba View) are standard; mirror the patterns in components/GlassPanel.tsx when building new UI.
 
-## Project Structure Patterns
-
-```
-app/              # File-based routes (Expo Router)
-  (tabs)/         # Tab navigation group - generate, results, history, settings
-  _layout.tsx     # Root layout with providers (Auth, Generation, ErrorBoundary)
-  plans.tsx       # Modal screen for credit purchases
-backend/          # API layer
-  hono.ts         # Hono server entry, tRPC middleware setup
-  trpc/
-    app-router.ts       # Centralized tRPC router (auth, user, credits, example)
-    create-context.ts   # tRPC context factory with superjson transformer
-    routes/             # Organized by feature (auth/, credits/, user/)
-      */route.ts        # Individual procedures with Zod schemas
-components/       # Reusable UI components (ALL use glass morphism)
-contexts/         # React Context providers (AuthContext, GenerationContext)
-constants/        # Design system (colors.ts, glassStyles.ts)
-```
-
-## Development Commands
-
-```bash
-# Start dev server with Rork CLI (tunneled for device testing)
-bun run start           # Mobile preview (scan QR)
-bun run start-web       # Web browser preview
-bun run start-web-dev   # Web with debug logs (DEBUG=expo*)
-
-# Lint
-bun run lint           # ESLint with expo config
-```
-
-**Note:** Uses custom Rork CLI (`bunx rork start`) instead of standard `expo start`. The `-p 89f4413u0flgij4dba864` flag is project-specific identifier.
-
-## Critical Conventions
-
-### Glass Morphism Design System
-
-ALL UI components use the glass morphism aesthetic defined in `constants/glassStyles.ts`:
-- `glassStyles.glass3DSurface` - Containers, panels, cards
-- `glassStyles.glass3DButton` - Interactive elements
-- `glassStyles.activeButton` / `glassStyles.activeButtonText` - Selected states
-- Color palette in `COLORS` constant (bgColor, lightColor1-3, silverLight/Mid/Dark)
-
-**Example:** When creating buttons, use `GlowingButton` component or apply `glassStyles.glass3DButton` + gradient layers. Never use plain backgrounds.
-
-### Component Patterns
-
-**GlassPanel Component:**
-```tsx
-// Wraps content with blur effect + glass styling
-<GlassPanel radius={28} intensity={25}>
-  {/* content */}
-</GlassPanel>
-```
-- Uses `expo-blur` BlurView on native, fallback on web
-- Always includes top highlight layer for 3D glass effect
-
-**GlowingButton Component:**
-```tsx
-<GlowingButton 
-  variant="primary"  // or "default" | "small"
-  text="Generate"
-  onPress={handleGenerate}
-  icon={<SomeIcon />}
-/>
-```
-- `variant="primary"` adds animated glow ring (pulsing opacity)
-- Multi-layer: gradient border → inner gradient → blur → shine layer → content
-- Press animations with `Animated.spring`
-
-### tRPC Route Organization
-
-Each route is a **separate file** exporting a procedure:
-```typescript
-// backend/trpc/routes/auth/sign-in/route.ts
-import { z } from 'zod';
-import { publicProcedure } from '../../../create-context';
-
-const signInInputSchema = z.object({ email: z.string().email(), password: z.string() });
-
-export const signInProcedure = publicProcedure
-  .input(signInInputSchema)
-  .mutation(async ({ input }) => {
-    // Implementation
-  });
-```
-
-Then imported in `app-router.ts`:
-```typescript
-export const appRouter = createTRPCRouter({
-  auth: createTRPCRouter({
-    signIn: signInProcedure,
-  }),
-});
-```
-
-**Always use superjson transformer** (already configured in `create-context.ts` and `lib/trpc.ts`).
-
-### Context Providers Pattern
-
-Contexts use **custom hooks for type safety**:
-```tsx
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
-}
-```
-
-**Root layout wraps app** (`app/_layout.tsx`):
-```tsx
-<ErrorBoundary>
-  <AuthProvider>
-    <GenerationProvider>
-      <GestureHandlerRootView>
-        <Stack />
-      </GestureHandlerRootView>
-    </GenerationProvider>
-  </AuthProvider>
-</ErrorBoundary>
-```
-
-### Image Generation Flow
-
-`GenerationContext.generateImages()` is the core AI integration:
-1. Converts local file URIs to base64 (FileReader API)
-2. Iterates through `generationCount` (1-4 images)
-3. Rotates through 4 predefined `FASHION_PROMPTS` (strict same-person/same-clothes prompts)
-4. POSTs to `https://toolkit.rork.com/images/edit/` with 120s timeout
-5. Updates state progressively as each image completes
-6. Auto-saves to history with AsyncStorage
-
-**Error Handling:** Network failures, timeouts (AbortController), large images (413), rate limits (429) - all have specific user messages.
-
-### Platform-Specific Handling
-
-```tsx
-// Blur effects
-Platform.OS === 'web' 
-  ? <View style={{ backgroundColor: 'rgba(...)' }} />
-  : <BlurView intensity={25} />
-
-// Haptics (mobile only)
-if (Platform.OS !== 'web') {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-}
-
-// Alerts
-Platform.OS === 'web' ? alert(msg) : Alert.alert('Title', msg);
-```
-
-### TypeScript Path Aliases
-
-Use `@/*` for absolute imports:
-```typescript
-import Colors from '@/constants/colors';
-import { useAuth } from '@/contexts/AuthContext';
-import GlassPanel from '@/components/GlassPanel';
-```
-
-Configured in `tsconfig.json` paths.
-
-## Common Tasks
-
-**Add new tRPC route:**
-1. Create `backend/trpc/routes/{feature}/{action}/route.ts`
-2. Define Zod schema + export procedure
-3. Import in `backend/trpc/app-router.ts`
-4. Type inference auto-updates in `lib/trpc.ts` via `AppRouter` type
-
-**Add new screen:**
-1. Create file in `app/` (auto-routes via Expo Router)
-2. Use `Stack.Screen` in parent `_layout.tsx` for options
-3. Wrap content in `<LinearGradient>` with `Colors.dark.background`
-4. Use `useSafeAreaInsets()` for safe area padding
-
-**Create new glass component:**
-1. Import `glassStyles` and `COLORS` from `constants/glassStyles`
-2. Layer structure: glass3DSurface → BlurView → LinearGradient → content
-3. Use `topHighlight` view for 3D effect (see `GlassPanel.tsx`)
-4. Add shadows: `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, `elevation`
-
-**Access user state:**
-```tsx
-const { user, isAuthenticated, signIn, updateCredits } = useAuth();
-const { selectedImage, generateImages, isGenerating } = useGeneration();
-```
-
-## External Dependencies
-
-- **Rork Toolkit API:** `https://toolkit.rork.com/images/edit/` - External AI image generation (no auth, POST JSON with base64 images)
-- **AsyncStorage:** `@react-native-async-storage/async-storage` - Persists user data and history
-- **Expo Router:** File-based routing with typed routes (`experiments.typedRoutes: true`)
-- **Lucide Icons:** `lucide-react-native` for SVG icons (NOT using Expo vector icons)
-
-## Gotchas
-
-- **Bun is package manager** (not npm/yarn) - use `bun i`, `bun run`
-- **Rork CLI** wraps Expo CLI - commands differ from standard Expo docs
-- **No native modules** currently - app runs in Expo Go (no custom dev client needed)
-- **Web fallbacks required** for BlurView, Haptics, native image pickers
-- **Image API timeout** is 120s - show loading states immediately
-- **History is local only** (AsyncStorage) - not synced to backend yet
-- **Auth uses SQLite database with password hashing and validation** (signIn/signUp validate against database)
+## Workflows & Gotchas
+- Primary commands live in package.json: `bun run start` (mobile tunnel), `bun run start-web`, `bun run start-web-dev` (DEBUG=expo*).
+- Rork CLI requires the project flag `-p 89f4413u0flgij4dba864`; keep it in any custom automation.
+- SQLite is unavailable on web builds, so persistence work must be exercised on device/emulator; lib/database.ts gracefully no-ops when unsupported.
+- Generation flows store base64 URIs directly—respect MAX_IMAGE_SIZE, timeout, and retry guards when touching GenerationContext or generationService.
+- __tests__/database.test.ts covers the DB contract but no npm script runs it; execute with Bun manually when migrating schema or auth logic.

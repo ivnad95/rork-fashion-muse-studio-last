@@ -8,6 +8,7 @@ import {
   ViewStyle,
   TextStyle,
   Platform,
+  StyleProp,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -17,8 +18,8 @@ interface GlowingButtonProps {
   onPress?: () => void;
   children?: React.ReactNode;
   text?: string;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
   variant?: 'default' | 'primary' | 'small' | 'ghost';
   icon?: React.ReactNode;
