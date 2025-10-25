@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     marginBottom: 12,
-    opacity: 0.3,
+    opacity: 0.6,
   },
   logo: {
     width: '100%',

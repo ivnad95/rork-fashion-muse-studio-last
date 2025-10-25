@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
 import { Heart } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { COLORS } from '@/constants/glassStyles';
 import { toggleFavorite, isFavorite } from '@/lib/database';
 import { useAuth } from '@/contexts/AuthContext';
@@ -60,7 +61,6 @@ export default function FavoriteButton({ imageId, size = 24, onToggle }: Favorit
 
     // Haptic feedback
     if (Platform.OS !== 'web') {
-      const Haptics = require('expo-haptics');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 

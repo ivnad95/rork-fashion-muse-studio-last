@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { COLORS, RADIUS } from '@/constants/glassStyles';
 
 interface GlowingButtonProps {
@@ -111,7 +112,6 @@ export default function GlowingButton({
   const handlePressIn = () => {
     // Haptic feedback on press
     if (Platform.OS !== 'web' && !disabled) {
-      const Haptics = require('expo-haptics');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 

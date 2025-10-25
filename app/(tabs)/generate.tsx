@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, ScrollView, Alert, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
 import ImageUploader from '@/components/ImageUploader';
+import StyleSelector from '@/components/StyleSelector';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -31,6 +33,8 @@ export default function GenerateScreen() {
   } = useGeneration();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState('casual');
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -66,6 +70,7 @@ export default function GenerateScreen() {
         setUploading(false);
       }
     } catch (err) {
+      console.error('Upload error:', err);
       setError('Failed to upload image. Please try again.');
       showToast('Failed to upload image', 'error');
       setUploading(false);
@@ -101,6 +106,7 @@ export default function GenerateScreen() {
       
       Alert.alert('Success', 'Generation started! Check the Results tab.');
     } catch (err) {
+      console.error('Generation error:', err);
       setError('Failed to generate images. Please try again.');
       showToast('Generation failed', 'error');
     }
@@ -135,6 +141,28 @@ export default function GenerateScreen() {
         />
         
         <TouchableOpacity
+          style={styles.advancedToggle}
+          onPress={() => setShowAdvanced(!showAdvanced)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.advancedToggleText}>Advanced Options</Text>
+          {showAdvanced ? (
+            <ChevronUp size={20} color={COLORS.silverMid} />
+          ) : (
+            <ChevronDown size={20} color={COLORS.silverMid} />
+          )}
+        </TouchableOpacity>
+        
+        {showAdvanced && (
+          <View style={styles.advancedSection}>
+            <StyleSelector
+              selectedStyleId={selectedStyle}
+              onSelectStyle={setSelectedStyle}
+            />
+          </View>
+        )}
+        
+        <TouchableOpacity
           style={[
             glassStyles.glass3DButton,
             glassStyles.primaryButton,
@@ -149,6 +177,10 @@ export default function GenerateScreen() {
             {isGenerating ? 'Generating...' : 'Generate Photoshoot'}
           </Text>
         </TouchableOpacity>
+        
+        <Text style={styles.creditsInfo}>
+          Cost: {generationCount} credit{generationCount !== 1 ? 's' : ''} • Available: {user?.credits || 0}
+        </Text>
         
         {error && (
           <GlassPanel style={styles.errorPanel} radius={16}>
@@ -172,6 +204,29 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  creditsInfo: {
+    color: COLORS.silverMid,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 12,
+    fontWeight: '500',
+  },
+  advancedToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  advancedToggleText: {
+    color: COLORS.silverLight,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  advancedSection: {
+    marginBottom: 16,
   },
   errorPanel: {
     width: '100%',

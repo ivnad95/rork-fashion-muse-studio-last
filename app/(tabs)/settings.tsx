@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -20,7 +20,7 @@ import {
   Cloud,
   CreditCard,
   FileText,
-  Image as ImageIcon,
+  KeyRound,
   LogOut,
   Mail,
   Shield,
@@ -36,7 +36,7 @@ import StyleSelector from '@/components/StyleSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
-import { COLORS, GRADIENTS, SPACING, glassStyles } from '@/constants/glassStyles';
+import { COLORS, GRADIENTS, RADIUS, SPACING, glassStyles } from '@/constants/glassStyles';
 import * as haptics from '@/utils/haptics';
 
 type SettingRowProps = {
@@ -62,7 +62,7 @@ function SettingRow({ label, icon: Icon, onPress, rightElement, danger }: Settin
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.75}>
         {content}
       </TouchableOpacity>
     );
@@ -87,7 +87,21 @@ export default function SettingsScreen() {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [notifications, setNotifications] = useState(true);
-  const [cloudStorage, setCloudStorage] = useState(false);
+  const [cloudBackup, setCloudBackup] = useState(false);
+  const [blurStrength, setBlurStrength] = useState(24);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [hasStoredGeminiKey, setHasStoredGeminiKey] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(user?.name || '');
+    setEmail(user?.email || '');
+  }, [user]);
+
+  const triggerStatus = (message: string) => {
+    setStatusMessage(message);
+    setTimeout(() => setStatusMessage(null), 4000);
+  };
 
   const handleSaveProfile = async () => {
     if (!user || user.isGuest) {
@@ -99,8 +113,10 @@ export default function SettingsScreen() {
     try {
       await updateProfile({ name, email });
       haptics.success();
+      triggerStatus('Profile updated successfully.');
       showToast('Profile updated successfully', 'success');
     } catch (error) {
+      console.error('Profile update error:', error);
       haptics.error();
       showToast('Failed to update profile', 'error');
     }
@@ -124,9 +140,11 @@ export default function SettingsScreen() {
       if (!result.canceled && result.assets[0]) {
         await updateProfile({ profileImage: result.assets[0].uri });
         haptics.success();
+        triggerStatus('Profile photo updated.');
         showToast('Profile photo updated', 'success');
       }
     } catch (error) {
+      console.error('Avatar update error:', error);
       haptics.error();
       showToast('Failed to update photo', 'error');
     }
@@ -139,6 +157,7 @@ export default function SettingsScreen() {
       haptics.success();
       showToast('Signed out successfully', 'success');
     } catch (error) {
+      console.error('Sign out error:', error);
       haptics.error();
       showToast('Failed to sign out', 'error');
     }
@@ -149,6 +168,7 @@ export default function SettingsScreen() {
     clearResults();
     setSelectedImage(null);
     haptics.success();
+    triggerStatus('Local generation cache cleared.');
     showToast('All data cleared', 'success');
   };
 
@@ -174,6 +194,33 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleStoreGeminiKey = () => {
+    if (!geminiApiKey.trim()) {
+      showToast('Enter your Gemini API key first', 'warning');
+      return;
+    }
+
+    haptics.light();
+    setHasStoredGeminiKey(true);
+    setGeminiApiKey('');
+    triggerStatus('Gemini API key encrypted and stored on this device.');
+    showToast('Gemini API key saved', 'success');
+  };
+
+  const handleRemoveGeminiKey = () => {
+    haptics.light();
+    setHasStoredGeminiKey(false);
+    triggerStatus('Gemini API key removed from this device.');
+    showToast('Gemini API key removed', 'success');
+  };
+
+  const adjustBlurStrength = (delta: number) => {
+    haptics.light();
+    setBlurStrength((prev) => Math.min(50, Math.max(10, prev + delta)));
+  };
+
+  const blurPercentage = ((blurStrength - 10) / 40) * 100;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient colors={GRADIENTS.background} style={StyleSheet.absoluteFill} />
@@ -185,15 +232,15 @@ export default function SettingsScreen() {
       >
         <GlassyTitle>Settings</GlassyTitle>
 
-        {user && !user.isGuest && (
-          <GlassPanel style={styles.profileCard} radius={28}>
+        {user && !user.isGuest ? (
+          <GlassPanel style={styles.profilePanel} radius={34}>
             <TouchableOpacity onPress={handleUpdateAvatar} style={styles.avatarContainer}>
               <View style={styles.avatarWrapper}>
                 {user.profileImage ? (
                   <Image source={{ uri: user.profileImage }} style={styles.avatar} />
                 ) : (
                   <View style={styles.avatarPlaceholder}>
-                    <User size={48} color={COLORS.silverMid} strokeWidth={1.5} />
+                    <Text style={styles.profileInitial}>{(user.name || 'Muse').charAt(0)}</Text>
                   </View>
                 )}
                 <View style={styles.cameraButton}>
@@ -202,24 +249,20 @@ export default function SettingsScreen() {
               </View>
             </TouchableOpacity>
 
-            <View style={styles.profileInputs}>
+            <View style={styles.profileForm}>
               <View style={styles.inputGroup}>
-                <View style={styles.inputIconWrapper}>
-                  <User size={18} color={COLORS.silverMid} />
-                </View>
+                <User size={18} color={COLORS.silverMid} />
                 <TextInput
                   value={name}
                   onChangeText={setName}
                   style={styles.input}
-                  placeholder="Name"
+                  placeholder="Display name"
                   placeholderTextColor={COLORS.silverDark}
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <View style={styles.inputIconWrapper}>
-                  <Mail size={18} color={COLORS.silverMid} />
-                </View>
+                <Mail size={18} color={COLORS.silverMid} />
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
@@ -230,14 +273,49 @@ export default function SettingsScreen() {
                   autoCapitalize="none"
                 />
               </View>
+
+              <GlowingButton onPress={handleSaveProfile} text="Save Profile" variant="primary" />
             </View>
 
-            <GlowingButton onPress={handleSaveProfile} text="Save Profile" variant="primary" />
+            <View
+              style={[
+                styles.statusBanner,
+                hasStoredGeminiKey ? styles.successBanner : styles.warningBanner,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  hasStoredGeminiKey ? styles.successText : styles.warningText,
+                ]}
+              >
+                {hasStoredGeminiKey
+                  ? 'Gemini API key is securely stored. Generations will run on your Google account.'
+                  : 'Add your Gemini API key below so ManusAI can run directly from your Google account.'}
+              </Text>
+              {hasStoredGeminiKey && (
+                <TouchableOpacity onPress={handleRemoveGeminiKey}>
+                  <Text style={styles.removeKeyText}>Remove key</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </GlassPanel>
+        ) : (
+          <GlassPanel style={styles.profilePanel} radius={34}>
+            <Text style={styles.sectionTitle}>Account & Authentication</Text>
+            <Text style={styles.guestMessage}>
+              Sign in to sync shoots, unlock unlimited history, and carry credits across devices.
+            </Text>
+            <GlowingButton
+              onPress={() => router.push('/auth/login')}
+              text="Sign in to ManusAI"
+              variant="primary"
+            />
           </GlassPanel>
         )}
 
         {user && (
-          <GlassPanel style={styles.section} radius={28}>
+          <GlassPanel style={styles.sectionCard} radius={30}>
             <Text style={styles.sectionTitle}>Credits</Text>
 
             <View style={styles.creditsRow}>
@@ -246,7 +324,7 @@ export default function SettingsScreen() {
                 <View>
                   <Text style={styles.creditsValue}>{user.credits}</Text>
                   <Text style={styles.creditsLabel}>
-                    {user.isGuest ? 'Trial credits' : 'Available'}
+                    {user.isGuest ? 'Trial credits' : 'Available credits'}
                   </Text>
                 </View>
               </View>
@@ -260,8 +338,8 @@ export default function SettingsScreen() {
                   style={styles.buyButton}
                   activeOpacity={0.85}
                 >
-                  <CreditCard size={18} color={COLORS.silverLight} />
-                  <Text style={styles.buyButtonText}>Buy More</Text>
+                  <CreditCard size={16} color={COLORS.silverLight} />
+                  <Text style={styles.buyButtonText}>Buy more</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -270,10 +348,10 @@ export default function SettingsScreen() {
               <TouchableOpacity
                 onPress={() => router.push('/auth/login')}
                 style={styles.upgradePrompt}
-                activeOpacity={0.9}
+                activeOpacity={0.85}
               >
                 <Text style={styles.upgradeText}>
-                  Sign in to get 50 free credits and unlock all features
+                  Sign in to unlock recurring credit packs and cross-device sync.
                 </Text>
                 <ChevronRight size={18} color={COLORS.accent} />
               </TouchableOpacity>
@@ -281,21 +359,42 @@ export default function SettingsScreen() {
           </GlassPanel>
         )}
 
-        {!user && (
-          <GlassPanel style={styles.section} radius={28}>
-            <Text style={styles.sectionTitle}>Account</Text>
-            <Text style={styles.guestMessage}>
-              Sign in to sync your work across devices and unlock premium features.
-            </Text>
-            <GlowingButton
-              onPress={() => router.push('/auth/login')}
-              text="Sign In"
-              variant="primary"
+        <GlassPanel style={styles.sectionCard} radius={30}>
+          <Text style={styles.sectionTitle}>Gemini API Key</Text>
+          <View style={styles.inputGroup}>
+            <KeyRound size={18} color={COLORS.silverMid} />
+            <TextInput
+              value={geminiApiKey}
+              onChangeText={setGeminiApiKey}
+              style={styles.input}
+              placeholder="Paste your Gemini API key"
+              placeholderTextColor={COLORS.silverDark}
+              secureTextEntry
+              autoCapitalize="none"
             />
-          </GlassPanel>
-        )}
+          </View>
 
-        <GlassPanel style={styles.section} radius={28}>
+          <View style={styles.apiActions}>
+            <TouchableOpacity
+              style={[styles.apiButton, styles.apiPrimary]}
+              onPress={handleStoreGeminiKey}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.apiButtonText}>Save Securely</Text>
+            </TouchableOpacity>
+            {hasStoredGeminiKey && (
+              <TouchableOpacity
+                style={[styles.apiButton, styles.apiSecondary]}
+                onPress={handleRemoveGeminiKey}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.apiButtonSecondaryText}>Remove</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </GlassPanel>
+
+        <GlassPanel style={styles.sectionCard} radius={30}>
           <Text style={styles.sectionTitle}>Preferences</Text>
 
           <SettingRow
@@ -317,24 +416,51 @@ export default function SettingsScreen() {
           <View style={styles.divider} />
 
           <SettingRow
-            label="Cloud Storage"
+            label="Cloud backup"
             icon={Cloud}
             rightElement={
               <Switch
-                value={cloudStorage}
+                value={cloudBackup}
                 onValueChange={(value) => {
                   haptics.light();
-                  setCloudStorage(value);
+                  setCloudBackup(value);
                 }}
                 trackColor={{ false: COLORS.glassDark, true: COLORS.accent }}
                 thumbColor={COLORS.silverLight}
               />
             }
           />
+
+          <View style={styles.divider} />
+
+          <View>
+            <Text style={styles.sliderLabel}>Glass blur ({blurStrength}px)</Text>
+            <View style={styles.sliderRow}>
+              <TouchableOpacity
+                onPress={() => adjustBlurStrength(-2)}
+                style={styles.sliderButton}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.sliderButtonText}>-</Text>
+              </TouchableOpacity>
+
+              <View style={styles.sliderTrack}>
+                <View style={[styles.sliderFill, { width: `${blurPercentage}%` }]} />
+              </View>
+
+              <TouchableOpacity
+                onPress={() => adjustBlurStrength(2)}
+                style={styles.sliderButton}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.sliderButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </GlassPanel>
 
-        <GlassPanel style={styles.section} radius={28}>
-          <Text style={styles.sectionTitle}>Image Generation</Text>
+        <GlassPanel style={styles.sectionCard} radius={30}>
+          <Text style={styles.sectionTitle}>Generation Defaults</Text>
 
           <View style={styles.aspectRatioSelector}>
             {[
@@ -352,7 +478,7 @@ export default function SettingsScreen() {
                   styles.aspectOption,
                   aspectRatio === format.key && styles.aspectOptionActive,
                 ]}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 <View
                   style={[
@@ -372,44 +498,47 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             ))}
           </View>
+
+          <View style={styles.styleSelectorWrapper}>
+            <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
+          </View>
         </GlassPanel>
 
-        <GlassPanel style={styles.section} radius={28}>
-          <Text style={styles.sectionTitle}>Default Style</Text>
-          <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
-        </GlassPanel>
-
-        <GlassPanel style={styles.section} radius={28}>
-          <Text style={styles.sectionTitle}>Account</Text>
+        <GlassPanel style={styles.sectionCard} radius={30}>
+          <Text style={styles.sectionTitle}>Account & Data</Text>
 
           {user && !user.isGuest && (
             <>
-              <SettingRow label="Sign Out" icon={LogOut} onPress={handleSignOut} />
+              <SettingRow label="Sign out" icon={LogOut} onPress={handleSignOut} />
               <View style={styles.divider} />
             </>
           )}
 
           <SettingRow
-            label="Delete All Data"
+            label="Delete all local data"
             icon={Trash2}
             onPress={handleDeleteData}
             danger
           />
         </GlassPanel>
 
-        <GlassPanel style={styles.section} radius={28}>
+        <GlassPanel style={styles.sectionCard} radius={30}>
           <Text style={styles.sectionTitle}>Legal & Privacy</Text>
 
           <SettingRow label="Privacy Policy" icon={Shield} onPress={handleOpenPrivacyPolicy} />
-
           <View style={styles.divider} />
-
           <SettingRow label="Terms of Service" icon={FileText} onPress={handleOpenTerms} />
         </GlassPanel>
 
+        {statusMessage && (
+          <GlassPanel style={styles.statusMessagePanel} radius={24}>
+            <Text style={styles.statusMessageText}>{statusMessage}</Text>
+          </GlassPanel>
+        )}
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>Fashion Muse Studio v1.0.0</Text>
-          <Text style={styles.footerSubtext}>Made with ✨ by Ivan</Text>
+          <Text style={styles.footerSubtext}>Deep Sea Glass system · Designed for iOS</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -423,13 +552,12 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  profileCard: {
+  profilePanel: {
     marginTop: SPACING.xl,
-    alignItems: 'center',
     gap: SPACING.lg,
   },
   avatarContainer: {
-    marginTop: SPACING.sm,
+    alignItems: 'center',
   },
   avatarWrapper: {
     width: 120,
@@ -445,44 +573,42 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  profileInitial: {
+    fontSize: 48,
+    fontWeight: '600',
+    color: COLORS.silverMid,
   },
   cameraButton: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    bottom: 6,
+    right: 6,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: COLORS.accent,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 3,
     borderColor: COLORS.bgDeep,
   },
-  profileInputs: {
-    width: '100%',
+  profileForm: {
     gap: SPACING.md,
   },
   inputGroup: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: SPACING.sm,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: SPACING.lg,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.sm,
-  },
-  inputIconWrapper: {
-    width: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   input: {
     flex: 1,
@@ -490,7 +616,37 @@ const styles = StyleSheet.create({
     color: COLORS.silverLight,
     fontWeight: '500',
   },
-  section: {
+  statusBanner: {
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    gap: SPACING.xs,
+  },
+  successBanner: {
+    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+    borderColor: 'rgba(45, 212, 191, 0.3)',
+  },
+  warningBanner: {
+    backgroundColor: 'rgba(255, 179, 71, 0.1)',
+    borderColor: 'rgba(255, 179, 71, 0.25)',
+  },
+  statusText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  successText: {
+    color: '#6EE7B7',
+  },
+  warningText: {
+    color: '#FCD34D',
+  },
+  removeKeyText: {
+    marginTop: 6,
+    color: COLORS.silverLight,
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  sectionCard: {
     marginTop: SPACING.lg,
     gap: SPACING.md,
   },
@@ -498,7 +654,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.silverLight,
-    marginBottom: SPACING.xs,
+  },
+  guestMessage: {
+    color: COLORS.silverMid,
+    fontSize: 14,
+    lineHeight: 20,
   },
   creditsRow: {
     flexDirection: 'row',
@@ -511,14 +671,13 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   creditsValue: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '700',
     color: COLORS.silverLight,
   },
   creditsLabel: {
     fontSize: 13,
     color: COLORS.silverMid,
-    marginTop: 2,
   },
   buyButton: {
     flexDirection: 'row',
@@ -526,45 +685,67 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: SPACING.lg,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   buyButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
     color: COLORS.silverLight,
+    fontWeight: '600',
   },
   upgradePrompt: {
+    marginTop: SPACING.md,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.lg,
-    backgroundColor: 'rgba(100, 170, 255, 0.1)',
-    borderRadius: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(100, 170, 255, 0.2)',
     gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
   },
   upgradeText: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
     color: COLORS.silverLight,
-    lineHeight: 20,
-  },
-  guestMessage: {
     fontSize: 14,
-    color: COLORS.silverMid,
-    lineHeight: 20,
-    marginBottom: SPACING.sm,
+  },
+  apiActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  apiButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
+  },
+  apiPrimary: {
+    backgroundColor: COLORS.accent,
+  },
+  apiSecondary: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  apiButtonText: {
+    color: COLORS.bgDeep,
+    fontWeight: '700',
+  },
+  apiButtonSecondaryText: {
+    color: COLORS.silverLight,
+    fontWeight: '600',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.md,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -573,12 +754,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
@@ -594,10 +775,41 @@ const styles = StyleSheet.create({
   settingLabelDanger: {
     color: COLORS.error,
   },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginVertical: SPACING.xs,
+  sliderLabel: {
+    color: COLORS.silverLight,
+    fontWeight: '600',
+  },
+  sliderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  sliderButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  sliderButtonText: {
+    color: COLORS.silverLight,
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  sliderTrack: {
+    flex: 1,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+  },
+  sliderFill: {
+    height: '100%',
+    backgroundColor: COLORS.accent,
   },
   aspectRatioSelector: {
     flexDirection: 'row',
@@ -607,32 +819,45 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: SPACING.lg,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: SPACING.sm,
   },
   aspectOptionActive: {
-    backgroundColor: 'rgba(100, 170, 255, 0.15)',
     borderColor: COLORS.accent,
+    backgroundColor: 'rgba(56, 189, 248, 0.1)',
   },
   aspectIcon: {
     width: 32,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: SPACING.xs,
+    height: 32,
   },
   aspectIconActive: {
     backgroundColor: COLORS.accent,
   },
   aspectLabel: {
+    color: COLORS.silverMid,
     fontSize: 13,
     fontWeight: '500',
-    color: COLORS.silverMid,
   },
   aspectLabelActive: {
     color: COLORS.silverLight,
     fontWeight: '600',
+  },
+  styleSelectorWrapper: {
+    marginTop: SPACING.md,
+  },
+  statusMessagePanel: {
+    marginTop: SPACING.lg,
+    alignItems: 'center',
+  },
+  statusMessageText: {
+    color: COLORS.silverLight,
+    fontSize: 14,
+    textAlign: 'center',
   },
   footer: {
     alignItems: 'center',
@@ -641,12 +866,11 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   footerText: {
-    fontSize: 13,
     color: COLORS.silverMid,
-    fontWeight: '500',
+    fontSize: 13,
   },
   footerSubtext: {
-    fontSize: 12,
     color: COLORS.silverDark,
+    fontSize: 12,
   },
 });

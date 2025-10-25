@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   Modal,
   ScrollView,
@@ -16,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  LayoutGrid,
   Share2,
   Trash2,
   X,
@@ -25,17 +27,40 @@ import GlassyTitle from '@/components/GlassyTitle';
 import { useGeneration, type HistoryItem } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { COLORS, GRADIENTS, SPACING, glassStyles } from '@/constants/glassStyles';
+import { COLORS, GRADIENTS, SPACING, RADIUS, glassStyles } from '@/constants/glassStyles';
 import { downloadImage, shareImage } from '@/utils/download';
 
-type HistoryGroup = {
-  date: string;
-  items: HistoryItem[];
-};
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type PreviewState = {
   item: HistoryItem;
   index: number;
+};
+
+const parseHistoryDate = (dateStr: string, timeStr: string) => {
+  const parsed = new Date(`${dateStr} ${timeStr}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatHistoryTimestamp = (item: HistoryItem) => {
+  const parsed = parseHistoryDate(item.date, item.time);
+  if (!parsed) {
+    return `${item.date} · ${item.time}`;
+  }
+
+  return parsed.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+const getItemImages = (item: HistoryItem) => {
+  if (item.results.length > 0) {
+    return item.results;
+  }
+  return item.thumbnail ? [item.thumbnail] : [];
 };
 
 export default function HistoryScreen() {
@@ -85,52 +110,32 @@ export default function HistoryScreen() {
     };
   }, [user, loadHistory]);
 
-  const groupedHistory = useMemo<HistoryGroup[]>(() => {
-    const groups = new Map<string, HistoryItem[]>();
-
-    history.forEach((item) => {
-      const existing = groups.get(item.date) ?? [];
-      existing.push(item);
-      groups.set(item.date, existing);
+  const orderedHistory = useMemo(() => {
+    const sorted = [...history];
+    return sorted.sort((a, b) => {
+      const dateA = parseHistoryDate(a.date, a.time)?.getTime() ?? 0;
+      const dateB = parseHistoryDate(b.date, b.time)?.getTime() ?? 0;
+      return dateB - dateA;
     });
-
-    return Array.from(groups.entries()).map(([date, items]) => ({
-      date,
-      items,
-    }));
   }, [history]);
 
-  const getImages = (item: HistoryItem) => {
-    if (item.results.length > 0) {
-      return item.results;
+  const historySummary = useMemo(() => {
+    if (orderedHistory.length === 0) {
+      return {
+        shoots: 0,
+        variations: 0,
+        lastRun: 'No shoots yet',
+      };
     }
-    return item.thumbnail ? [item.thumbnail] : [];
-  };
 
-  const formatGroupLabel = (isoDate: string) => {
-    const parsed = new Date(`${isoDate}T00:00:00`);
-    if (Number.isNaN(parsed.getTime())) {
-      return isoDate;
-    }
-    return parsed.toLocaleDateString(undefined, {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+    const variations = orderedHistory.reduce((sum, item) => sum + getItemImages(item).length, 0);
 
-  const formatTimestamp = (item: HistoryItem) => {
-    const parsed = new Date(`${item.date} ${item.time}`);
-    if (Number.isNaN(parsed.getTime())) {
-      return `${item.date} · ${item.time}`;
-    }
-    return parsed.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  };
+    return {
+      shoots: orderedHistory.length,
+      variations,
+      lastRun: formatHistoryTimestamp(orderedHistory[0]),
+    };
+  }, [orderedHistory]);
 
   const handleDelete = async (historyId: string) => {
     if (!user) {
@@ -175,12 +180,12 @@ export default function HistoryScreen() {
     }
   };
 
-  const previewImage = preview ? getImages(preview.item)[preview.index] : undefined;
-  const previewCount = preview ? getImages(preview.item).length : 0;
+  const previewImage = preview ? getItemImages(preview.item)[preview.index] : undefined;
+  const previewCount = preview ? getItemImages(preview.item).length : 0;
 
   const showNextPreview = () => {
     if (!preview) return;
-    const images = getImages(preview.item);
+    const images = getItemImages(preview.item);
     if (images.length <= 1) return;
     const nextIndex = (preview.index + 1) % images.length;
     setPreview({ item: preview.item, index: nextIndex });
@@ -188,7 +193,7 @@ export default function HistoryScreen() {
 
   const showPreviousPreview = () => {
     if (!preview) return;
-    const images = getImages(preview.item);
+    const images = getItemImages(preview.item);
     if (images.length <= 1) return;
     const nextIndex = (preview.index - 1 + images.length) % images.length;
     setPreview({ item: preview.item, index: nextIndex });
@@ -206,110 +211,136 @@ export default function HistoryScreen() {
         <GlassyTitle>History</GlassyTitle>
 
         {!user ? (
-          <GlassPanel style={styles.messagePanel} radius={28}>
-            <Text style={styles.messageTitle}>No session active</Text>
+          <GlassPanel style={styles.messagePanel} radius={30}>
+            <Text style={styles.messageTitle}>Sign in to sync your gallery</Text>
             <Text style={styles.messageBody}>
-              Sign in to sync your fashion shoots across devices.
+              Create an account to store every shoot, download high-res images, and keep all
+              your edits synced across devices.
             </Text>
           </GlassPanel>
         ) : loading ? (
-          <GlassPanel style={styles.loaderPanel} radius={28}>
+          <GlassPanel style={styles.loaderPanel} radius={30}>
             <ActivityIndicator size="large" color={COLORS.silverLight} />
             <Text style={styles.loaderText}>Fetching your shoots…</Text>
           </GlassPanel>
         ) : error ? (
-          <GlassPanel style={styles.messagePanel} radius={28}>
+          <GlassPanel style={styles.messagePanel} radius={30}>
             <Text style={styles.messageTitle}>Something went wrong</Text>
             <Text style={styles.messageBody}>{error}</Text>
           </GlassPanel>
-        ) : history.length === 0 ? (
-          <GlassPanel style={styles.messagePanel} radius={28}>
+        ) : orderedHistory.length === 0 ? (
+          <GlassPanel style={styles.messagePanel} radius={30}>
             <Text style={styles.messageTitle}>No shoots yet</Text>
             <Text style={styles.messageBody}>
-              Generate a photoshoot to start building your gallery.
+              Generate your first ManusAI shoot from the Generate tab to populate this gallery.
             </Text>
           </GlassPanel>
         ) : (
-          <View style={styles.groups}>
-            {groupedHistory.map((group) => (
-              <View key={group.date} style={styles.groupContainer}>
-                <Text style={styles.groupLabel}>{formatGroupLabel(group.date)}</Text>
+          <>
+            <GlassPanel style={styles.summaryPanel} radius={30}>
+              <View style={styles.summaryRow}>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Shoots</Text>
+                  <Text style={styles.summaryValue}>{historySummary.shoots}</Text>
+                </View>
+                <View style={styles.summaryDivider} />
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Variations</Text>
+                  <Text style={styles.summaryValue}>{historySummary.variations}</Text>
+                </View>
+                <View style={styles.summaryDivider} />
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Last shoot</Text>
+                  <Text style={styles.summaryValueSmall}>{historySummary.lastRun}</Text>
+                </View>
+              </View>
+              <Text style={styles.summaryHint}>Tap any tile to open a full-screen preview.</Text>
+            </GlassPanel>
 
-                {group.items.map((item) => {
-                  const images = getImages(item);
-                  if (images.length === 0) {
-                    return null;
-                  }
-                  const primaryImage = images[0];
+            <View style={styles.historyList}>
+              {orderedHistory.map((item) => {
+                const images = getItemImages(item);
+                if (images.length === 0) {
+                  return null;
+                }
+                const primaryImage = images[0];
 
-                  return (
-                    <GlassPanel key={item.id} style={styles.historyCard} radius={28}>
-                      <View style={styles.cardHeader}>
-                        <View>
-                          <Text style={styles.cardDate}>{formatTimestamp(item)}</Text>
-                          <Text style={styles.cardCount}>{item.count} variations</Text>
-                        </View>
+                return (
+                  <GlassPanel key={item.id} style={styles.historyCard} radius={34}>
+                    <View style={styles.cardHeader}>
+                      <View>
+                        <Text style={styles.cardTitle}>{formatHistoryTimestamp(item)}</Text>
+                        <Text style={styles.cardMeta}>{item.count} generated variations</Text>
+                      </View>
 
+                      <TouchableOpacity
+                        onPress={() => handleDelete(item.id)}
+                        style={styles.deleteButton}
+                        activeOpacity={0.85}
+                      >
+                        <Trash2 size={18} color={COLORS.error} />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.imageGrid}>
+                      {images.map((uri, index) => (
                         <TouchableOpacity
-                          onPress={() => handleDelete(item.id)}
-                          style={styles.iconButtonDanger}
+                          key={`${item.id}-${index}`}
+                          style={styles.imageTile}
+                          onPress={() => setPreview({ item, index })}
                           activeOpacity={0.85}
                         >
-                          <Trash2 size={18} color={COLORS.error} />
+                          <Image source={{ uri }} style={styles.image} resizeMode="cover" />
+                          <View style={styles.imageOverlay}>
+                            <LayoutGrid size={16} color={COLORS.silverLight} />
+                            <Text style={styles.overlayText}>Preview</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <View style={styles.cardFooter}>
+                      <View style={styles.footerMeta}>
+                        <Calendar size={16} color={COLORS.silverMid} />
+                        <Text style={styles.footerText}>{formatHistoryTimestamp(item)}</Text>
+                      </View>
+
+                      <View style={styles.footerActions}>
+                        <TouchableOpacity
+                          onPress={() => setPreview({ item, index: 0 })}
+                          style={styles.actionPill}
+                          activeOpacity={0.85}
+                        >
+                          <LayoutGrid size={16} color={COLORS.silverLight} />
+                          <Text style={styles.actionText}>View set</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={() => handleDownload(primaryImage)}
+                          style={styles.actionPill}
+                          activeOpacity={0.85}
+                          disabled={!primaryImage}
+                        >
+                          <Download size={16} color={primaryImage ? COLORS.silverLight : COLORS.silverDark} />
+                          <Text style={[styles.actionText, !primaryImage && styles.actionTextDisabled]}>Save</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={() => handleShare(primaryImage)}
+                          style={styles.actionPill}
+                          activeOpacity={0.85}
+                          disabled={!primaryImage}
+                        >
+                          <Share2 size={16} color={primaryImage ? COLORS.silverLight : COLORS.silverDark} />
+                          <Text style={[styles.actionText, !primaryImage && styles.actionTextDisabled]}>Share</Text>
                         </TouchableOpacity>
                       </View>
-
-                      <View style={styles.imageGrid}>
-                        {images.map((uri, index) => (
-                          <TouchableOpacity
-                            key={`${item.id}-${index}`}
-                            style={styles.imageWrapper}
-                            onPress={() => setPreview({ item, index })}
-                            activeOpacity={0.9}
-                          >
-                            <Image source={{ uri }} style={styles.image} resizeMode="cover" />
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-
-                      <View style={styles.cardFooter}>
-                        <View style={styles.footerMeta}>
-                          <Calendar size={16} color={COLORS.silverMid} />
-                          <Text style={styles.footerText}>{formatTimestamp(item)}</Text>
-                        </View>
-
-                        <View style={styles.footerActions}>
-                          <TouchableOpacity
-                            onPress={() => handleDownload(primaryImage)}
-                            style={styles.iconButton}
-                            activeOpacity={0.85}
-                            disabled={!primaryImage}
-                          >
-                            <Download
-                              size={18}
-                              color={primaryImage ? COLORS.silverLight : COLORS.silverDark}
-                            />
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            onPress={() => handleShare(primaryImage)}
-                            style={styles.iconButton}
-                            activeOpacity={0.85}
-                            disabled={!primaryImage}
-                          >
-                            <Share2
-                              size={18}
-                              color={primaryImage ? COLORS.silverLight : COLORS.silverDark}
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </GlassPanel>
-                  );
-                })}
-              </View>
-            ))}
-          </View>
+                    </View>
+                  </GlassPanel>
+                );
+              })}
+            </View>
+          </>
         )}
       </ScrollView>
 
@@ -320,20 +351,39 @@ export default function HistoryScreen() {
         onRequestClose={() => setPreview(null)}
       >
         <View style={styles.modalBackdrop}>
-          <GlassPanel style={styles.modalPanel} radius={32} noPadding>
+          <GlassPanel style={styles.modalPanel} radius={36} noPadding>
             <View style={styles.modalImageContainer}>
               {previewImage ? (
                 <Image source={{ uri: previewImage }} style={styles.modalImage} resizeMode="contain" />
               ) : null}
+
+              {previewCount > 1 && (
+                <>
+                  <TouchableOpacity
+                    onPress={showPreviousPreview}
+                    style={[styles.carouselButton, styles.carouselLeft]}
+                    activeOpacity={0.85}
+                  >
+                    <ChevronLeft size={22} color={COLORS.silverLight} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={showNextPreview}
+                    style={[styles.carouselButton, styles.carouselRight]}
+                    activeOpacity={0.85}
+                  >
+                    <ChevronRight size={22} color={COLORS.silverLight} />
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
 
             {preview && (
               <View style={styles.modalFooter}>
                 <View>
-                  <Text style={styles.modalTitle}>{formatTimestamp(preview.item)}</Text>
+                  <Text style={styles.modalTitle}>{formatHistoryTimestamp(preview.item)}</Text>
                   <Text style={styles.modalSubtitle}>
                     {previewCount > 1
-                      ? `Image ${preview.index + 1} of ${previewCount}`
+                      ? `Variation ${preview.index + 1} of ${previewCount}`
                       : 'Single variation'}
                   </Text>
                 </View>
@@ -344,14 +394,14 @@ export default function HistoryScreen() {
                     style={styles.modalIconButton}
                     activeOpacity={0.85}
                   >
-                    <Download size={20} color={COLORS.silverLight} />
+                    <Download size={18} color={COLORS.silverLight} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleShare(previewImage)}
                     style={styles.modalIconButton}
                     activeOpacity={0.85}
                   >
-                    <Share2 size={20} color={COLORS.silverLight} />
+                    <Share2 size={18} color={COLORS.silverLight} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -362,27 +412,8 @@ export default function HistoryScreen() {
               style={styles.modalClose}
               activeOpacity={0.85}
             >
-              <X size={20} color={COLORS.silverLight} />
+              <X size={16} color={COLORS.silverLight} />
             </TouchableOpacity>
-
-            {previewCount > 1 && (
-              <>
-                <TouchableOpacity
-                  onPress={showPreviousPreview}
-                  style={[styles.carouselButton, styles.carouselLeft]}
-                  activeOpacity={0.85}
-                >
-                  <ChevronLeft size={24} color={COLORS.silverLight} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={showNextPreview}
-                  style={[styles.carouselButton, styles.carouselRight]}
-                  activeOpacity={0.85}
-                >
-                  <ChevronRight size={24} color={COLORS.silverLight} />
-                </TouchableOpacity>
-              </>
-            )}
           </GlassPanel>
         </View>
       </Modal>
@@ -406,6 +437,7 @@ const styles = StyleSheet.create({
     color: COLORS.silverLight,
     fontSize: 18,
     fontWeight: '700',
+    textAlign: 'center',
   },
   messageBody: {
     color: COLORS.silverMid,
@@ -422,53 +454,89 @@ const styles = StyleSheet.create({
     color: COLORS.silverMid,
     fontSize: 14,
   },
-  groups: {
+  summaryPanel: {
+    marginTop: SPACING.xl,
+    gap: SPACING.md,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: SPACING.sm,
+  },
+  summaryLabel: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  summaryValue: {
+    color: COLORS.silverLight,
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  summaryValueSmall: {
+    color: COLORS.silverLight,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  summaryDivider: {
+    width: 1,
+    height: 54,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  summaryHint: {
+    color: COLORS.silverMid,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  historyList: {
     marginTop: SPACING.xl,
     gap: SPACING.lg,
   },
-  groupContainer: {
-    gap: SPACING.md,
-  },
-  groupLabel: {
-    color: COLORS.silverMid,
-    fontSize: 12,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
   historyCard: {
-    gap: SPACING.md,
+    gap: SPACING.lg,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  cardDate: {
+  cardTitle: {
     color: COLORS.silverLight,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
   },
-  cardCount: {
+  cardMeta: {
     color: COLORS.silverMid,
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 4,
   },
-  iconButtonDanger: {
-    padding: SPACING.xs,
-    borderRadius: SPACING.sm,
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+  deleteButton: {
+    padding: SPACING.sm,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: SPACING.md,
+    backgroundColor: 'rgba(248, 113, 113, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.25)',
+    borderColor: 'rgba(248, 113, 113, 0.3)',
   },
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
   },
-  imageWrapper: {
-    flexBasis: '47%',
+  imageTile: {
+    width: (SCREEN_WIDTH - 80) / 2, // Better calculation for consistent sizing
     aspectRatio: 3 / 4,
-    borderRadius: SPACING.md,
+    borderRadius: SPACING.lg,
     overflow: 'hidden',
     backgroundColor: COLORS.glassDark,
   },
@@ -476,10 +544,28 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  cardFooter: {
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: RADIUS.full,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  },
+  overlayText: {
+    color: COLORS.silverLight,
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  cardFooter: {
+    gap: SPACING.md,
   },
   footerMeta: {
     flexDirection: 'row',
@@ -492,12 +578,31 @@ const styles = StyleSheet.create({
   },
   footerActions: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: SPACING.sm,
+    flexWrap: 'wrap',
   },
-  iconButton: {
-    padding: SPACING.xs,
-    borderRadius: SPACING.md,
+  actionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    minHeight: 44,
+    borderRadius: RADIUS.full,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  actionText: {
+    color: COLORS.silverLight,
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  actionTextDisabled: {
+    color: COLORS.silverDark,
   },
   modalBackdrop: {
     flex: 1,
@@ -515,7 +620,9 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 3 / 4,
     backgroundColor: COLORS.bgDeep,
-    alignItems: 'center',
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    overflow: 'hidden',
     justifyContent: 'center',
   },
   modalImage: {
@@ -535,11 +642,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     color: COLORS.silverLight,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   modalSubtitle: {
     color: COLORS.silverMid,
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 4,
   },
   modalActions: {
@@ -547,24 +654,36 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   modalIconButton: {
-    padding: SPACING.sm,
-    borderRadius: SPACING.lg,
+    padding: SPACING.md,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RADIUS.full,
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   modalClose: {
     position: 'absolute',
     top: SPACING.md,
     right: SPACING.md,
-    padding: SPACING.sm,
-    borderRadius: SPACING.lg,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    padding: SPACING.md,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   carouselButton: {
     position: 'absolute',
     top: '45%',
     padding: SPACING.md,
-    borderRadius: 999,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
   },
   carouselLeft: {
     left: SPACING.md,

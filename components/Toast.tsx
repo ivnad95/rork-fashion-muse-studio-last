@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 
@@ -40,7 +41,6 @@ export default function Toast({
     if (visible) {
       // Haptic feedback
       if (Platform.OS !== 'web') {
-        const Haptics = require('expo-haptics');
         Haptics.notificationAsync(
           type === 'success'
             ? Haptics.NotificationFeedbackType.Success

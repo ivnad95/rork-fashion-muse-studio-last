@@ -14,14 +14,14 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Icons matching ManusAI reference
 const EyeIcon = () => (
-  <Svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
     <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
     <Path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
   </Svg>
 );
 
 const DownloadIcon = () => (
-  <Svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+  <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
     <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <Path d="M7 10l5 5 5-5" />
     <Path d="M12 15V3" />
@@ -205,18 +205,24 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   overlayButton: {
-    padding: 8,
+    padding: 12,
+    minWidth: 52,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
   },
   loadingCard: {
     flex: 1,

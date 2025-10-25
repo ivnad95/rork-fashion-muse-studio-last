@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
-import { glassStyles, COLORS } from '@/constants/glassStyles';
+import { COLORS } from '@/constants/glassStyles';
 
 const iconColor = (focused: boolean) => (focused ? COLORS.silverLight : COLORS.silverMid);
 
@@ -53,42 +53,44 @@ const iconForRoute = (name: string, focused: boolean) => {
 };
 
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Platform.OS === 'ios' ? Math.max(insets.bottom, 8) : 8;
+
   return (
-    <View style={styles.container}>
-      <View style={[glassStyles.glass3DSurface, styles.tabBar]}>
-        <BlurView intensity={30} style={StyleSheet.absoluteFill} />
-        <View style={styles.inner}>
-          {state.routes.map((route, index) => {
-            const { options } = descriptors[route.key];
-            const isFocused = state.index === index;
+    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
+      <View style={styles.inner}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
 
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
 
-            return (
-              <TouchableOpacity
-                key={route.key}
-                accessibilityRole="button"
-                accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={options.tabBarAccessibilityLabel}
-                onPress={onPress}
-                style={[glassStyles.glass3DButton, styles.navButton, isFocused && glassStyles.activeButton]}
-                activeOpacity={0.75}
-              >
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              onPress={onPress}
+              style={styles.navButton}
+              activeOpacity={0.75}
+            >
+              <View style={[styles.iconWrapper, isFocused && styles.iconWrapperActive]}>
                 {iconForRoute(route.name, isFocused)}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -97,27 +99,38 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-  },
-  tabBar: {
-    height: 80,
-    borderRadius: 40,
-    overflow: 'hidden',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    height: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
   },
   navButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  iconWrapper: {
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  iconWrapperActive: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });

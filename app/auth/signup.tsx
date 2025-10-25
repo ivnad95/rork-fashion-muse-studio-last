@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
   ScrollView,
   Platform,
   Alert,
   KeyboardAvoidingView,
+  View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { User, Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react-native';
-import Colors from '@/constants/colors';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import GlowingButton from '@/components/GlowingButton';
+import GlassPanel from '@/components/GlassPanel';
 import GlassyTitle from '@/components/GlassyTitle';
+import { COLORS, GRADIENTS, SPACING } from '@/constants/glassStyles';
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { signUp, isLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -58,6 +58,7 @@ export default function SignUpScreen() {
       await signUp(name, email, password);
       // Navigation is handled automatically by auth state change
     } catch (error: any) {
+      console.error('Sign up error:', error);
       const msg = error.message || 'Failed to create account';
       if (Platform.OS === 'web') {
         alert(msg);
@@ -75,105 +76,66 @@ export default function SignUpScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <LinearGradient
-        colors={Colors.dark.backgroundGradient as unknown as [string, string, string, string]}
-        locations={[0, 0.35, 0.7, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <LinearGradient colors={GRADIENTS.background} style={StyleSheet.absoluteFill} />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <View style={styles.header}>
-          <View style={styles.iconContainer}>
-            <LinearGradient
-              colors={['rgba(200, 220, 255, 0.3)', 'rgba(150, 180, 230, 0.2)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.iconGradient}
-            >
-              <View style={styles.iconInner}>
-                <Sparkles size={36} color="rgba(200, 220, 255, 0.95)" strokeWidth={2} />
-              </View>
-            </LinearGradient>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <GlassyTitle>Create Account</GlassyTitle>
+            <Text style={styles.subtitle}>Start your creative journey</Text>
           </View>
-          <GlassyTitle>
-            <Text>Create Account</Text>
-          </GlassyTitle>
-          <Text style={styles.subtitle}>Start your creative journey</Text>
-        </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.inputGradient}
-            >
-              <View style={styles.inputInner}>
-                <User size={20} color="rgba(200, 220, 255, 0.7)" style={styles.inputIcon} />
+          <View style={styles.form}>
+            <GlassPanel style={styles.inputPanel} radius={20}>
+              <View style={styles.inputRow}>
+                <User size={20} color={COLORS.silverMid} style={styles.inputIcon} />
                 <TextInput
                   value={name}
                   onChangeText={setName}
                   style={styles.input}
                   placeholder="Full Name"
-                  placeholderTextColor="rgba(200, 220, 255, 0.4)"
+                  placeholderTextColor={COLORS.silverDark}
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
               </View>
-            </LinearGradient>
-          </View>
+            </GlassPanel>
 
-          <View style={styles.inputContainer}>
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.inputGradient}
-            >
-              <View style={styles.inputInner}>
-                <Mail size={20} color="rgba(200, 220, 255, 0.7)" style={styles.inputIcon} />
+            <GlassPanel style={styles.inputPanel} radius={20}>
+              <View style={styles.inputRow}>
+                <Mail size={20} color={COLORS.silverMid} style={styles.inputIcon} />
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
                   style={styles.input}
                   placeholder="Email"
-                  placeholderTextColor="rgba(200, 220, 255, 0.4)"
+                  placeholderTextColor={COLORS.silverDark}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
               </View>
-            </LinearGradient>
-          </View>
+            </GlassPanel>
 
-          <View style={styles.inputContainer}>
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.inputGradient}
-            >
-              <View style={styles.inputInner}>
-                <Lock size={20} color="rgba(200, 220, 255, 0.7)" style={styles.inputIcon} />
+            <GlassPanel style={styles.inputPanel} radius={20}>
+              <View style={styles.inputRow}>
+                <Lock size={20} color={COLORS.silverMid} style={styles.inputIcon} />
                 <TextInput
                   value={password}
                   onChangeText={setPassword}
                   style={styles.input}
                   placeholder="Password (min 6 characters)"
-                  placeholderTextColor="rgba(200, 220, 255, 0.4)"
+                  placeholderTextColor={COLORS.silverDark}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -183,167 +145,118 @@ export default function SignUpScreen() {
                   style={styles.eyeButton}
                 >
                   {showPassword ? (
-                    <EyeOff size={20} color="rgba(200, 220, 255, 0.7)" />
+                    <EyeOff size={20} color={COLORS.silverMid} />
                   ) : (
-                    <Eye size={20} color="rgba(200, 220, 255, 0.7)" />
+                    <Eye size={20} color={COLORS.silverMid} />
                   )}
                 </TouchableOpacity>
               </View>
-            </LinearGradient>
+            </GlassPanel>
+
+            <GlowingButton
+              onPress={handleSignUp}
+              disabled={isLoading}
+              text={isLoading ? 'Creating Account...' : 'Sign Up'}
+              variant="primary"
+              style={styles.signUpButton}
+            />
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity onPress={handleLoginPress} style={styles.loginButton}>
+              <Text style={styles.loginButtonText}>
+                Already have an account? <Text style={styles.loginButtonTextBold}>Sign In</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <GlowingButton
-            onPress={handleSignUp}
-            disabled={isLoading}
-            text={isLoading ? 'Creating Account...' : 'Sign Up'}
-            variant="primary"
-            style={styles.signUpButton}
-          />
-
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity onPress={handleLoginPress} style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>
-              Already have an account? <Text style={styles.loginButtonTextBold}>Sign In</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDeep,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xxxl,
+    paddingBottom: SPACING.xxxl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  iconGradient: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    padding: 3,
-    shadowColor: 'rgba(200, 220, 255, 0.5)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.7,
-    shadowRadius: 32,
-    elevation: 20,
-    borderWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.45)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.38)',
-    borderRightColor: 'rgba(255, 255, 255, 0.22)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  iconInner: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 20, 30, 0.6)',
-    borderRadius: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.12)',
-    borderRightColor: 'rgba(255, 255, 255, 0.06)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    marginBottom: SPACING.xxxl,
   },
   subtitle: {
     fontSize: 16,
-    color: 'rgba(200, 220, 255, 0.7)',
+    color: COLORS.silverMid,
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: SPACING.sm,
   },
   form: {
-    gap: 20,
+    gap: SPACING.lg,
   },
-  inputContainer: {
-    minHeight: 60,
+  inputPanel: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
   },
-  inputGradient: {
-    borderRadius: 20,
-    padding: 2.5,
-    shadowColor: 'rgba(200, 220, 255, 0.3)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
-    borderWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.25)',
-    borderRightColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  inputInner: {
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(12, 18, 28, 0.6)',
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.08)',
-    borderRightColor: 'rgba(255, 255, 255, 0.04)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.02)',
   },
   inputIcon: {
-    marginRight: 14,
+    marginRight: SPACING.md,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: Colors.dark.text,
+    color: COLORS.silverLight,
     fontWeight: '500',
   },
   eyeButton: {
-    padding: 4,
+    padding: SPACING.xs,
   },
   signUpButton: {
-    marginTop: 12,
+    marginTop: SPACING.md,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 12,
+    marginVertical: SPACING.md,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(200, 220, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   dividerText: {
-    marginHorizontal: 16,
+    marginHorizontal: SPACING.lg,
     fontSize: 14,
-    color: 'rgba(200, 220, 255, 0.5)',
+    color: COLORS.silverDark,
     fontWeight: '500',
   },
   loginButton: {
-    padding: 16,
+    padding: SPACING.lg,
     alignItems: 'center',
   },
   loginButtonText: {
     fontSize: 15,
-    color: 'rgba(200, 220, 255, 0.7)',
+    color: COLORS.silverMid,
     fontWeight: '500',
   },
   loginButtonTextBold: {
     fontWeight: '700',
-    color: 'rgba(200, 220, 255, 0.95)',
+    color: COLORS.silverLight,
   },
 });
