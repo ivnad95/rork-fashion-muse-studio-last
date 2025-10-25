@@ -1,4 +1,4 @@
-import React from 'react';
+yesimport React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -33,7 +33,7 @@ const HistoryIcon = ({ focused }: { focused: boolean }) => (
 const SettingsIcon = ({ focused }: { focused: boolean }) => (
   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={iconColor(focused)} strokeWidth={2}>
     <Circle cx={12} cy={12} r={3} />
-    <Path d="M19.4 15a1.49 1.49 0 0 0 .6-2l-1-3.4a1 1 0 0 0-1-1.2h-3.2a1 1 0 0 0-1-.6l-3.4-1a1.49 1.49 0 0 0-2 .6l-1 3.4a1 1 0 0 0-.6 1.2v3.2a1 1 0 0 0 .6 1l1 3.4a1.49 1.49 0 0 0 2 .6h3.2a1 1 0 0 0 1 .6l3.4 1a1.49 1.49 0 0 0 2-.6l1-3.4a1 1 0 0 0 .6-1.2z" />
+    <Path d="M12 1v6m0 6v10M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h10M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" />
   </Svg>
 );
 

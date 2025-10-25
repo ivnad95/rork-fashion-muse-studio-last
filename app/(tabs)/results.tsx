@@ -1,14 +1,44 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Eye, Download, X } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
 import { downloadImage } from '@/utils/download';
 import { COLORS, glassStyles } from '@/constants/glassStyles';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Icons matching ManusAI reference
+const EyeIcon = () => (
+  <Svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+    <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <Path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+  </Svg>
+);
+
+const DownloadIcon = () => (
+  <Svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+    <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <Path d="M7 10l5 5 5-5" />
+    <Path d="M12 15V3" />
+  </Svg>
+);
+
+const CheckCircleIcon = () => (
+  <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2">
+    <Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <Path d="M22 4L12 14.01l-3-3" />
+  </Svg>
+);
+
+/**
+ * ResultsScreen - Display generation results in a grid
+ * Matches ManusAI reference design exactly
+ */
 
 export default function ResultsScreen() {
   const { showToast } = useToast();
@@ -63,11 +93,17 @@ export default function ResultsScreen() {
                 <View style={styles.imageWrapper}>
                   <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
                   <View style={styles.overlay}>
-                    <TouchableOpacity style={styles.overlayButton} onPress={() => setPreviewImage(img)}>
-                      <Eye size={26} color="#fff" />
+                    <TouchableOpacity
+                      style={styles.overlayButton}
+                      onPress={() => setPreviewImage(img)}
+                    >
+                      <EyeIcon />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.overlayButton} onPress={() => handleDownload(img)}>
-                      <Download size={26} color="#fff" />
+                    <TouchableOpacity
+                      style={styles.overlayButton}
+                      onPress={() => handleDownload(img)}
+                    >
+                      <DownloadIcon />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -86,35 +122,36 @@ export default function ResultsScreen() {
 
         {!isGenerating && generatedImages.length > 0 && (
           <GlassPanel style={styles.successPanel} radius={20}>
-            <Text style={styles.successText}>Your fashion photos are ready!</Text>
+            <View style={styles.successContent}>
+              <CheckCircleIcon />
+              <Text style={styles.successText}>Your fashion photos are ready!</Text>
+            </View>
           </GlassPanel>
         )}
       </ScrollView>
 
+      {/* Lightbox Modal */}
       <Modal
         visible={previewImage !== null}
-        transparent
+        transparent={true}
         animationType="fade"
         onRequestClose={() => setPreviewImage(null)}
       >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setPreviewImage(null)} />
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setPreviewImage(null)}
+        >
           <View style={styles.modalContent}>
             {previewImage && (
-              <>
-                <Image source={{ uri: previewImage }} style={styles.modalImage} resizeMode="contain" />
-                <View style={styles.modalActions}>
-                  <TouchableOpacity onPress={() => handleDownload(previewImage)} style={styles.actionButton}>
-                    <Download size={22} color={COLORS.silverLight} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setPreviewImage(null)} style={styles.actionButton}>
-                    <X size={22} color={COLORS.silverLight} />
-                  </TouchableOpacity>
-                </View>
-              </>
+              <Image
+                source={{ uri: previewImage }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
             )}
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
@@ -150,11 +187,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 16,
+    marginBottom: 16,
   },
   gridItem: {
-    width: '47%',
+    width: (SCREEN_WIDTH - 56) / 2,
     aspectRatio: 3 / 4,
-    padding: 0,
   },
   imageWrapper: {
     flex: 1,
@@ -208,40 +245,30 @@ const styles = StyleSheet.create({
   successPanel: {
     padding: 16,
     marginTop: 16,
+  },
+  successContent: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   successText: {
     color: '#4ADE80',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
   },
   modalContent: {
-    width: '100%',
-    maxWidth: 420,
-    gap: 16,
+    width: '90%',
+    height: '80%',
   },
   modalImage: {
     width: '100%',
-    aspectRatio: 3 / 4,
-    borderRadius: 24,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: '100%',
   },
 });

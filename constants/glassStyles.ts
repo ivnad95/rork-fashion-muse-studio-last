@@ -809,6 +809,50 @@ export const glassStyles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 12,
   },
+
+  // --------------------------------------------------------------------------
+  // PRIMARY BUTTON STYLES (ManusAI compatibility)
+  // --------------------------------------------------------------------------
+
+  /**
+   * Primary button style - large call-to-action buttons
+   * Use for main actions like "Generate Photoshoot"
+   */
+  primaryButton: {
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  /**
+   * Primary button text style
+   */
+  primaryButtonText: {
+    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontWeight: '600' as const,
+  },
+
+  /**
+   * Delete button style (for destructive actions)
+   */
+  deleteButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 80, 80, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 150, 150, 0.15)',
+  },
+
+  /**
+   * Delete button text style
+   */
+  deleteButtonText: {
+    color: 'rgba(255, 150, 150, 1)',
+    fontWeight: '600' as const,
+  },
 });
 
 // ============================================================================
@@ -817,10 +861,10 @@ export const glassStyles = StyleSheet.create({
 
 export const GRADIENTS = {
   /**
-   * Background gradient (full-screen)
+   * Background gradient (full-screen) - Matches ManusAI reference design
    * Use with LinearGradient for app backgrounds
    */
-  background: [COLORS.bgDeepest, COLORS.bgDeep, COLORS.bgMid] as const,
+  background: ['#002857', '#004b93', '#002857'] as const,
 
   /**
    * Glass panel gradient (top-to-bottom depth)
