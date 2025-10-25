@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
 
 interface SimpleButtonProps {
   title: string;
@@ -8,6 +9,7 @@ interface SimpleButtonProps {
   disabled?: boolean;
   loading?: boolean;
   fullWidth?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function SimpleButton({
@@ -17,6 +19,7 @@ export default function SimpleButton({
   disabled = false,
   loading = false,
   fullWidth = false,
+  style,
 }: SimpleButtonProps) {
   return (
     <TouchableOpacity
@@ -29,11 +32,12 @@ export default function SimpleButton({
         variant === 'ghost' && styles.ghost,
         disabled && styles.disabled,
         fullWidth && styles.fullWidth,
+        style,
       ]}
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFF' : '#007AFF'} />
+        <ActivityIndicator color={variant === 'primary' ? COLORS.textPrimary : COLORS.accent} />
       ) : (
         <Text
           style={[
@@ -52,20 +56,25 @@ export default function SimpleButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.xl,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
   },
   primary: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.accent,
+    shadowColor: COLORS.accentShadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 6,
   },
   secondary: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.glassMinimalLight,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: COLORS.borderMinimalLeft,
   },
   ghost: {
     backgroundColor: 'transparent',
@@ -79,14 +88,15 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600',
+    color: COLORS.textPrimary,
   },
   primaryText: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
   secondaryText: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
   ghostText: {
-    color: '#007AFF',
+    color: COLORS.accent,
   },
 });

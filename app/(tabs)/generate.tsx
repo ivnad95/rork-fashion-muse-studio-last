@@ -4,21 +4,33 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { Image as ImageIcon } from 'lucide-react-native';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { COLORS, SPACING, GRADIENTS, RADIUS } from '@/constants/glassStyles';
 import SimpleButton from '@/components/SimpleButton';
 import SimpleCard from '@/components/SimpleCard';
+import StyleSelector from '@/components/StyleSelector';
+
+const VARIATION_COUNTS = [1, 2, 4, 6, 8];
 
 export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { selectedImage, setSelectedImage, generationCount, setGenerationCount, isGenerating, generateImages } = useGeneration();
+  const {
+    selectedImage,
+    setSelectedImage,
+    generationCount,
+    setGenerationCount,
+    selectedStyleId,
+    setSelectedStyleId,
+    isGenerating,
+    generateImages,
+  } = useGeneration();
   const [uploading, setUploading] = useState(false);
-
-  const counts = [1, 2, 4, 6, 8];
 
   const handleImageSelect = async () => {
     try {
@@ -29,6 +41,7 @@ export default function GenerateScreen() {
         aspect: [3, 4],
         quality: 1,
       });
+
       if (!result.canceled && result.assets[0]) {
         setSelectedImage(result.assets[0].uri);
       }
@@ -61,73 +74,67 @@ export default function GenerateScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#0A0F1C', '#0D1929', '#1A2F4F']}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={GRADIENTS.background as unknown as string[]} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.xxxl },
+        ]}
       >
-        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Generate</Text>
+          <View>
+            <Text style={styles.title}>Generate</Text>
+            <Text style={styles.subtitle}>Upload a photo and pick your style</Text>
+          </View>
           <View style={styles.creditBadge}>
-            <Text style={styles.creditText}>{user?.credits || 0}</Text>
+            <Text style={styles.creditLabel}>Credits</Text>
+            <Text style={styles.creditValue}>{user?.credits ?? 0}</Text>
           </View>
         </View>
 
-        {/* Image Upload */}
+        <View style={styles.section}>
+          <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
+        </View>
+
         <SimpleCard style={styles.uploadCard}>
-          <TouchableOpacity
-            onPress={handleImageSelect}
-            style={styles.uploadArea}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity onPress={handleImageSelect} style={styles.uploadArea} activeOpacity={0.85}>
             {uploading ? (
-              <ActivityIndicator size="large" color="#007AFF" />
+              <ActivityIndicator size="large" color={COLORS.accent} />
             ) : selectedImage ? (
               <Image source={{ uri: selectedImage }} style={styles.uploadedImage} />
             ) : (
-              <>
+              <View style={styles.placeholderContent}>
                 <View style={styles.uploadIcon}>
-                  <Text style={styles.uploadIconText}>📷</Text>
+                  <ImageIcon size={32} color={COLORS.accent} />
                 </View>
                 <Text style={styles.uploadText}>Tap to upload photo</Text>
-              </>
+                <Text style={styles.uploadSubtext}>Supports JPG or PNG up to 4MB</Text>
+              </View>
             )}
           </TouchableOpacity>
         </SimpleCard>
 
-        {/* Count Selector */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Number of variations</Text>
           <View style={styles.countRow}>
-            {counts.map((count) => (
-              <TouchableOpacity
-                key={count}
-                onPress={() => setGenerationCount(count)}
-                style={[
-                  styles.countButton,
-                  generationCount === count && styles.countButtonActive,
-                ]}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.countText,
-                    generationCount === count && styles.countTextActive,
-                  ]}
+            {VARIATION_COUNTS.map((count) => {
+              const isActive = generationCount === count;
+              return (
+                <TouchableOpacity
+                  key={count}
+                  onPress={() => setGenerationCount(count)}
+                  style={[styles.countButton, isActive && styles.countButtonActive]}
+                  activeOpacity={0.85}
                 >
-                  {count}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={[styles.countText, isActive && styles.countTextActive]}>{count}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
-        {/* Generate Button */}
         <SimpleButton
           title={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
           onPress={handleGenerate}
@@ -148,8 +155,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    gap: 24,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.xl,
   },
   header: {
     flexDirection: 'row',
@@ -157,88 +164,107 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
+  },
+  subtitle: {
+    marginTop: 4,
+    color: COLORS.textMuted,
+    fontSize: 15,
   },
   creditBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: COLORS.glassMinimalLight,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: COLORS.borderMinimalLeft,
+    alignItems: 'center',
   },
-  creditText: {
-    fontSize: 16,
+  creditLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  creditValue: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
+    marginTop: 2,
+  },
+  section: {
+    gap: SPACING.sm,
   },
   uploadCard: {
     padding: 0,
     overflow: 'hidden',
-    aspectRatio: 3 / 4,
   },
   uploadArea: {
-    flex: 1,
+    height: 420,
     justifyContent: 'center',
     alignItems: 'center',
   },
   uploadedImage: {
     width: '100%',
     height: '100%',
+    borderRadius: RADIUS.lg,
+  },
+  placeholderContent: {
+    alignItems: 'center',
+    gap: SPACING.md,
   },
   uploadIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
+    width: 72,
+    height: 72,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.glassMinimalMedium,
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  uploadIconText: {
-    fontSize: 40,
+    justifyContent: 'center',
   },
   uploadText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
   },
-  section: {
-    gap: 12,
+  uploadSubtext: {
+    fontSize: 14,
+    color: COLORS.textMuted,
   },
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
-    textTransform: 'uppercase',
+    color: COLORS.textMuted,
     letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   countRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: SPACING.sm,
     justifyContent: 'space-between',
   },
   countButton: {
     flex: 1,
     aspectRatio: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.borderMinimalLeft,
+    backgroundColor: COLORS.glassMinimalLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   countButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
   },
   countText: {
     fontSize: 18,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: COLORS.textMuted,
   },
   countTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
 });
+

@@ -2,28 +2,40 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Download, Share2 } from 'lucide-react-native';
+import { X, Download, Share2, Trash2 } from 'lucide-react-native';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
 import { downloadImage, shareImage } from '@/utils/download';
+import FavoriteButton from '@/components/FavoriteButton';
+import { COLORS, GRADIENTS, RADIUS, SPACING } from '@/constants/glassStyles';
 
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
-  const { generatedImages, isGenerating, generationCount } = useGeneration();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { generatedImages, generatedImageIds, isGenerating, generationCount, deleteImage } = useGeneration();
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const selectedImage = selectedIndex !== null ? generatedImages[selectedIndex] : null;
 
   const handleDownload = async () => {
     if (!selectedImage) return;
     const success = await downloadImage(selectedImage, { filename: `fashion-${Date.now()}.jpg` });
-    if (success) showToast('Image downloaded!', 'success');
-    else showToast('Failed to download', 'error');
+    showToast(success ? 'Image downloaded!' : 'Failed to download', success ? 'success' : 'error');
   };
 
   const handleShare = async () => {
     if (!selectedImage) return;
     const success = await shareImage(selectedImage);
-    if (success) showToast('Image shared!', 'success');
+    if (success) {
+      showToast('Image shared!', 'success');
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedIndex === null) return;
+    deleteImage(selectedIndex);
+    setSelectedIndex(null);
+    showToast('Image deleted', 'success');
   };
 
   const remainingCount = Math.max(0, generationCount - generatedImages.length);
@@ -31,16 +43,13 @@ export default function ResultsScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#0A0F1C', '#0D1929', '#1A2F4F']}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={GRADIENTS.background as unknown as string[]} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 }
+          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.xxxl },
         ]}
       >
         <Text style={styles.title}>Results</Text>
@@ -56,18 +65,23 @@ export default function ResultsScreen() {
             {generatedImages.map((img, i) => (
               <TouchableOpacity
                 key={`img-${i}`}
-                onPress={() => setSelectedImage(img)}
+                onPress={() => setSelectedIndex(i)}
                 style={styles.imageCard}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 <Image source={{ uri: img }} style={styles.image} />
+                {generatedImageIds[i] && (
+                  <View style={styles.favoriteOverlay}>
+                    <FavoriteButton imageId={generatedImageIds[i]} size={18} />
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
 
             {loadingPlaceholders.map((_, i) => (
               <View key={`loading-${i}`} style={styles.imageCard}>
                 <View style={styles.loadingCard}>
-                  <ActivityIndicator size="large" color="#007AFF" />
+                  <ActivityIndicator size="large" color={COLORS.accent} />
                 </View>
               </View>
             ))}
@@ -79,14 +93,10 @@ export default function ResultsScreen() {
         visible={selectedImage !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setSelectedImage(null)}
+        onRequestClose={() => setSelectedIndex(null)}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => setSelectedImage(null)}
-          />
+          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setSelectedIndex(null)} />
 
           <View style={styles.modalContent}>
             {selectedImage && (
@@ -95,15 +105,19 @@ export default function ResultsScreen() {
 
                 <View style={styles.modalActions}>
                   <TouchableOpacity onPress={handleDownload} style={styles.actionButton}>
-                    <Download size={24} color="#FFFFFF" />
+                    <Download size={22} color={COLORS.textPrimary} />
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
-                    <Share2 size={24} color="#FFFFFF" />
+                    <Share2 size={22} color={COLORS.textPrimary} />
                   </TouchableOpacity>
 
-                  <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.actionButton}>
-                    <X size={24} color="#FFFFFF" />
+                  <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
+                    <Trash2 size={22} color={COLORS.textPrimary} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setSelectedIndex(null)} style={styles.actionButton}>
+                    <X size={22} color={COLORS.textPrimary} />
                   </TouchableOpacity>
                 </View>
               </>
@@ -123,31 +137,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    gap: 20,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.xl,
   },
   title: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: SPACING.sm,
+    justifyContent: 'space-between',
   },
   imageCard: {
     width: '48%',
     aspectRatio: 3 / 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    backgroundColor: COLORS.glassMinimalLight,
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.borderMinimalLeft,
   },
   image: {
     width: '100%',
     height: '100%',
+  },
+  favoriteOverlay: {
+    position: 'absolute',
+    top: SPACING.xs,
+    right: SPACING.xs,
   },
   loadingCard: {
     flex: 1,
@@ -159,20 +179,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 100,
-    gap: 12,
+    gap: SPACING.md,
   },
   emptyIcon: {
     fontSize: 64,
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
   emptySubtext: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: COLORS.textMuted,
     textAlign: 'center',
     maxWidth: 250,
   },
@@ -181,31 +201,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: SPACING.lg,
   },
   modalContent: {
     width: '100%',
-    maxWidth: 400,
-    gap: 20,
+    maxWidth: 420,
+    gap: SPACING.lg,
   },
   modalImage: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: 16,
+    borderRadius: RADIUS.xl,
   },
   modalActions: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
+    justifyContent: 'space-between',
+    gap: SPACING.md,
   },
   actionButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    flex: 1,
+    height: 52,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.glassMinimalMedium,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: COLORS.borderMinimalLeft,
   },
 });
+
