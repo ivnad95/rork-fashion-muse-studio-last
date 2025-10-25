@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { Image as ImageIcon } from 'lucide-react-native';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { COLORS, SPACING, GRADIENTS, RADIUS } from '@/constants/glassStyles';
-import SimpleButton from '@/components/SimpleButton';
-import SimpleCard from '@/components/SimpleCard';
+import { COLORS, glassStyles } from '@/constants/glassStyles';
+import GlassyTitle from '@/components/GlassyTitle';
+import GlassPanel from '@/components/GlassPanel';
+import CountSelector from '@/components/CountSelector';
+import ImageUploader from '@/components/ImageUploader';
 import StyleSelector from '@/components/StyleSelector';
-
-const VARIATION_COUNTS = [1, 2, 4, 6, 8];
 
 export default function GenerateScreen() {
   const router = useRouter();
@@ -31,6 +30,13 @@ export default function GenerateScreen() {
     generateImages,
   } = useGeneration();
   const [uploading, setUploading] = useState(false);
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
 
   const handleImageSelect = async () => {
     try {
@@ -73,77 +79,53 @@ export default function GenerateScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={GRADIENTS.background as unknown as string[]} style={StyleSheet.absoluteFill} />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <LinearGradient colors={[COLORS.lightColor1, COLORS.lightColor2, COLORS.lightColor1]} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.xxxl },
-        ]}
+        contentContainerStyle={[glassStyles.screenContent, { paddingBottom: insets.bottom + 120 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Generate</Text>
-            <Text style={styles.subtitle}>Upload a photo and pick your style</Text>
-          </View>
-          <View style={styles.creditBadge}>
+        <GlassyTitle>
+          {greeting}, {user?.name || 'Muse'}
+        </GlassyTitle>
+
+        <View style={styles.inlineRow}>
+          <GlassPanel style={styles.creditPanel} radius={24}>
             <Text style={styles.creditLabel}>Credits</Text>
             <Text style={styles.creditValue}>{user?.credits ?? 0}</Text>
-          </View>
+          </GlassPanel>
+          <GlassPanel style={styles.countPanel} radius={24}>
+            <Text style={styles.sectionTitle}>Variations</Text>
+            <CountSelector value={generationCount} onChange={setGenerationCount} disabled={isGenerating} />
+          </GlassPanel>
         </View>
 
-        <View style={styles.section}>
+        <GlassPanel style={styles.sectionPanel} radius={24}>
+          <Text style={styles.sectionTitle}>Pick Your Style</Text>
           <StyleSelector selectedStyleId={selectedStyleId} onSelectStyle={setSelectedStyleId} />
-        </View>
+        </GlassPanel>
 
-        <SimpleCard style={styles.uploadCard}>
-          <TouchableOpacity onPress={handleImageSelect} style={styles.uploadArea} activeOpacity={0.85}>
-            {uploading ? (
-              <ActivityIndicator size="large" color={COLORS.accent} />
-            ) : selectedImage ? (
-              <Image source={{ uri: selectedImage }} style={styles.uploadedImage} />
-            ) : (
-              <View style={styles.placeholderContent}>
-                <View style={styles.uploadIcon}>
-                  <ImageIcon size={32} color={COLORS.accent} />
-                </View>
-                <Text style={styles.uploadText}>Tap to upload photo</Text>
-                <Text style={styles.uploadSubtext}>Supports JPG or PNG up to 4MB</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </SimpleCard>
+        <ImageUploader uploadedImage={selectedImage} uploading={uploading} onImageSelect={handleImageSelect} />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Number of variations</Text>
-          <View style={styles.countRow}>
-            {VARIATION_COUNTS.map((count) => {
-              const isActive = generationCount === count;
-              return (
-                <TouchableOpacity
-                  key={count}
-                  onPress={() => setGenerationCount(count)}
-                  style={[styles.countButton, isActive && styles.countButtonActive]}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[styles.countText, isActive && styles.countTextActive]}>{count}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        <SimpleButton
-          title={isGenerating ? 'Generating...' : 'Generate Photoshoot'}
+        <TouchableOpacity
+          style={[
+            glassStyles.glass3DButton,
+            glassStyles.primaryButton,
+            styles.generateButton,
+            (isGenerating || !selectedImage) && styles.disabledButton,
+          ]}
           onPress={handleGenerate}
           disabled={isGenerating || !selectedImage}
-          loading={isGenerating}
-          fullWidth
-        />
+          activeOpacity={0.8}
+        >
+          <Text style={[glassStyles.buttonText, glassStyles.primaryButtonText]}>
+            {isGenerating ? 'Generating...' : 'Generate Photoshoot'}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -154,117 +136,49 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  content: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.xl,
-  },
-  header: {
+  inlineRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 16,
+    marginBottom: 16,
+  },
+  creditPanel: {
+    flex: 0.35,
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  subtitle: {
-    marginTop: 4,
-    color: COLORS.textMuted,
-    fontSize: 15,
-  },
-  creditBadge: {
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    backgroundColor: COLORS.glassMinimalLight,
-    borderWidth: 1,
-    borderColor: COLORS.borderMinimalLeft,
-    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
   },
   creditLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    letterSpacing: 0.6,
+    color: COLORS.silverMid,
+    fontSize: 12,
+    letterSpacing: 1,
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   creditValue: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginTop: 2,
+    color: COLORS.silverLight,
+    fontSize: 32,
+    fontWeight: '700',
+    textShadowColor: COLORS.shadowColor,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
-  section: {
-    gap: SPACING.sm,
+  countPanel: {
+    flex: 0.65,
   },
-  uploadCard: {
-    padding: 0,
-    overflow: 'hidden',
-  },
-  uploadArea: {
-    height: 420,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  uploadedImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: RADIUS.lg,
-  },
-  placeholderContent: {
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  uploadIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.glassMinimalMedium,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  uploadText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  uploadSubtext: {
+  sectionTitle: {
+    color: COLORS.silverLight,
     fontSize: 14,
-    color: COLORS.textMuted,
-  },
-  sectionLabel: {
-    fontSize: 13,
     fontWeight: '600',
-    color: COLORS.textMuted,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    marginBottom: 12,
   },
-  countRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    justifyContent: 'space-between',
+  sectionPanel: {
+    marginBottom: 16,
   },
-  countButton: {
-    flex: 1,
-    aspectRatio: 1,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderMinimalLeft,
-    backgroundColor: COLORS.glassMinimalLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  generateButton: {
+    width: '100%',
+    marginTop: 16,
   },
-  countButtonActive: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
-  },
-  countText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  countTextActive: {
-    color: COLORS.textPrimary,
+  disabledButton: {
+    opacity: 0.5,
   },
 });
-

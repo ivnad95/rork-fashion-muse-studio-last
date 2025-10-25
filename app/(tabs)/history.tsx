@@ -4,14 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Calendar, Trash2, X, Sparkles, Download, Share2 } from 'lucide-react-native';
-import EmptyState from '@/components/EmptyState';
-import FavoriteButton from '@/components/FavoriteButton';
 import SearchBar from '@/components/SearchBar';
 import FilterChips, { FilterOption } from '@/components/FilterChips';
 import DateRangeFilter, { DateRange } from '@/components/DateRangeFilter';
 import NeumorphicPanel from '@/components/NeumorphicPanel';
-import { COLORS, SPACING, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
-import GlassContainer from '@/components/GlassContainer';
+import GlassyTitle from '@/components/GlassyTitle';
+import { COLORS, SPACING, GRADIENTS, glassStyles } from '@/constants/glassStyles';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -264,7 +262,7 @@ export default function HistoryScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <Text style={styles.title}>History</Text>
+        <GlassyTitle>History</GlassyTitle>
 
         {/* Search Bar */}
         <SearchBar

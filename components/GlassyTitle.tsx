@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, ViewStyle, View, StyleSheet } from 'react-native';
+import { Text, ViewStyle } from 'react-native';
+import GlassPanel from '@/components/GlassPanel';
 import { glassStyles } from '@/constants/glassStyles';
 
 interface GlassyTitleProps {
@@ -12,14 +13,8 @@ interface GlassyTitleProps {
  */
 export default function GlassyTitle({ children, style }: GlassyTitleProps) {
   return (
-    <View style={[styles.container, style]}>
+    <GlassPanel style={[glassStyles.titleContainer, style]} radius={20} noPadding>
       <Text style={glassStyles.titleText}>{children}</Text>
-    </View>
+    </GlassPanel>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 8,
-  },
-});

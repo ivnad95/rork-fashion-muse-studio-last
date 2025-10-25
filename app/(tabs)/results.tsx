@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useMemo, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Download, Share2, Trash2 } from 'lucide-react-native';
+import { Eye, Download, Share2, Trash2, X } from 'lucide-react-native';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
 import { downloadImage, shareImage } from '@/utils/download';
 import FavoriteButton from '@/components/FavoriteButton';
-import { COLORS, GRADIENTS, RADIUS, SPACING } from '@/constants/glassStyles';
+import GlassyTitle from '@/components/GlassyTitle';
+import GlassPanel from '@/components/GlassPanel';
+import { COLORS, glassStyles } from '@/constants/glassStyles';
 
 export default function ResultsScreen() {
   const insets = useSafeAreaInsets();
@@ -16,10 +18,15 @@ export default function ResultsScreen() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const selectedImage = selectedIndex !== null ? generatedImages[selectedIndex] : null;
+  const progress = useMemo(() => {
+    if (!generationCount) return 0;
+    return Math.min(100, Math.round((generatedImages.length / generationCount) * 100));
+  }, [generatedImages.length, generationCount]);
 
-  const handleDownload = async () => {
-    if (!selectedImage) return;
-    const success = await downloadImage(selectedImage, { filename: `fashion-${Date.now()}.jpg` });
+  const handleDownload = async (imageUri?: string) => {
+    const target = imageUri ?? selectedImage;
+    if (!target) return;
+    const success = await downloadImage(target, { filename: `fashion-${Date.now()}.jpg` });
     showToast(success ? 'Image downloaded!' : 'Failed to download', success ? 'success' : 'error');
   };
 
@@ -42,50 +49,68 @@ export default function ResultsScreen() {
   const loadingPlaceholders = isGenerating && remainingCount > 0 ? Array(remainingCount).fill(null) : [];
 
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={GRADIENTS.background as unknown as string[]} style={StyleSheet.absoluteFill} />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <LinearGradient colors={[COLORS.lightColor1, COLORS.lightColor2, COLORS.lightColor1]} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.xxxl },
-        ]}
+        contentContainerStyle={[glassStyles.screenContent, { paddingBottom: insets.bottom + 120 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Results</Text>
+        <GlassyTitle>Results</GlassyTitle>
+
+        {isGenerating && (
+          <GlassPanel style={styles.progressPanel} radius={20}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progress}%` }]} />
+            </View>
+            <Text style={styles.progressText}>{progress}% complete</Text>
+          </GlassPanel>
+        )}
 
         {generatedImages.length === 0 && !isGenerating ? (
-          <View style={styles.emptyState}>
+          <GlassPanel style={styles.emptyPanel} radius={20}>
             <Text style={styles.emptyIcon}>🎨</Text>
             <Text style={styles.emptyText}>No results yet</Text>
             <Text style={styles.emptySubtext}>Generate your first photoshoot to see results here</Text>
-          </View>
+          </GlassPanel>
         ) : (
           <View style={styles.grid}>
             {generatedImages.map((img, i) => (
-              <TouchableOpacity
-                key={`img-${i}`}
-                onPress={() => setSelectedIndex(i)}
-                style={styles.imageCard}
-                activeOpacity={0.85}
-              >
-                <Image source={{ uri: img }} style={styles.image} />
-                {generatedImageIds[i] && (
-                  <View style={styles.favoriteOverlay}>
-                    <FavoriteButton imageId={generatedImageIds[i]} size={18} />
+              <GlassPanel key={`img-${i}`} style={styles.gridItem} radius={20}>
+                <TouchableOpacity style={styles.imageWrapper} activeOpacity={0.85} onPress={() => setSelectedIndex(i)}>
+                  <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
+                  <View style={styles.overlay}>
+                    <TouchableOpacity style={styles.overlayButton} onPress={() => setSelectedIndex(i)}>
+                      <Eye size={28} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.overlayButton} onPress={() => handleDownload(img)}>
+                      <Download size={28} color="#fff" />
+                    </TouchableOpacity>
                   </View>
-                )}
-              </TouchableOpacity>
+                  {generatedImageIds[i] && (
+                    <View style={styles.favoriteBadge}>
+                      <FavoriteButton imageId={generatedImageIds[i]} size={18} />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </GlassPanel>
             ))}
 
             {loadingPlaceholders.map((_, i) => (
-              <View key={`loading-${i}`} style={styles.imageCard}>
+              <GlassPanel key={`loading-${i}`} style={styles.gridItem} radius={20}>
                 <View style={styles.loadingCard}>
-                  <ActivityIndicator size="large" color={COLORS.accent} />
+                  <Text style={styles.loadingText}>Generating...</Text>
                 </View>
-              </View>
+              </GlassPanel>
             ))}
           </View>
+        )}
+
+        {!isGenerating && generatedImages.length > 0 && (
+          <GlassPanel style={styles.successPanel} radius={20}>
+            <Text style={styles.successText}>Your fashion photos are ready!</Text>
+          </GlassPanel>
         )}
       </ScrollView>
 
@@ -104,20 +129,20 @@ export default function ResultsScreen() {
                 <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
 
                 <View style={styles.modalActions}>
-                  <TouchableOpacity onPress={handleDownload} style={styles.actionButton}>
-                    <Download size={22} color={COLORS.textPrimary} />
+                  <TouchableOpacity onPress={() => handleDownload()} style={styles.actionButton}>
+                    <Download size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={handleShare} style={styles.actionButton}>
-                    <Share2 size={22} color={COLORS.textPrimary} />
+                    <Share2 size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
-                    <Trash2 size={22} color={COLORS.textPrimary} />
+                    <Trash2 size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={() => setSelectedIndex(null)} style={styles.actionButton}>
-                    <X size={22} color={COLORS.textPrimary} />
+                    <X size={22} color={COLORS.silverLight} />
                   </TouchableOpacity>
                 </View>
               </>
@@ -125,7 +150,7 @@ export default function ResultsScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -136,97 +161,127 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  content: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.xl,
+  progressPanel: {
+    padding: 16,
+    marginBottom: 16,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.lightColor3,
+  },
+  progressText: {
+    color: COLORS.silverMid,
+    textAlign: 'center',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
-    justifyContent: 'space-between',
+    gap: 16,
   },
-  imageCard: {
-    width: '48%',
+  gridItem: {
+    width: '47%',
     aspectRatio: 3 / 4,
-    backgroundColor: COLORS.glassMinimalLight,
-    borderRadius: RADIUS.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.borderMinimalLeft,
+    padding: 0,
   },
-  image: {
+  imageWrapper: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  resultImage: {
     width: '100%',
     height: '100%',
   },
-  favoriteOverlay: {
+  overlay: {
     position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    opacity: 1,
+  },
+  overlayButton: {
+    padding: 8,
+  },
+  favoriteBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
   loadingCard: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
+  loadingText: {
+    color: COLORS.silverMid,
+  },
+  emptyPanel: {
     alignItems: 'center',
-    paddingTop: 100,
-    gap: SPACING.md,
+    gap: 12,
   },
   emptyIcon: {
-    fontSize: 64,
-    marginBottom: SPACING.md,
+    fontSize: 48,
   },
   emptyText: {
-    fontSize: 20,
+    color: COLORS.silverLight,
+    fontSize: 18,
     fontWeight: '600',
-    color: COLORS.textPrimary,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: COLORS.textMuted,
+    color: COLORS.silverMid,
     textAlign: 'center',
-    maxWidth: 250,
+  },
+  successPanel: {
+    padding: 16,
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  successText: {
+    color: '#4ADE80',
+    fontSize: 14,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.lg,
+    padding: 24,
   },
   modalContent: {
     width: '100%',
     maxWidth: 420,
-    gap: SPACING.lg,
+    gap: 16,
   },
   modalImage: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: RADIUS.xl,
+    borderRadius: 24,
   },
   modalActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: SPACING.md,
+    gap: 12,
   },
   actionButton: {
     flex: 1,
     height: 52,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.glassMinimalMedium,
-    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.borderMinimalLeft,
+    justifyContent: 'center',
   },
 });
-

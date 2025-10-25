@@ -10,6 +10,12 @@ import { StyleSheet, Platform } from 'react-native';
 // ============================================================================
 
 export const COLORS = {
+  // Deep Sea Glass palette aliases (for design parity with ManusAI reference)
+  bgColor: '#0A133B',
+  lightColor1: '#002857',
+  lightColor2: '#004b93',
+  lightColor3: '#0A76AF',
+
   // Background Gradients (Deep Blue Theme)
   bgDeepest: '#0A0F1C',        // Darkest - near black blue
   bgDeep: '#0D1929',           // Deep background - dark navy
@@ -57,6 +63,12 @@ export const COLORS = {
   textMuted: '#94A3B8',            // Muted text - mid silver
   textGlow: 'rgba(248, 250, 252, 0.40)',  // Text glow effect
 
+  // Legacy naming used by reference repo components
+  silverLight: '#F5F7FA',
+  silverMid: '#C8CDD5',
+  silverDark: '#8A92A0',
+  silverGlow: 'rgba(200, 205, 213, 0.4)',
+
   // Accent Colors (Bright Sky Blue with Glow)
   accent: '#38BDF8',               // Primary accent - bright sky blue
   accentLight: '#7DD3FC',          // Light accent
@@ -69,6 +81,7 @@ export const COLORS = {
   shadowMedium: 'rgba(58, 89, 130, 0.60)',  // Medium direct shadow
   shadowDark: 'rgba(13, 25, 42, 0.80)',     // Deep contact shadow
   shadowBlack: 'rgba(0, 0, 0, 0.50)',       // Pure black shadow
+  shadowColor: 'rgba(0, 0, 0, 0.5)',
 
   // Inner Shadow (Inset/Pressed States)
   innerShadow: 'rgba(0, 0, 0, 0.35)',

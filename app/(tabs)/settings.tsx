@@ -6,21 +6,19 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
-  Platform,
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
   Image,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as WebBrowser from 'expo-web-browser';
 import { User, Mail, Trash2, LogOut, CreditCard, ChevronRight, Lock, Eye, EyeOff, Image as ImageIcon, Bell, Cloud, Camera, CheckCircle, Star, Sparkles, FileText, Shield } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import { COLORS, SPACING, RADIUS, GRADIENTS, glassStyles } from '@/constants/glassStyles';
-import GlassContainer from '@/components/GlassContainer';
-import GlassButton from '@/components/GlassButton';
+import { COLORS, SPACING, GRADIENTS, glassStyles } from '@/constants/glassStyles';
+import GlassyTitle from '@/components/GlassyTitle';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -415,7 +413,7 @@ export default function SettingsScreen() {
     const privacyUrl = 'https://fashion-muse-studio-6377.taskade.app/privacy-policy';
     try {
       await WebBrowser.openBrowserAsync(privacyUrl);
-    } catch (error) {
+    } catch {
       showToast('Unable to open Privacy Policy', 'error');
     }
   };
@@ -425,13 +423,13 @@ export default function SettingsScreen() {
     const termsUrl = 'https://fashion-muse-studio-6377.taskade.app/terms-of-service';
     try {
       await WebBrowser.openBrowserAsync(termsUrl);
-    } catch (error) {
+    } catch {
       showToast('Unable to open Terms of Service', 'error');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Full-screen gradient background */}
       <LinearGradient
         colors={GRADIENTS.background as any}
@@ -455,7 +453,7 @@ export default function SettingsScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View>
-        <Text style={[glassStyles.titleText, styles.title]}>Settings</Text>
+        <GlassyTitle>Settings</GlassyTitle>
 
         {!user ? (
           <NeumorphicPanel style={styles.settingsPanel}>
@@ -881,7 +879,7 @@ export default function SettingsScreen() {
         </View>
         </TouchableWithoutFeedback>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -895,13 +893,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     // Padding added via paddingTop, paddingBottom, paddingHorizontal in the component
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '300' as const,
-    letterSpacing: -0.5,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.lg,
   },
   mainTitle: {
     fontSize: 28,
