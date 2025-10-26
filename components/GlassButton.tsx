@@ -3,23 +3,18 @@ import {
   TouchableOpacity,
   Text,
   Animated,
-  View,
   StyleSheet,
   ViewStyle,
   TextStyle,
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import {
   glassStyles,
   COLORS,
-  BLUR,
   RADIUS,
   SPACING,
-  GRADIENTS,
-  SHADOW,
   ANIMATION,
 } from '@/constants/glassStyles';
 

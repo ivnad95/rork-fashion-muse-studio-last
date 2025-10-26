@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Modal,
   Animated,
-  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar, X } from 'lucide-react-native';

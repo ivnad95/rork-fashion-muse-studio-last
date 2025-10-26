@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, Text, View, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { COLORS, SPACING } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -37,44 +37,7 @@ export default function Toast({
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (visible) {
-      // Haptic feedback
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(
-          type === 'success'
-            ? Haptics.NotificationFeedbackType.Success
-            : type === 'error'
-            ? Haptics.NotificationFeedbackType.Error
-            : Haptics.NotificationFeedbackType.Warning
-        );
-      }
-
-      // Slide in animation
-      Animated.parallel([
-        Animated.spring(translateY, {
-          toValue: 0,
-          friction: 8,
-          tension: 50,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Auto-hide after duration
-      const timer = setTimeout(() => {
-        hideToast();
-      }, duration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [visible, duration]);
-
-  const hideToast = () => {
+  const hideToast = useCallback(() => {
     Animated.parallel([
       Animated.spring(translateY, {
         toValue: -100,
@@ -90,7 +53,45 @@ export default function Toast({
     ]).start(() => {
       onHide?.();
     });
-  };
+  }, [onHide, opacity, translateY]);
+
+  useEffect(() => {
+    if (!visible) {
+      return undefined;
+    }
+
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(
+        type === 'success'
+          ? Haptics.NotificationFeedbackType.Success
+          : type === 'error'
+          ? Haptics.NotificationFeedbackType.Error
+          : Haptics.NotificationFeedbackType.Warning
+      ).catch(() => undefined);
+    }
+
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: 0,
+        friction: 8,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    const timer = setTimeout(() => {
+      hideToast();
+    }, duration);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [duration, hideToast, opacity, translateY, type, visible]);
 
   const getIcon = () => {
     const iconProps = { size: 20, strokeWidth: 2.5 };

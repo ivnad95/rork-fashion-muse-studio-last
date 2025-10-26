@@ -27,8 +27,7 @@ export default function EmptyState({ icon: Icon, title, description, action }: E
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Floating animation
-    Animated.loop(
+    const floatLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, {
           toValue: 1,
@@ -41,10 +40,9 @@ export default function EmptyState({ icon: Icon, title, description, action }: E
           useNativeDriver: true,
         }),
       ])
-    ).start();
+    );
 
-    // Glow animation
-    Animated.loop(
+    const glowLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
@@ -57,8 +55,16 @@ export default function EmptyState({ icon: Icon, title, description, action }: E
           useNativeDriver: true,
         }),
       ])
-    ).start();
-  }, []);
+    );
+
+    floatLoop.start();
+    glowLoop.start();
+
+    return () => {
+      floatLoop.stop();
+      glowLoop.stop();
+    };
+  }, [floatAnim, glowAnim]);
 
   const translateY = floatAnim.interpolate({
     inputRange: [0, 1],

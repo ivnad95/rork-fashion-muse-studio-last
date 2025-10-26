@@ -34,16 +34,14 @@ export default function ProgressBar({
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Animate progress
-    Animated.spring(progressAnim, {
+    const progressAnimation = Animated.spring(progressAnim, {
       toValue: progress,
       friction: 8,
       tension: 40,
       useNativeDriver: false,
-    }).start();
+    });
 
-    // Animate glow
-    Animated.loop(
+    const glowLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
@@ -56,8 +54,16 @@ export default function ProgressBar({
           useNativeDriver: true,
         }),
       ])
-    ).start();
-  }, [progress]);
+    );
+
+    progressAnimation.start();
+    glowLoop.start();
+
+    return () => {
+      progressAnimation.stop();
+      glowLoop.stop();
+    };
+  }, [glowAnim, progress, progressAnim]);
 
   const widthInterpolation = progressAnim.interpolate({
     inputRange: [0, 100],

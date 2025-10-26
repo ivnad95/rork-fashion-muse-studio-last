@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { X, Check, Sparkles } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import { COLORS, SPACING } from '@/constants/glassStyles';
 import { TEXT_STYLES } from '@/constants/typography';
 import { useAuth } from '@/contexts/AuthContext';
 import PremiumLiquidGlass from '@/components/PremiumLiquidGlass';

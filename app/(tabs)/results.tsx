@@ -1,16 +1,30 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
+import ProgressBar from '@/components/ProgressBar';
+import GlassButton from '@/components/GlassButton';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
 import { downloadImage } from '@/utils/download';
-import { COLORS, glassStyles } from '@/constants/glassStyles';
+import { COLORS, SPACING, RADIUS, glassStyles, GRADIENTS } from '@/constants/glassStyles';
+import { useRouter } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const GRID_GAP = SPACING.md;
+const TILE_WIDTH = Math.max((SCREEN_WIDTH - SPACING.xl * 2 - GRID_GAP) / 2, 140);
 
 // Icons matching ManusAI reference
 const EyeIcon = () => (
@@ -41,6 +55,7 @@ const CheckCircleIcon = () => (
  */
 
 export default function ResultsScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
   const { generatedImages, isGenerating, generationCount } = useGeneration();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -60,9 +75,13 @@ export default function ResultsScreen() {
   const remainingCount = Math.max(0, generationCount - generatedImages.length);
   const loadingPlaceholders = isGenerating && remainingCount > 0 ? Array(remainingCount).fill(null) : [];
 
+  const statusLabel = isGenerating
+    ? `Generating ${generationCount} variations`
+    : `${generatedImages.length} finished variation${generatedImages.length === 1 ? '' : 's'}`;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <LinearGradient colors={[COLORS.lightColor1, COLORS.lightColor2, COLORS.lightColor1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={GRADIENTS.background} style={StyleSheet.absoluteFill} />
 
       <ScrollView
         style={styles.scrollView}
@@ -71,48 +90,81 @@ export default function ResultsScreen() {
       >
         <GlassyTitle>Results</GlassyTitle>
 
-        {isGenerating && (
-          <GlassPanel style={styles.progressPanel} radius={20}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        <GlassPanel style={styles.statusPanel} radius={30}>
+          <View style={styles.statusRow}>
+            <View style={styles.statusMetric}>
+              <Text style={styles.metricLabel}>Generated</Text>
+              <Text style={styles.metricValue}>{generatedImages.length}</Text>
             </View>
-            <Text style={styles.progressText}>{progress}% complete</Text>
+            <View style={styles.statusDivider} />
+            <View style={styles.statusMetric}>
+              <Text style={styles.metricLabel}>Remaining</Text>
+              <Text style={styles.metricValue}>{Math.max(0, remainingCount)}</Text>
+            </View>
+            <View style={styles.statusDivider} />
+            <View style={styles.statusMetric}>
+              <Text style={styles.metricLabel}>Status</Text>
+              <Text style={styles.metricSubValue}>{statusLabel}</Text>
+            </View>
+          </View>
+
+          <ProgressBar
+            progress={progress}
+            current={generatedImages.length}
+            total={generationCount}
+            label={isGenerating ? 'Generation in progress' : 'Completed'}
+          />
+        </GlassPanel>
+
+        {!isGenerating && generatedImages.length === 0 && (
+          <GlassPanel style={styles.emptyPanel} radius={30}>
+            <Text style={styles.emptyIcon}>✨</Text>
+            <Text style={styles.emptyTitle}>Nothing here yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Upload a muse photo on the Generate tab to create your first fashion shoot.
+            </Text>
+            <GlassButton title="Go to Generate" onPress={() => router.push('/(tabs)/generate')} fullWidth />
           </GlassPanel>
         )}
 
-        {generatedImages.length === 0 && !isGenerating ? (
-          <GlassPanel style={styles.emptyPanel} radius={20}>
-            <Text style={styles.emptyIcon}>🎨</Text>
-            <Text style={styles.emptyText}>No results yet</Text>
-            <Text style={styles.emptySubtext}>Generate your first photoshoot to see results here</Text>
-          </GlassPanel>
-        ) : (
+        {generatedImages.length > 0 && (
           <View style={styles.grid}>
             {generatedImages.map((img, index) => (
-              <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={20}>
-                <View style={styles.imageWrapper}>
+              <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={28} noPadding>
+                <TouchableOpacity activeOpacity={0.9} style={styles.imageWrapper} onPress={() => setPreviewImage(img)}>
                   <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
-                  <View style={styles.overlay}>
+                  <LinearGradient
+                    colors={['transparent', 'rgba(2, 9, 23, 0.65)']}
+                    style={styles.overlay}
+                  >
                     <TouchableOpacity
                       style={styles.overlayButton}
                       onPress={() => setPreviewImage(img)}
+                      activeOpacity={0.85}
                     >
                       <EyeIcon />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.overlayButton}
                       onPress={() => handleDownload(img)}
+                      activeOpacity={0.85}
                     >
                       <DownloadIcon />
                     </TouchableOpacity>
-                  </View>
-                </View>
+                  </LinearGradient>
+                </TouchableOpacity>
               </GlassPanel>
             ))}
 
             {loadingPlaceholders.map((_, index) => (
-              <GlassPanel key={`loading-${index}`} style={styles.gridItem} radius={20}>
+              <GlassPanel key={`loading-${index}`} style={styles.gridItem} radius={28}>
                 <View style={styles.loadingCard}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
                   <Text style={styles.loadingText}>Generating...</Text>
                 </View>
               </GlassPanel>
@@ -121,10 +173,13 @@ export default function ResultsScreen() {
         )}
 
         {!isGenerating && generatedImages.length > 0 && (
-          <GlassPanel style={styles.successPanel} radius={20}>
+          <GlassPanel style={styles.successPanel} radius={28}>
             <View style={styles.successContent}>
               <CheckCircleIcon />
-              <Text style={styles.successText}>Your fashion photos are ready!</Text>
+              <View>
+                <Text style={styles.successText}>Shoot complete</Text>
+                <Text style={styles.successSubtext}>Download or share your favorites.</Text>
+              </View>
             </View>
           </GlassPanel>
         )}
@@ -164,38 +219,56 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  progressPanel: {
-    padding: 16,
-    marginBottom: 16,
+  statusPanel: {
+    marginTop: SPACING.xl,
+    gap: SPACING.md,
   },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    overflow: 'hidden',
-    marginBottom: 8,
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.lightColor3,
+  statusMetric: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
   },
-  progressText: {
+  statusDivider: {
+    width: 1,
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  metricLabel: {
     color: COLORS.silverMid,
+    fontSize: 12,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  metricValue: {
+    color: COLORS.silverLight,
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  metricSubValue: {
+    color: COLORS.silverLight,
+    fontSize: 14,
     textAlign: 'center',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 16,
+    gap: GRID_GAP,
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   gridItem: {
-    width: (SCREEN_WIDTH - 56) / 2,
+    width: TILE_WIDTH,
     aspectRatio: 3 / 4,
   },
   imageWrapper: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -205,73 +278,79 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    bottom: 0,
+    paddingVertical: SPACING.sm,
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    justifyContent: 'space-evenly',
+    gap: SPACING.md,
   },
   overlayButton: {
-    padding: 12,
-    minWidth: 52,
-    minHeight: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
   loadingCard: {
     flex: 1,
-    alignItems: 'center',
+    borderRadius: RADIUS.lg,
     justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   loadingText: {
-    color: COLORS.silverMid,
-  },
-  emptyPanel: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  emptyIcon: {
-    fontSize: 48,
-  },
-  emptyText: {
     color: COLORS.silverLight,
-    fontSize: 18,
     fontWeight: '600',
   },
-  emptySubtext: {
+  emptyPanel: {
+    marginTop: SPACING.xl,
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  emptyIcon: {
+    fontSize: 40,
+  },
+  emptyTitle: {
+    color: COLORS.silverLight,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  emptySubtitle: {
     color: COLORS.silverMid,
     textAlign: 'center',
+    lineHeight: 22,
   },
   successPanel: {
-    padding: 16,
-    marginTop: 16,
+    marginTop: SPACING.sm,
   },
   successContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    gap: SPACING.md,
   },
   successText: {
-    color: '#4ADE80',
-    fontSize: 14,
-    fontWeight: '500',
+    color: COLORS.silverLight,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  successSubtext: {
+    color: COLORS.silverMid,
+    fontSize: 13,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: SPACING.lg,
   },
   modalContent: {
-    width: '90%',
-    height: '80%',
+    width: '100%',
+    maxWidth: 520,
+    aspectRatio: 3 / 4,
+    borderRadius: 36,
+    overflow: 'hidden',
+    backgroundColor: COLORS.bgDeep,
   },
   modalImage: {
     width: '100%',

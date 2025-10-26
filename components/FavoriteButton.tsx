@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -29,24 +29,9 @@ export default function FavoriteButton({ imageId, size = 24, onToggle }: Favorit
   const [favorite, setFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const fillAnim = useRef(new Animated.Value(0)).current;
 
   // Load favorite status
-  useEffect(() => {
-    loadFavoriteStatus();
-  }, [imageId, user?.id]);
-
-  useEffect(() => {
-    // Animate fill
-    Animated.spring(fillAnim, {
-      toValue: favorite ? 1 : 0,
-      friction: 5,
-      tension: 80,
-      useNativeDriver: false,
-    }).start();
-  }, [favorite]);
-
-  const loadFavoriteStatus = async () => {
+  const loadFavoriteStatus = useCallback(async () => {
     if (!user?.id) return;
     try {
       const status = await isFavorite(user.id, imageId);
@@ -54,7 +39,12 @@ export default function FavoriteButton({ imageId, size = 24, onToggle }: Favorit
     } catch (error) {
       console.error('Error loading favorite status:', error);
     }
-  };
+  }, [imageId, user?.id]);
+
+  useEffect(() => {
+    loadFavoriteStatus();
+  }, [loadFavoriteStatus]);
+
 
   const handlePress = async () => {
     if (!user?.id || loading) return;
@@ -106,11 +96,6 @@ export default function FavoriteButton({ imageId, size = 24, onToggle }: Favorit
       setLoading(false);
     }
   };
-
-  const fillColor = fillAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['transparent', COLORS.error],
-  });
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
