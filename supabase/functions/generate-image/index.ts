@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
                         clearTimeout(timeoutId);
                         lastError = error;
 
-                        if (error.name === 'AbortError') {
+                        if (error instanceof Error && error.name === 'AbortError') {
                             if (attempt < MAX_RETRIES) {
                                 console.log(`Request timed out, retrying (${attempt + 1}/${MAX_RETRIES})...`);
                                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -253,12 +253,12 @@ Deno.serve(async (req) => {
                         }
 
                         // Don't retry for user errors
-                        if (error.message.includes('too large') || error.message.includes('Rate limit')) {
+                        if (error instanceof Error && (error.message.includes('too large') || error.message.includes('Rate limit'))) {
                             throw error;
                         }
 
                         // Retry for network errors
-                        if (attempt < MAX_RETRIES && (error.message.includes('network') || error.message.includes('fetch'))) {
+                        if (error instanceof Error && attempt < MAX_RETRIES && (error.message.includes('network') || error.message.includes('fetch'))) {
                             console.log(`Network error, retrying (${attempt + 1}/${MAX_RETRIES})...`);
                             await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
                             continue;
@@ -312,7 +312,7 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({
             error: {
                 code: 'IMAGE_GENERATION_FAILED',
-                message: error.message
+                message: error instanceof Error ? error.message : 'Unknown error'
             }
         }), {
             status: 500,

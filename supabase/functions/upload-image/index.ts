@@ -1,4 +1,4 @@
-import { handleCors, createErrorResponse, createSuccessResponse } from '../_shared/cors.ts';
+import { handleCors, createErrorResponse, createSuccessResponse } from '../_shared/cors';
 
 Deno.serve(async (req) => {
     const corsResponse = handleCors(req);
@@ -58,6 +58,6 @@ Deno.serve(async (req) => {
 
     } catch (error) {
         console.error('Upload image error:', error);
-        return createErrorResponse(error.message);
+        return createErrorResponse(error instanceof Error ? error.message : 'Unknown error');
     }
 });

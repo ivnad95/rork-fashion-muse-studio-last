@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({
             error: {
                 code: 'GET_CREDITS_FAILED',
-                message: error.message
+                message: error instanceof Error ? error.message : 'Unknown error'
             }
         }), {
             status: 500,
