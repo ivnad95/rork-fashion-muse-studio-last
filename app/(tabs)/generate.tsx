@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, ScrollView, Alert, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Sparkles, Image as ImageIcon } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import CountSelector from '@/components/CountSelector';
@@ -76,15 +76,30 @@ export default function GenerateScreen() {
     }
 
     if (!user) {
-      showToast('Please sign in to generate images', 'warning');
+      showToast('Loading user data...', 'warning');
       return;
     }
 
     if (user.credits < generationCount) {
-      Alert.alert(
-        'Insufficient Credits',
-        `You need ${generationCount} credits but only have ${user.credits}.`
-      );
+      if (user.isGuest) {
+        Alert.alert(
+          'Not Enough Credits',
+          `You need ${generationCount} credits but only have ${user.credits}. Sign in to get more credits!`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign In', onPress: () => router.push('/auth/login') }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Insufficient Credits',
+          `You need ${generationCount} credits but only have ${user.credits}.`,
+          [
+            { text: 'OK', style: 'cancel' },
+            { text: 'Buy Credits', onPress: () => router.push('/plans') }
+          ]
+        );
+      }
       return;
     }
 
@@ -95,7 +110,7 @@ export default function GenerateScreen() {
       router.push('/(tabs)/results');
       await generateImages(user.id);
       
-      Alert.alert('Success', 'Generation started! Check the Results tab.');
+      showToast('Generation started!', 'success');
     } catch (err) {
       console.error('Generation error:', err);
       setError('Failed to generate images. Please try again.');
@@ -114,26 +129,48 @@ export default function GenerateScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          {
-            paddingTop: insets.top + SPACING.xl,
-            paddingBottom: insets.bottom + 120,
-          }
+          { paddingTop: insets.top + SPACING.xl }
         ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <GlassyTitle><Text>Generate</Text></GlassyTitle>
+          <GlassyTitle><Text>Create</Text></GlassyTitle>
           
           {user && (
-            <View style={styles.creditBadge}>
-              <Sparkles size={16} color={COLORS.accent} />
+            <TouchableOpacity 
+              style={styles.creditBadge}
+              onPress={() => {
+                if (user.isGuest) {
+                  router.push('/auth/login');
+                } else {
+                  router.push('/plans');
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <Sparkles size={18} color={COLORS.accent} strokeWidth={2.5} />
               <Text style={styles.creditText}>{user.credits}</Text>
-            </View>
+            </TouchableOpacity>
           )}
         </View>
         
+        {user?.isGuest && (
+          <GlassPanel style={styles.guestBanner} radius={RADIUS.lg}>
+            <Text style={styles.guestBannerText}>
+              <Text style={styles.guestBannerBold}>{user.credits} free credits</Text> remaining. Sign in to unlock unlimited generations.
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/auth/login')}
+              style={styles.guestBannerButton}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.guestBannerButtonText}>Sign In</Text>
+            </TouchableOpacity>
+          </GlassPanel>
+        )}
+        
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Number of images</Text>
+          <Text style={styles.sectionLabel}>Variations</Text>
           <CountSelector
             value={generationCount}
             onChange={setGenerationCount}
@@ -171,33 +208,38 @@ export default function GenerateScreen() {
           </View>
         )}
         
-        <TouchableOpacity
-          style={[
-            styles.generateButton,
-            (isGenerating || !selectedImage) && styles.disabledButton,
-          ]}
-          onPress={handleGenerate}
-          disabled={isGenerating || !selectedImage}
-          activeOpacity={0.85}
-        >
-          <LinearGradient
-            colors={[
-              'rgba(10, 118, 175, 0.25)',
-              'rgba(10, 118, 175, 0.15)',
-              'rgba(10, 118, 175, 0.08)',
+        <View style={styles.generateSection}>
+          <TouchableOpacity
+            style={[
+              styles.generateButton,
+              (isGenerating || !selectedImage) && styles.disabledButton,
             ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-          <Text style={styles.generateButtonText}>
-            {isGenerating ? 'Generating...' : 'Generate Photoshoot'}
+            onPress={handleGenerate}
+            disabled={isGenerating || !selectedImage}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={[
+                'rgba(56, 189, 248, 0.30)',
+                'rgba(56, 189, 248, 0.15)',
+                'rgba(56, 189, 248, 0.08)',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={styles.generateButtonContent}>
+              <ImageIcon size={24} color={COLORS.textPrimary} strokeWidth={2.5} />
+              <Text style={styles.generateButtonText}>
+                {isGenerating ? 'Creating...' : 'Generate Shoot'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          
+          <Text style={styles.creditsInfo}>
+            {generationCount} credit{generationCount !== 1 ? 's' : ''} per generation
           </Text>
-        </TouchableOpacity>
-        
-        <Text style={styles.creditsInfo}>
-          Cost: {generationCount} credit{generationCount !== 1 ? 's' : ''}
-        </Text>
+        </View>
         
         {error && (
           <GlassPanel style={styles.errorPanel} radius={RADIUS.lg}>
@@ -218,24 +260,24 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.lg,
+    paddingBottom: 140,
+    gap: SPACING.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: SPACING.sm,
   },
   creditBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.full,
-    backgroundColor: 'rgba(10, 118, 175, 0.15)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(10, 118, 175, 0.30)',
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
   creditText: {
     color: COLORS.textPrimary,
@@ -243,19 +285,45 @@ const styles = StyleSheet.create({
     fontWeight: '700' as const,
     letterSpacing: -0.3,
   },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
+  },
+  guestBannerText: {
+    flex: 1,
+    color: COLORS.silverMid,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  guestBannerBold: {
+    color: COLORS.accent,
+    fontWeight: '700' as const,
+  },
+  guestBannerButton: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.accent,
+  },
+  guestBannerButtonText: {
+    color: COLORS.bgDeep,
+    fontSize: 14,
+    fontWeight: '700' as const,
+  },
   section: {
-    gap: SPACING.sm,
+    gap: SPACING.md,
   },
   sectionLabel: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-    fontWeight: '700' as const,
-    letterSpacing: 1.5,
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '600' as const,
+    letterSpacing: 0.5,
     textTransform: 'uppercase' as const,
-    paddingLeft: SPACING.xxs,
   },
   uploaderSection: {
-    marginVertical: SPACING.sm,
+    marginTop: -SPACING.sm,
   },
   advancedToggle: {
     flexDirection: 'row',
@@ -274,42 +342,49 @@ const styles = StyleSheet.create({
   advancedSection: {
     marginTop: SPACING.sm,
   },
+  generateSection: {
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+  },
   generateButton: {
-    height: 64,
-    borderRadius: RADIUS.xxl,
+    height: 68,
+    borderRadius: RADIUS.xxxl,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 2,
-    borderTopColor: 'rgba(10, 118, 175, 0.40)',
-    borderLeftColor: 'rgba(10, 118, 175, 0.30)',
-    borderRightColor: 'rgba(10, 118, 175, 0.15)',
-    borderBottomColor: 'rgba(10, 118, 175, 0.10)',
+    borderTopColor: 'rgba(56, 189, 248, 0.45)',
+    borderLeftColor: 'rgba(56, 189, 248, 0.35)',
+    borderRightColor: 'rgba(56, 189, 248, 0.20)',
+    borderBottomColor: 'rgba(56, 189, 248, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: SPACING.lg,
-    shadowColor: COLORS.shadowAccent,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.80,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowColor: COLORS.accentShadow,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.90,
+    shadowRadius: 32,
+    elevation: 16,
     overflow: 'hidden',
+  },
+  generateButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
   },
   generateButtonText: {
     color: COLORS.textPrimary,
-    fontSize: 19,
-    fontWeight: '800' as const,
-    letterSpacing: -0.6,
-    textShadowColor: 'rgba(10, 118, 175, 0.80)',
+    fontSize: 20,
+    fontWeight: '700' as const,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(56, 189, 248, 0.90)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 16,
+    textShadowRadius: 20,
   },
   disabledButton: {
     opacity: 0.4,
   },
   creditsInfo: {
-    color: COLORS.textMuted,
-    fontSize: 13,
+    color: COLORS.silverMid,
+    fontSize: 12,
     textAlign: 'center',
-    marginTop: SPACING.sm,
     fontWeight: '500' as const,
   },
   errorPanel: {

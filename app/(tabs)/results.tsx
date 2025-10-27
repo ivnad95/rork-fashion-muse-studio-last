@@ -11,11 +11,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Download, Eye, CheckCircle2, Sparkles } from 'lucide-react-native';
+import { Download, Eye, CheckCircle2, Sparkles, Plus } from 'lucide-react-native';
 import GlassyTitle from '@/components/GlassyTitle';
 import GlassPanel from '@/components/GlassPanel';
 import ProgressBar from '@/components/ProgressBar';
-import GlowingButton from '@/components/GlowingButton';
 import { useGeneration } from '@/contexts/GenerationContext';
 import { useToast } from '@/contexts/ToastContext';
 import { downloadImage } from '@/utils/download';
@@ -23,7 +22,7 @@ import { COLORS, SPACING, RADIUS, GRADIENTS } from '@/constants/glassStyles';
 import { useRouter } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const GRID_GAP = SPACING.md;
+const GRID_GAP = SPACING.lg;
 const TILE_WIDTH = (SCREEN_WIDTH - SPACING.lg * 2 - GRID_GAP) / 2;
 
 export default function ResultsScreen() {
@@ -67,7 +66,9 @@ export default function ResultsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <GlassyTitle><Text>Results</Text></GlassyTitle>
+        <View style={styles.header}>
+          <GlassyTitle><Text>Results</Text></GlassyTitle>
+        </View>
 
         {(isGenerating || generatedImages.length > 0) && (
           <GlassPanel style={styles.statusPanel} radius={RADIUS.xl}>
@@ -93,43 +94,61 @@ export default function ResultsScreen() {
         )}
 
         {!isGenerating && generatedImages.length === 0 && (
-          <GlassPanel style={styles.emptyPanel} radius={RADIUS.xl}>
-            <Sparkles size={48} color={COLORS.accent} strokeWidth={1.5} />
-            <Text style={styles.emptyTitle}>Nothing here yet</Text>
+          <GlassPanel style={styles.emptyPanel} radius={RADIUS.xxl}>
+            <View style={styles.emptyIconWrapper}>
+              <Sparkles size={56} color={COLORS.accent} strokeWidth={2} />
+            </View>
+            <Text style={styles.emptyTitle}>Ready to Create</Text>
             <Text style={styles.emptySubtitle}>
-              Upload a photo on the Generate tab to create your first fashion shoot.
+              Upload your photo and let our AI transform it into stunning professional fashion shots.
             </Text>
-            <GlowingButton 
-              onPress={() => router.push('/(tabs)/generate')} 
-              text="Go to Generate"
-              variant="primary"
-            />
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.push('/(tabs)/generate')}
+              activeOpacity={0.85}
+            >
+              <LinearGradient
+                colors={[
+                  'rgba(56, 189, 248, 0.25)',
+                  'rgba(56, 189, 248, 0.12)',
+                ]}
+                style={StyleSheet.absoluteFill}
+              />
+              <Plus size={20} color={COLORS.textPrimary} strokeWidth={2.5} />
+              <Text style={styles.emptyButtonText}>Start Creating</Text>
+            </TouchableOpacity>
           </GlassPanel>
         )}
 
         {generatedImages.length > 0 && (
           <View style={styles.grid}>
             {generatedImages.map((img, index) => (
-              <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={RADIUS.lg} noPadding>
-                <TouchableOpacity activeOpacity={0.9} style={styles.imageWrapper} onPress={() => setPreviewImage(img)}>
+              <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={RADIUS.xl} noPadding>
+                <TouchableOpacity activeOpacity={0.95} style={styles.imageWrapper} onPress={() => setPreviewImage(img)}>
                   <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
                   <LinearGradient
-                    colors={['transparent', 'rgba(0, 0, 0, 0.75)']}
+                    colors={['transparent', 'rgba(0, 0, 0, 0.85)']}
                     style={styles.overlay}
                   >
                     <TouchableOpacity
                       style={styles.overlayButton}
-                      onPress={() => setPreviewImage(img)}
-                      activeOpacity={0.85}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        setPreviewImage(img);
+                      }}
+                      activeOpacity={0.8}
                     >
-                      <Eye size={20} color={COLORS.silverLight} strokeWidth={2.5} />
+                      <Eye size={18} color={COLORS.silverLight} strokeWidth={2.5} />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.overlayButton}
-                      onPress={() => handleDownload(img)}
-                      activeOpacity={0.85}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleDownload(img);
+                      }}
+                      activeOpacity={0.8}
                     >
-                      <Download size={20} color={COLORS.silverLight} strokeWidth={2.5} />
+                      <Download size={18} color={COLORS.silverLight} strokeWidth={2.5} />
                     </TouchableOpacity>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -137,28 +156,33 @@ export default function ResultsScreen() {
             ))}
 
             {loadingPlaceholders.map((_, index) => (
-              <GlassPanel key={`loading-${index}`} style={styles.gridItem} radius={RADIUS.lg}>
-                <View style={styles.loadingCard}>
-                  <LinearGradient
-                    colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.03)']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={StyleSheet.absoluteFill}
-                  />
-                  <Text style={styles.loadingText}>Generating...</Text>
+              <View key={`loading-${index}`} style={[styles.gridItem, styles.loadingGridItem]}>
+                <LinearGradient
+                  colors={['rgba(56, 189, 248, 0.12)', 'rgba(56, 189, 248, 0.05)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={styles.loadingContent}>
+                  <Sparkles size={32} color={COLORS.accent} strokeWidth={2} />
+                  <Text style={styles.loadingText}>Creating...</Text>
                 </View>
-              </GlassPanel>
+              </View>
             ))}
           </View>
         )}
 
         {!isGenerating && generatedImages.length > 0 && (
-          <GlassPanel style={styles.successPanel} radius={RADIUS.lg}>
+          <GlassPanel style={styles.successPanel} radius={RADIUS.xl}>
             <View style={styles.successContent}>
-              <CheckCircle2 size={24} color={COLORS.success} strokeWidth={2.5} />
+              <View style={styles.successIcon}>
+                <CheckCircle2 size={22} color={COLORS.success} strokeWidth={2.5} />
+              </View>
               <View style={styles.successTextContainer}>
-                <Text style={styles.successText}>Shoot complete</Text>
-                <Text style={styles.successSubtext}>Download or share your favorites</Text>
+                <Text style={styles.successText}>Generation Complete</Text>
+                <Text style={styles.successSubtext}>
+                  {generatedImages.length} image{generatedImages.length !== 1 ? 's' : ''} ready to download
+                </Text>
               </View>
             </View>
           </GlassPanel>
@@ -201,7 +225,10 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.lg,
+    gap: SPACING.xl,
+  },
+  header: {
+    marginBottom: -SPACING.sm,
   },
   statusPanel: {
     gap: SPACING.md,
@@ -270,42 +297,88 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
-  loadingCard: {
+  loadingGridItem: {
+    borderRadius: RADIUS.xl,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.20)',
+  },
+  loadingContent: {
     flex: 1,
-    borderRadius: RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    gap: SPACING.sm,
   },
   loadingText: {
     color: COLORS.silverLight,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '600' as const,
+    letterSpacing: -0.2,
   },
   emptyPanel: {
     alignItems: 'center',
-    gap: SPACING.lg,
-    paddingVertical: SPACING.xxxl,
+    gap: SPACING.xl,
+    paddingVertical: SPACING.xxxl * 2,
+    paddingHorizontal: SPACING.lg,
+  },
+  emptyIconWrapper: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
   emptyTitle: {
     color: COLORS.textPrimary,
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700' as const,
-    letterSpacing: -0.6,
+    letterSpacing: -0.8,
   },
   emptySubtitle: {
-    color: COLORS.textSecondary,
+    color: COLORS.silverMid,
     fontSize: 15,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: SPACING.md,
+    lineHeight: 24,
+    paddingHorizontal: SPACING.md,
+  },
+  emptyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: RADIUS.xxl,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.30)',
+    marginTop: SPACING.md,
+    overflow: 'hidden',
+  },
+  emptyButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
   },
   successPanel: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.lg,
   },
   successContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.lg,
+  },
+  successIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(74, 222, 128, 0.30)',
   },
   successTextContainer: {
     flex: 1,
@@ -314,12 +387,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 17,
     fontWeight: '700' as const,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   successSubtext: {
-    color: COLORS.textSecondary,
+    color: COLORS.silverMid,
     fontSize: 14,
-    marginTop: 2,
+    marginTop: 4,
+    letterSpacing: -0.1,
   },
   modalOverlay: {
     flex: 1,
