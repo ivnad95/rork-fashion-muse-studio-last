@@ -11,10 +11,7 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-// Import test utilities for development (provides browser console helpers)
-if (process.env.NODE_ENV === 'development') {
-  import('@/scripts/add-credits');
-}
+
 
 SplashScreen.preventAutoHideAsync();
 
