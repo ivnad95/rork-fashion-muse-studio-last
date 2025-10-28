@@ -4,6 +4,7 @@ import { signInProcedure } from "./routes/auth/sign-in/route";
 import { signUpProcedure } from "./routes/auth/sign-up/route";
 import { updateProfileProcedure } from "./routes/user/profile/route";
 import { purchaseCreditsProcedure } from "./routes/credits/purchase/route";
+import generateImageProcedure from "./routes/generation/generate/route";
 
 export const appRouter = createTRPCRouter({
   example: createTRPCRouter({
@@ -18,6 +19,9 @@ export const appRouter = createTRPCRouter({
   }),
   credits: createTRPCRouter({
     purchase: purchaseCreditsProcedure,
+  }),
+  generation: createTRPCRouter({
+    generate: generateImageProcedure,
   }),
 });
 
