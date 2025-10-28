@@ -59,7 +59,7 @@ function StyleCard({ style, isSelected, onPress }: {
 
   const glowColor = glowAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['rgba(255, 255, 255, 0)', style.color + '80'],
+    outputRange: ['rgba(255, 255, 255, 0)', `${style.color}80`],
   });
 
   return (
