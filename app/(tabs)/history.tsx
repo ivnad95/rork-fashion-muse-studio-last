@@ -266,7 +266,7 @@ export default function HistoryScreen() {
                 const primaryImage = images[0];
 
                 return (
-                  <GlassPanel key={item.id} style={styles.historyCard} radius={34}>
+                  <GlassPanel key={item.id} style={styles.historyCard} radius={34} testID={`history-card-${item.id}`}>
                     <View style={styles.cardHeader}>
                       <View>
                         <Text style={styles.cardTitle}>{formatHistoryTimestamp(item)}</Text>
@@ -310,6 +310,8 @@ export default function HistoryScreen() {
                           onPress={() => setPreview({ item, index: 0 })}
                           style={styles.actionPill}
                           activeOpacity={0.85}
+                          testID={`view-set-${item.id}`}
+                          accessibilityLabel="View set"
                         >
                           <LayoutGrid size={16} color={COLORS.silverLight} />
                           <Text style={styles.actionText}>View set</Text>
@@ -320,6 +322,8 @@ export default function HistoryScreen() {
                           style={styles.actionPill}
                           activeOpacity={0.85}
                           disabled={!primaryImage}
+                          testID={`save-${item.id}`}
+                          accessibilityLabel="Save image"
                         >
                           <Download size={16} color={primaryImage ? COLORS.silverLight : COLORS.silverDark} />
                           <Text style={[styles.actionText, !primaryImage && styles.actionTextDisabled]}>Save</Text>
@@ -330,6 +334,8 @@ export default function HistoryScreen() {
                           style={styles.actionPill}
                           activeOpacity={0.85}
                           disabled={!primaryImage}
+                          testID={`share-${item.id}`}
+                          accessibilityLabel="Share image"
                         >
                           <Share2 size={16} color={primaryImage ? COLORS.silverLight : COLORS.silverDark} />
                           <Text style={[styles.actionText, !primaryImage && styles.actionTextDisabled]}>Share</Text>

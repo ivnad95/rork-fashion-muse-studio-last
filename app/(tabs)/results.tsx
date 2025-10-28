@@ -124,7 +124,7 @@ export default function ResultsScreen() {
           <View style={styles.grid}>
             {generatedImages.map((img, index) => (
               <GlassPanel key={`img-${index}`} style={styles.gridItem} radius={RADIUS.xl} noPadding>
-                <TouchableOpacity activeOpacity={0.95} style={styles.imageWrapper} onPress={() => setPreviewImage(img)}>
+                <TouchableOpacity activeOpacity={0.95} style={styles.imageWrapper} onPress={() => setPreviewImage(img)} testID={`grid-item-${index}`} accessibilityLabel="Open preview">
                   <Image source={{ uri: img }} style={styles.resultImage} resizeMode="cover" />
                   <LinearGradient
                     colors={['transparent', 'rgba(0, 0, 0, 0.85)']}
@@ -207,6 +207,8 @@ export default function ResultsScreen() {
                 source={{ uri: previewImage }}
                 style={styles.modalImage}
                 resizeMode="contain"
+                testID="preview-image"
+                accessibilityLabel="Preview image"
               />
             )}
           </GlassPanel>

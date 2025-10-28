@@ -3,7 +3,8 @@ import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
-import { COLORS } from '@/constants/glassStyles';
+import { COLORS, SPACING, RADIUS } from '@/constants/glassStyles';
+import GlassPanel from '@/components/GlassPanel';
 
 const iconColor = (focused: boolean) => (focused ? COLORS.silverLight : COLORS.silverMid);
 
@@ -58,8 +59,9 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 
   return (
     <View style={[styles.container, { paddingBottom: bottomPadding }]}>
-      <View style={styles.inner}>
-        {state.routes.map((route, index) => {
+      <GlassPanel style={styles.bar} radius={RADIUS.xxl} noPadding>
+        <View style={styles.inner}>
+          {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
 
@@ -80,10 +82,12 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
               key={route.key}
               accessibilityRole="button"
               accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
+              accessibilityLabel={options.tabBarAccessibilityLabel ?? `${route.name} tab`}
               onPress={onPress}
               style={styles.navButton}
               activeOpacity={0.75}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              testID={`tab-${route.name}`}
             >
               <View style={[styles.iconWrapper, isFocused && styles.iconWrapperActive]}>
                 {iconForRoute(route.name, isFocused)}
@@ -91,7 +95,8 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
             </TouchableOpacity>
           );
         })}
-      </View>
+        </View>
+      </GlassPanel>
     </View>
   );
 }
@@ -103,11 +108,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  bar: {
+    marginHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)'
+  },
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.lg,
   },
   navButton: {
     alignItems: 'center',

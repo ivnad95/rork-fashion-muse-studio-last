@@ -129,7 +129,7 @@ export default function GenerateScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + SPACING.xl }
+          { paddingTop: insets.top + SPACING.xl, paddingBottom: insets.bottom + 120 }
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -147,6 +147,8 @@ export default function GenerateScreen() {
                 }
               }}
               activeOpacity={0.8}
+            testID="credit-badge"
+            accessibilityLabel="Credits"
             >
               <Sparkles size={18} color={COLORS.accent} strokeWidth={2.5} />
               <Text style={styles.creditText}>{user.credits}</Text>
@@ -190,6 +192,8 @@ export default function GenerateScreen() {
           style={styles.advancedToggle}
           onPress={() => setShowAdvanced(!showAdvanced)}
           activeOpacity={0.8}
+        testID="advanced-toggle"
+        accessibilityLabel="Toggle advanced options"
         >
           <Text style={styles.advancedToggleText}>Advanced Options</Text>
           {showAdvanced ? (
@@ -217,6 +221,8 @@ export default function GenerateScreen() {
             onPress={handleGenerate}
             disabled={isGenerating || !selectedImage}
             activeOpacity={0.85}
+          testID="generate-button"
+          accessibilityLabel={isGenerating ? 'Creating' : 'Generate shoot'}
           >
             <LinearGradient
               colors={[
@@ -260,7 +266,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 140,
     gap: SPACING.xl,
   },
   header: {
