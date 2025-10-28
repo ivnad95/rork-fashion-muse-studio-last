@@ -5,7 +5,7 @@ import {
   getUserHistory,
   deleteHistory as dbDeleteHistory
 } from '@/lib/database';
-import { getStylePrompt } from '@/constants/styles';
+import { trpcClient } from '@/lib/trpc';
 
 type AspectRatio = 'portrait' | 'square' | 'landscape';
 
@@ -46,15 +46,34 @@ interface GenerationContextType extends GenerationState {
 
 const GenerationContext = createContext<GenerationContextType | undefined>(undefined);
 
-const FASHION_PROMPTS = [
-  'Create a professional fashion photoshoot image. CRITICAL REQUIREMENTS: 1) Keep the EXACT SAME person - preserve their face, gender, age, ethnicity, hair color, hair style, and all facial features identically. 2) Keep their EXACT SAME clothing - same outfit, same colors, same style, same accessories. 3) ONLY CHANGE: the pose and body position to create a professional model pose. Use professional studio lighting with soft key light and subtle shadows. Clean, elegant background. The person should be in a confident, professional modeling pose while wearing their original outfit.',
-  
-  'Transform into a professional model pose photoshoot. MUST PRESERVE: 1) The exact same person - identical face, gender, skin tone, hair, and all features. 2) The exact same outfit they are wearing - same clothing items, colors, patterns, and style. ONLY MODIFY: Change the pose to a dynamic fashion model stance. Use three-point studio lighting. Professional photography composition with proper depth of field. The same person in the same clothes, just in a different professional modeling pose.',
-  
-  'Create a high-end fashion photography shot. STRICT REQUIREMENTS: 1) Same person - do not change gender, face, age, ethnicity, or any physical features. 2) Same exact clothing - keep all garments, colors, and accessories identical to the original. 3) CHANGE ONLY THE POSE: Position them in an elegant, professional model pose. Implement cinematic studio lighting with soft diffused key light and gentle rim light. Neutral, upscale background. The identical person wearing their original outfit, posed professionally.',
-  
-  'Professional fashion editorial photograph. MANDATORY: 1) Preserve the person completely - same gender, same face, same hair, same everything about them. 2) Keep their clothing exactly as shown - same outfit, same colors, same style. 3) ONLY ALTER: The body pose and positioning for a professional fashion model look. Use professional beauty lighting setup. Sophisticated background with subtle depth. The same person in the same clothes, just repositioned in a confident modeling pose with proper posture.',
+const CATALOG_POSES = [
+  "Standing confidently with hands on hips, looking directly at the camera.",
+  "A relaxed standing pose, one hand in a pocket, with a slight, natural smile.",
+  "Three-quarter view, looking over the shoulder towards the camera.",
+  "Full body shot, standing straight with feet slightly apart, arms relaxed at the sides.",
+  "Leaning casually against an invisible wall, one leg crossed in front of the other.",
+  "A dynamic walking pose, captured mid-stride as if walking towards the viewer.",
+  "Hands clasped gently in front, with a soft and approachable expression.",
+  "Profile view, standing straight and looking forward, highlighting the silhouette of the outfit.",
+  "Adjusting a cuff or a collar, creating a natural, candid moment.",
+  "A simple pose with one hand gently touching the chin or side of the face.",
+  "Sitting elegantly on a simple stool or block, legs crossed, looking at the camera.",
+  "A casual seated pose on the floor, knees bent, leaning back on one hand.",
+  "Sitting on a low bench, leaning forward with elbows on knees, looking thoughtful.",
+  "Profile view while seated, showcasing the drape and fit of the clothing from the side.",
+  "A close-up shot from the waist up, focusing on the details of the upper garment.",
+  "A pose showing movement, like a gentle twirl to show the flow of a skirt or dress.",
+  "A pose that highlights a specific feature, like putting a hand in a pocket to show its placement.",
+  "Looking down at their shoes, as if admiring them, good for full outfit shots.",
+  "A laughing, candid pose, looking slightly away from the camera.",
+  "Arms crossed over the chest with a confident and strong stance.",
+  "A 'contrapposto' pose, with weight shifted to one foot, creating a natural S-curve in the body.",
+  "Reaching for something just out of frame, creating a sense of action.",
+  "A simple, elegant pose with hands held behind the back.",
+  "A dynamic pose as if just turning around to face the camera."
 ];
+
+const NEGATIVE_PROMPT = "text, watermark, signature, logo, blurry, fuzzy, low-quality, out of focus, distorted, disfigured, ugly, bad anatomy, extra limbs, missing limbs, poorly drawn hands, poorly drawn feet, mutated hands, long neck, tiling, artifacts, jpeg artifacts, compression artifacts, error, duplicate, AI-generated, cartoon, illustration, painting, 3d render, cgi, video game, artstation, deviantart, oversmoothing, airbrushed skin, plastic skin, uncanny valley, synthetic appearance, unrealistic";
 
 export function GenerationProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GenerationState>({
@@ -155,166 +174,114 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
 
     try {
       const results: string[] = [];
-      const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 4MB
-      const TIMEOUT_MS = 180000; // 3 minutes
-      const MAX_RETRIES = 2;
+      const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
+      
+      const aspectRatioMap: Record<AspectRatio, string> = {
+        portrait: '3:4',
+        square: '1:1',
+        landscape: '4:3',
+      };
+      
+      const aspectRatio = aspectRatioMap[state.aspectRatio];
+      
+      const themeMap: Record<string, string> = {
+        casual: 'studio',
+        formal: 'business',
+        streetwear: 'urban',
+        luxury: 'millionaire',
+        vintage: 'vintage',
+        sporty: 'studio',
+        bohemian: 'beach',
+        minimalist: 'studio',
+        cyberpunk: 'urban',
+        gothic: 'urban',
+        summer: 'beach',
+        winter: 'studio',
+        glamour: 'red_carpet',
+        grunge: 'urban',
+      };
+      
+      const theme = themeMap[state.selectedStyleId] || 'studio';
+      
+      let base64Image = state.selectedImage;
+      let mimeType = 'image/jpeg';
+      
+      if (base64Image.startsWith('file://')) {
+        try {
+          const response = await fetch(base64Image);
+          const blob = await response.blob();
+          
+          if (blob.size > MAX_IMAGE_SIZE) {
+            throw new Error('Image is too large. Please use a smaller image (max 4MB).');
+          }
+          
+          mimeType = blob.type;
+          
+          base64Image = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const result = reader.result as string;
+              if (result) {
+                resolve(result);
+              } else {
+                reject(new Error('Failed to read image'));
+              }
+            };
+            reader.onerror = () => reject(new Error('FileReader error'));
+            reader.readAsDataURL(blob);
+          });
+        } catch (err) {
+          console.error('Error reading local image:', err);
+          if (err instanceof Error && err.message.includes('too large')) {
+            throw err;
+          }
+          throw new Error('Failed to process image. Please try another image.');
+        }
+      } else if (base64Image.includes('base64,')) {
+        const parts = base64Image.split(';');
+        if (parts[0].includes(':')) {
+          mimeType = parts[0].split(':')[1];
+        }
+      }
+      
+      const selectedPoses = CATALOG_POSES
+        .sort(() => 0.5 - Math.random())
+        .slice(0, state.generationCount);
       
       for (let i = 0; i < state.generationCount; i++) {
         console.log(`Generating image ${i + 1}/${state.generationCount}...`);
 
-        // Get style-specific prompt and combine with pose variation
-        const stylePrompt = getStylePrompt(state.selectedStyleId);
-        const posePrompt = FASHION_PROMPTS[i % FASHION_PROMPTS.length];
-        const prompt = `${stylePrompt}. ${posePrompt}`;
+        const pose = selectedPoses[i];
         
-        let base64Image = state.selectedImage;
-        if (base64Image.startsWith('file://')) {
-          try {
-            const response = await fetch(base64Image);
-            const blob = await response.blob();
-            
-            if (blob.size > MAX_IMAGE_SIZE) {
-              throw new Error('Image is too large. Please use a smaller image (max 4MB).');
-            }
-            
-            base64Image = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const result = reader.result as string;
-                if (result) {
-                  resolve(result.split(',')[1]);
-                } else {
-                  reject(new Error('Failed to read image'));
-                }
-              };
-              reader.onerror = () => reject(new Error('FileReader error'));
-              reader.readAsDataURL(blob);
-            });
-          } catch (err) {
-            console.error('Error reading local image:', err);
-            if (err instanceof Error && err.message.includes('too large')) {
-              throw err;
-            }
-            throw new Error('Failed to process image. Please try another image.');
+        try {
+          const result = await trpcClient.generation.generate.mutate({
+            image: base64Image,
+            mimeType,
+            pose,
+            aspectRatio,
+            negativePrompt: NEGATIVE_PROMPT,
+            theme,
+          });
+          
+          if (result.status === 'success') {
+            results.push(result.data);
+            setState((prev) => ({
+              ...prev,
+              generatedImages: [...results],
+            }));
+            console.log('Successfully generated image');
+          } else {
+            console.error(`Failed to generate image ${i + 1}:`, result.data);
           }
-        } else if (base64Image.includes('base64,')) {
-          base64Image = base64Image.split('base64,')[1];
-        }
-        
-        // Check base64 size
-        const sizeInBytes = (base64Image.length * 3) / 4;
-        if (sizeInBytes > MAX_IMAGE_SIZE) {
-          throw new Error('Image is too large. Please use a smaller image (max 4MB).');
-        }
-
-        const requestBody = {
-          prompt,
-          images: [
-            {
-              type: 'image',
-              image: base64Image,
-            },
-          ],
-        };
-
-        console.log('Sending request to image edit API...');
-        console.log('Image size (base64):', base64Image.length, 'bytes');
-        
-        let lastError: Error | null = null;
-        let generatedImageUri: string | null = null;
-        
-        for (let attempt = 0; attempt <= MAX_RETRIES && !generatedImageUri; attempt++) {
-          try {
-            console.log(`API call attempt ${attempt + 1}/${MAX_RETRIES + 1}`);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => {
-              console.log(`Request timeout after ${TIMEOUT_MS}ms`);
-              controller.abort();
-            }, TIMEOUT_MS);
-            
-            const response = await fetch('https://toolkit.rork.com/images/edit/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: JSON.stringify(requestBody),
-              signal: controller.signal,
-            });
-            
-            clearTimeout(timeoutId);
-            
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-              if (response.status === 429) {
-                throw new Error('Rate limit exceeded. Please try again in a few moments.');
-              } else if (response.status === 413) {
-                throw new Error('Image is too large. Please try a smaller image.');
-              } else if (response.status >= 500 && attempt < MAX_RETRIES) {
-                console.log(`Server error (${response.status}), retrying...`);
-                await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
-                continue;
-              } else {
-                throw new Error(`Request failed (${response.status}). Please try again.`);
-              }
-            }
-
-            const data = await response.json();
-            
-            if (data.image && data.image.base64Data) {
-              generatedImageUri = `data:${data.image.mimeType || 'image/jpeg'};base64,${data.image.base64Data}`;
-              results.push(generatedImageUri);
-              
-              setState((prev) => ({
-                ...prev,
-                generatedImages: [...results],
-              }));
-              
-              console.log('Successfully generated image');
-              break;
-            } else {
-              throw new Error('Invalid response format from API');
-            }
-          } catch (fetchError) {
-            console.error('Request error:', fetchError);
-            lastError = fetchError instanceof Error ? fetchError : new Error('Unknown error');
-            
-            const errorName = fetchError instanceof Error ? fetchError.name : '';
-            const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown error';
-            
-            if (errorName === 'AbortError') {
-              if (attempt < MAX_RETRIES) {
-                console.log(`Request timed out, retrying (${attempt + 1}/${MAX_RETRIES})...`);
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                continue;
-              }
-              throw new Error('Request timed out after multiple attempts. Please try with a smaller image.');
-            }
-            
-            // Don't retry for user errors
-            if (errorMessage.includes('too large') || errorMessage.includes('Rate limit')) {
-              throw fetchError;
-            }
-            
-            // Retry for network errors
-            if (attempt < MAX_RETRIES && (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch'))) {
-              console.log(`Network error, retrying (${attempt + 1}/${MAX_RETRIES})...`);
-              await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
-              continue;
-            }
-            
-            throw fetchError;
-          }
-        }
-        
-        if (!generatedImageUri) {
-          throw lastError || new Error('Failed to generate image after multiple attempts');
+        } catch (error) {
+          console.error(`Error generating image ${i + 1}:`, error);
         }
       }
 
-      // Save all generated images to database
+      if (results.length === 0) {
+        throw new Error('Failed to generate any images');
+      }
+
       const imageIds: string[] = [];
       for (const imageData of results) {
         const savedImage = await saveImage(userId, imageData);
@@ -325,10 +292,8 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
       const date = now.toISOString().split('T')[0];
       const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-      // Save history record
       await saveHistory(userId, date, time, imageIds);
 
-      // Load updated history
       const historyItems = await getUserHistory(userId);
 
       setState((prev) => ({
@@ -348,7 +313,7 @@ export function GenerationProvider({ children }: { children: ReactNode }) {
         error: error instanceof Error ? error.message : 'Failed to generate images',
       }));
     }
-  }, [state.selectedImage, state.generationCount]);
+  }, [state.selectedImage, state.generationCount, state.aspectRatio, state.selectedStyleId]);
 
   const value = useMemo(
     () => ({
